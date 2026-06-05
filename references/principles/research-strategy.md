@@ -66,7 +66,7 @@ For empirical method papers, the default evidence package is:
 - applications or demos,
 - stress tests or failure analysis when robustness/safety/generalization is claimed.
 
-Other archetypes can adapt the package, but every central claim still needs aligned evidence.
+Other paper-types can adapt the package, but every central claim still needs aligned evidence.
 
 ## Pre-Draft Risk Check
 

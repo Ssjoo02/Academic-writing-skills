@@ -13,7 +13,7 @@ The paper should have:
 
 1. sufficient contribution,
 2. strong enough empirical effect or insight,
-3. sufficient comparison experiments and ablation studies for its archetype,
+3. sufficient comparison experiments and ablation studies for its paper type,
 4. clear writing and reproducible details,
 5. reasonable method or benchmark design.
 

@@ -114,7 +114,7 @@ Select the Method organization before writing:
 3. Module-on-prior-pipeline organization: prior pipeline overview -> new module -> integration.
 4. Analysis/protocol organization: definitions -> taxonomy/protocol -> measurement pipeline.
 
-Choose the organization internally based on the paper archetype and Writing Policy. Do not expose
+Choose the organization internally based on the paper type and Writing Policy. Do not expose
 template-selection notes unless the user asks for reasoning.
 
 ## Required Output

@@ -72,7 +72,7 @@ Do not load full-draft-only references by default:
 
 - `workflows/full-draft.md`
 - venue profiles
-- archetype profiles
+- paper type profiles
 - domain profiles
 
 Load those only when the user asks to revise using project evidence, the confirmed Writing Policy,

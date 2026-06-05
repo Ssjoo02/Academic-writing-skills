@@ -1,4 +1,4 @@
-# Position Paper Archetype
+# Position Paper Type
 
 ## Story Logic
 

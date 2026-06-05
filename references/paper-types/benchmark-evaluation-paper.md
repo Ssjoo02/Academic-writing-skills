@@ -1,4 +1,4 @@
-# Benchmark/Evaluation Paper Archetype
+# Benchmark/Evaluation Paper Type
 
 ## Story Logic
 

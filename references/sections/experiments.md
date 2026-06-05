@@ -96,7 +96,7 @@ Select an experiment organization before writing:
 3. Analysis paper: research questions -> findings -> supporting experiments -> caveats.
 4. New-task setting: protocol -> adapted baselines/variants -> diagnostics -> demos.
 
-Choose the organization internally based on paper archetype, available evidence, and reviewer risk.
+Choose the organization internally based on paper type, available evidence, and reviewer risk.
 Do not expose template-selection notes unless the user asks for reasoning.
 
 ## Required Output

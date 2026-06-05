@@ -1,4 +1,4 @@
-# Method Paper Archetype
+# Method Paper Type
 
 ## Story Logic
 

@@ -1,4 +1,4 @@
-# Analysis Paper Archetype
+# Analysis Paper Type
 
 ## Story Logic
 

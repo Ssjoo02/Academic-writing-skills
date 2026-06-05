@@ -21,8 +21,8 @@ Create each output only when its stage is reached and its upstream gate has been
 
 | Stage | Output |
 |---|---|
-| Writing Policy | `writing-policies/<paper-slug>-writing-policy.md` |
-| Paper Framework | `writing-policies/<paper-slug>-paper-framework.md` and `writing-policies/<paper-slug>-paper-framework.confirmation.md` |
+| Writing Policy | `writing-policies/<paper-slug>-writing-policy.md`; optional complete translated sibling artifacts only when requested |
+| Paper Framework | `writing-policies/<paper-slug>-paper-framework.md`; optional complete translated sibling artifacts only when requested |
 | Full Draft | complete `paper/` LaTeX project with `main.tex`, `sections/*.tex`, `references.bib`, and `math_commands.tex` |
 
 ## Execution Contract
@@ -32,7 +32,7 @@ Follow this contract before reading more references or writing downstream files.
 | Stage | Required output | Hard stop |
 |---|---|---|
 | Writing Policy | `writing-policies/<paper-slug>-writing-policy.md` | **STOP HERE and wait for user response.** Do not generate Paper Framework until confirmed. |
-| Paper Framework | `writing-policies/<paper-slug>-paper-framework.md` and `.confirmation.md` | **STOP HERE and wait for user response.** Do not create `paper/` until confirmed. |
+| Paper Framework | `writing-policies/<paper-slug>-paper-framework.md` | **STOP HERE and wait for user response.** Do not create `paper/` until confirmed. |
 | Full Draft | complete `paper/` LaTeX project | Return generated files, unresolved markers, and citation/template/compile risks. |
 
 Mandatory gate behavior:
@@ -42,7 +42,7 @@ Mandatory gate behavior:
 - Do not "compress", "batch", "assume", or "silently satisfy" the Writing Policy or Paper
   Framework confirmation gates.
 - After writing the Writing Policy, return only the concise policy summary, stage ledger, and the
-  required user action. **STOP HERE and wait for user response.** Do not load archetype, venue,
+  required user action. **STOP HERE and wait for user response.** Do not load paper type, venue,
   domain, section, figure, template, example, or check references until the user confirms the
   Writing Policy. Ask exactly for confirmation or corrections to the Writing Policy before moving
   to Paper Framework.
@@ -72,10 +72,12 @@ At every stage, keep a brief stage ledger in the user-facing summary:
 - unresolved blockers,
 - next required user action.
 
-Use the interaction language from `../SKILL.md` for user-facing summaries, checkpoint text,
-clarification questions, and confirmation files. Keep paper prose, LaTeX content, BibTeX entries,
-file paths, and machine-readable fields in English unless the user explicitly requests a Chinese
-paper artifact.
+Use the interaction language from `../SKILL.md` for user-facing summaries, checkpoint text, and
+clarification questions. Keep paper prose, LaTeX content, BibTeX entries, file paths, and
+machine-readable fields in English unless the user explicitly requests a Chinese paper artifact.
+Writing Policy and Paper Framework artifacts are English by default. If the user requests another
+language version before a stage is generated, create a complete translated sibling artifact with the
+same content and structure, changing only the natural language.
 
 Do not make a checkpoint summary primarily about process mechanics, file existence, line counts, or
 which folders were avoided. Those details can appear inside the written policy/framework when they
@@ -100,7 +102,7 @@ workspace is ambiguous, ask for the paper project workspace.
 
 Minimum discovery targets:
 
-- paper archetype,
+- paper type,
 - research domain, or `generic` / `no matching profile`,
 - core contribution and central claim,
 - evidence boundary: available results, source evidence, and unsupported claims,
@@ -159,7 +161,7 @@ over.
 - If the user does not answer a decisive evidence conflict, avoid exact numbers or strong claims and
   mark affected claims as `partially supported`, `needs evidence`, or `not verified`.
 
-Do not load venue, archetype, domain, section, figure, style, or check references during workspace
+Do not load venue, paper type, domain, section, figure, style, or check references during workspace
 discovery. Discovery reads project materials only.
 
 ## 2. Full Draft Clarification Boundaries
@@ -195,7 +197,9 @@ Stage boundaries:
 | Section Drafting | facts needed to write the section correctly without false claims | weaken the claim, defer the decision, or insert a precise LaTeX marker |
 
 Ask about venue at most once. If unspecified, use `generic / venue TBD` and
-`generic_article.tex (non-submission draft template)` unless the user later supplies a venue.
+`generic_article.tex (non-submission single-column draft template)` unless the user later supplies a
+venue. The fallback length is a soft drafting budget of 6-8 main-text pages, excluding references
+and appendix; it is not a venue page limit.
 
 Ask at most 1-3 questions per round. A round is one clarification message sent before the agent
 continues to the next stage. Normal Writing Policy generation should need at most one round.
@@ -208,21 +212,21 @@ Prefer confirm/correct questions over open-ended questions:
 ```text
 Before Writing Policy, I need one decision: should this be treated as a method paper?
 I infer method paper from the README and ablation-heavy results. Please confirm or correct.
-Default if unanswered: write `paper archetype = method paper`.
+Default if unanswered: write `paper type = method paper`.
 ```
 
 For target venue, do not ask before Writing Policy when it is merely unspecified. Record
 `target venue = generic / venue TBD; use generic framework unless the user requests venue-specific
 planning`. Before Paper Framework, ask only if the user explicitly wants a venue-specific framework
 or if venue ambiguity blocks a user-requested venue-specific template. Otherwise use a generic
-framework and `generic_article.tex` without asking again.
+framework, `generic_article.tex`, and the 6-8 main-text-page drafting budget without asking again.
 
 ## 3. Writing Policy
 
 Load only `../references/principles/research-strategy.md`.
 
-Do not load venue, archetype, domain, template, section, figure, style, or check references by
-default during Writing Policy generation. Writing Policy should identify candidate venue, archetype,
+Do not load venue, paper type, domain, template, section, figure, style, or check references by
+default during Writing Policy generation. Writing Policy should identify candidate venue, paper type,
 and domain from the workspace and user prompt, but detailed venue constraints and section templates
 are resolved in Paper Framework.
 
@@ -245,7 +249,7 @@ Writing Policy file format:
 
 1. **Source Snapshot**: project name, workspace path, files inspected, evidence snapshot date, and
    source traces for facts used in the paper contract.
-2. **Paper Identity**: target venue, paper archetype, archetype profile filename when available,
+2. **Paper Identity**: target venue, paper type, paper type profile filename when available,
    domain, domain profile filename or `generic` / `no matching profile`, intended reader, core
    research question, and venue/template constraints if already known.
 3. **Core Story**: problem, failure case or motivating gap, technical challenge, insight,
@@ -262,10 +266,10 @@ Writing Policy file format:
 7. **Open Decisions**: only unresolved decisions that can change the paper identity, central claim,
    evidence boundary, key terminology, figure/table plan, or venue/template choice.
 
-If the interaction language is Chinese, add a final **Chinese Confirmation Summary** with only:
-paper type, target venue, one-sentence contribution, core claim boundary, main evidence status,
-top risks, and decisions the user must confirm. If the interaction language is English, do not add a
-Chinese summary unless requested.
+Do not add a short translated confirmation summary inside the Writing Policy. If the user requested
+another language version before this stage was generated, create a complete same-content translated
+sibling artifact such as `writing-policies/<paper-slug>-writing-policy.zh-CN.md`; preserve the same
+sections, tables, claims, evidence statuses, and open decisions.
 
 Record venue status in the Writing Policy as one of:
 
@@ -277,21 +281,22 @@ Record venue status in the Writing Policy as one of:
 Do not include a section strategy in the Writing Policy. Section choices belong in the Paper
 Framework after the Writing Policy is confirmed.
 
-The paper archetype must be resolved before confirming the Writing Policy. If it cannot be inferred
+The paper type must be resolved before confirming the Writing Policy. If it cannot be inferred
 or safely defaulted, ask the user before finalizing the Writing Policy. The domain should also be
 resolved before Paper Framework as either a known domain profile, `generic`, or `no matching profile`.
-Do not defer unresolved paper archetype or domain selection to Paper Framework.
+Do not defer unresolved paper type or domain selection to Paper Framework.
 
 Status vocabulary: `unknown`, `supported`, `partially supported`, `needs evidence`, `not verified`,
 `should avoid`.
 
-Show only a concise summary: paper type, target venue, one-sentence contribution, core story, main
-claim/evidence statuses, key terminology decisions, available experiments/figures/tables, top
-claim or drafting risks, and decisive questions requiring confirmation.
+Show only a concise checkpoint summary: paper type, target venue, one-sentence contribution, core
+story, main claim/evidence statuses, key terminology decisions, available
+experiments/figures/tables, top claim or drafting risks, and decisive questions requiring
+confirmation.
 
-Writing Policy checkpoint content snapshot must include:
+Writing Policy checkpoint summary must include:
 
-- paper identity: working name, paper archetype, domain, and target venue status,
+- paper identity: working name, paper type, domain, and target venue status,
 - research content: core research question, one-sentence contribution, and central claim boundary,
 - evidence snapshot: key source-evidence types and what they support,
 - experiment/result snapshot: current datasets/tasks/models/metrics/result ranges found, or
@@ -301,9 +306,9 @@ Writing Policy checkpoint content snapshot must include:
 - decisions to confirm: split into `Required` identity/framing/claim-boundary decisions and
   `Optional` venue/template/style defaults.
 
-Do not replace this content snapshot with a line-count, existence check, or generic statement that
-the policy was written. If experiments or results are not available, say that explicitly in the
-snapshot instead of omitting the category.
+Do not replace this summary with a line-count, existence check, or generic statement that the policy
+was written. If experiments or results are not available, say that explicitly instead of omitting the
+category.
 
 Inputs:
 
@@ -316,6 +321,12 @@ Output file:
 
 ```text
 writing-policies/<paper-slug>-writing-policy.md
+```
+
+Optional translated output files, only when requested before generation:
+
+```text
+writing-policies/<paper-slug>-writing-policy.<language-code>.md
 ```
 
 Output format: Markdown using the seven sections above.
@@ -338,20 +349,20 @@ Load only the references needed to resolve paper structure and physical format:
 - template selection: `../templates/index.md`,
 - venue format and submission constraints: `../references/venues/<venue>.md` when a target venue is
   confirmed,
-- paper archetype section structure: `../references/archetypes/<archetype>.md` from the confirmed
+- paper type section structure: `../references/paper-types/<paper-type>.md` from the confirmed
   Writing Policy,
 - domain-specific evidence pressure and section content: `../references/domains/<domain>.md` only
   when the confirmed domain has a matching profile,
 - figure/table planning: `../references/figures/figure-planning.md`.
 
 Use `../references/venues/index.md` only when a venue hint exists but the profile mapping is
-unclear, or when the user explicitly asks for venue options. Do not use archetype/domain indexes at
-this stage to decide paper identity; archetype and domain come from the confirmed Writing Policy.
-If the confirmed Writing Policy records only a human-readable archetype or domain label, use
-`../references/archetypes/index.md` or `../references/domains/index.md` only to resolve the profile
+unclear, or when the user explicitly asks for venue options. Do not use paper type/domain indexes at
+this stage to decide paper identity; paper type and domain come from the confirmed Writing Policy.
+If the confirmed Writing Policy records only a human-readable paper type or domain label, use
+`../references/paper-types/index.md` or `../references/domains/index.md` only to resolve the profile
 filename, not to re-decide the paper identity.
 If the confirmed domain has no matching profile, skip the domain profile and rely on the Writing
-Policy plus archetype profile.
+Policy plus paper type profile.
 
 Do not load section-level guide files, section examples, `paragraph-flow.md`, style references, or
 check references at this stage. Those files are used only when drafting, revising, or reviewing
@@ -363,10 +374,11 @@ Build the framework in this order:
    submission constraints, including official template source, single-column/two-column layout, page
    budget, anonymity, citation style, required statements, and whether references count toward the
    limit. If no target venue is confirmed, use a generic framework and record the selected template
-   as `generic_article.tex (non-submission draft template)`.
-2. **Archetype second**: load the confirmed paper archetype profile and use its `Framework Effects`
+   as `generic_article.tex (non-submission single-column draft template)` with a soft 6-8
+   main-text-page drafting budget, excluding references and appendix.
+2. **Paper type second**: load the confirmed paper type profile and use its `Framework Effects`
    as the primary source for section structure. The lightweight section roles below are fallback
-   guidance only, not a replacement for the archetype profile.
+   guidance only, not a replacement for the paper type profile.
 3. **Domain third**: use the domain profile to add required content, evidence pressure, metrics,
    figures/tables, and claim/evaluation risks inside those sections.
 4. **Writing Policy last**: keep only sections and claims supported by available evidence; move
@@ -374,12 +386,32 @@ Build the framework in this order:
 
 Use `../templates/index.md` to select the preloaded official-style venue template when a target
 venue is confirmed. If no target venue is confirmed, select `generic_article.tex` as a
-non-submission draft template and record that the official target-venue template must be resolved
-before submission. If the needed venue template is not present, use a user-provided official
-template or the official template source recorded for that venue. If a selected template requires a
-companion `.sty`, `.cls`, or `.bst` file that is not available in `../templates/` or the workspace,
-record `template companion missing` in Open Decisions and do not claim the draft is compilable. Do
-not invent venue formatting from memory.
+non-submission single-column draft template and record that the official target-venue template must
+be resolved before submission. In this fallback, set the page/length budget to `soft drafting
+budget: 6-8 main-text pages, excluding references and appendix; not a submission limit`. If the
+needed venue template is not present, use a user-provided official template or the official template
+source recorded for that venue. If a selected template requires a companion `.sty`, `.cls`, or `.bst`
+file that is not available in `../templates/` or the workspace, record `template companion missing`
+in Open Decisions and do not claim the draft is compilable. Do not invent venue formatting from
+memory.
+
+Page-budget arithmetic:
+
+- If the target venue has a page limit, compute the total main-text budget first, including whether
+  references, appendix, ethics/limitations statements, or supplementary material count toward the
+  limit according to the venue profile. The Section Framework must include `Page budget` for every
+  section, and the total planned pages must not exceed the venue limit.
+- If the target venue is `generic / venue TBD`, use a soft drafting budget of 6-8 main-text pages,
+  excluding references and appendix; this is not a submission limit.
+- Allocate section pages after loading the confirmed paper type profile. Treat
+  `../references/paper-types/<paper-type>.md` as the primary source for section priorities and the
+  venue profile as the hard physical constraint.
+- If a paper type profile does not yet provide explicit section allocation guidance, infer a
+  conservative distribution from its `Framework Effects`, but still record numeric section budgets
+  and ensure their total fits the venue or generic budget.
+- If the required content cannot fit the page budget, merge sections, move secondary analyses to
+  appendix candidates, or mark the overflow as an Open Decision. Do not silently exceed the target
+  budget.
 
 Current preloaded templates:
 
@@ -398,6 +430,20 @@ Load `../references/figures/figure-planning.md` during Paper Framework generatio
 the main paper needs figures or tables, where they belong, what message they carry, and how they
 will be generated is part of the framework. Do not generate figures during framework writing.
 
+Generic fallback compression rules:
+
+- When target venue is `generic / venue TBD`, keep the main-paper framework compact: 4-6 numbered
+  main sections between Introduction and Conclusion, excluding Abstract and Conclusion.
+- Prefer merged section names when evidence does not require separation, such as `Benchmark and
+  Evaluation Protocol`, `Results and Diagnostic Analysis`, or `Discussion, Limitations, and
+  Reproducibility`.
+- Split a standalone section only when the Writing Policy shows that the topic is a core
+  contribution, a major evidence block, or a likely reviewer blocker that would become unclear if
+  merged.
+- Keep the main Figure Plan to 3-5 figures/tables for the generic draft. Put extra diagnostics,
+  release tables, ablations, or qualitative cases in Open Decisions or appendix candidates instead
+  of the main plan.
+
 Lightweight section roles:
 
 | Section | Framework role |
@@ -414,52 +460,80 @@ Save the framework to:
 
 ```text
 writing-policies/<paper-slug>-paper-framework.md
-writing-policies/<paper-slug>-paper-framework.confirmation.md
 ```
 
 Paper Framework file format:
 
 1. **Inputs Used**: Writing Policy path, target venue, selected template path or template source,
-   venue format summary, page/length budget, paper archetype, domain, evidence snapshot.
-2. **Section Framework**: ordered section list. For each section, include section name, main
-   content, rough length budget, key evidence or figure/table if any, and one writing caution if
-   needed.
-3. **Figure Plan**: a short table with only figures/tables that are likely to appear in the main
+   venue format summary, page/length budget, paper type, domain, evidence snapshot.
+2. **Page Budget Summary**: total venue or generic page budget, what counts toward the limit, planned
+   main-text total, whether references/appendix count, and any overflow or compression decision.
+3. **Section Framework**: ordered section list. For each section, include section name, main
+   content, `Page budget`, key evidence or figure/table if any, and one writing caution if needed.
+   The sum of section page budgets must fit the Page Budget Summary.
+4. **Figure Plan**: a short table with only figures/tables that are likely to appear in the main
    paper. Include `ID`, `type`, `section`, `message`, `source`, and `generation route`.
-4. **Open Decisions**: only blocking missing evidence, uncertain section choices, terminology,
+5. **Open Decisions**: only blocking missing evidence, uncertain section choices, terminology,
    figure/table choices, or user decisions.
 
 When target venue is `generic / venue TBD`, Paper Framework should record:
 
 - `target venue: generic / venue TBD`,
-- `selected template: generic_article.tex (non-submission draft template)`,
-- `venue format summary: generic research paper draft; not submission-ready`,
-- `page/length budget: flexible; resolve after target venue is selected`.
+- `selected template: generic_article.tex (non-submission single-column draft template)`,
+- `venue format summary: generic research paper draft; not submission-ready; replace with the
+  official target-venue template before submission`,
+- `page/length budget: soft drafting budget of 6-8 main-text pages, excluding references and
+  appendix; not a venue page limit`.
 
 Output files:
 
 ```text
 writing-policies/<paper-slug>-paper-framework.md
-writing-policies/<paper-slug>-paper-framework.confirmation.md
 ```
 
-Output format: Markdown using the four sections above. The primary framework is English and
-technical. The confirmation file is concise, user-facing, and written in the interaction language.
+Optional translated output files, only when requested before generation:
+
+```text
+writing-policies/<paper-slug>-paper-framework.<language-code>.md
+```
+
+Output format: Markdown using the five sections above. The primary framework is English and
+technical. A translated sibling artifact, when requested, must contain the same sections, page
+budgets, figure plan, and open decisions; only the natural language changes.
 
 Keep the framework short. Do not include paragraph-level plans, detailed claim-evidence tables,
 full formal-review risk maps, or long figure/table inventories.
 
-Create both the English framework and the concise confirmation framework. Show the confirmation
-framework, plus any blocking Open Decisions, to the user for confirmation.
+Show the framework to the user for confirmation in the conversation. Do not create a separate
+confirmation file. For Chinese interaction, use this terminal-style checkpoint summary shape:
 
-Paper Framework checkpoint content snapshot must include:
+```markdown
+Checkpoint: Paper Framework
+Stage result: <one sentence>
+Output: <framework artifact path, plus translated artifacts if any>
 
-- confirmed paper identity and any user changes from the Writing Policy gate,
-- proposed section order with each section's role in the argument,
-- main figure/table plan and which evidence supports each planned visual,
-- expected experiment/result placement by section,
-- unresolved structure, evidence, citation, template, or figure blockers,
-- decisions to confirm before creating `paper/`.
+论文结构：
+
+| 顺序 | Section | 主要内容 |
+|---:|---|---|
+| 1 | Abstract | <main content> |
+| 2 | Introduction | <main content> |
+
+图表计划：
+
+| ID | 放置位置 | 内容 |
+|---|---|---|
+| Fig. 1 | Introduction | <message> |
+
+Decisions to confirm:
+- Required: <section order / page budget / figure plan decisions before creating paper/>
+- Optional: <venue/template/additional language artifact defaults>
+Unresolved blockers: <none or concise list>
+User action required: 请确认是否继续创建 `paper/`，或说明要改的章节、页数预算、图表或 venue。
+```
+
+For English interaction, use the same content and table structure with English labels. Do not output
+a separate `Content snapshot` bullet list.
 
 Gate: the user must confirm the Paper Framework before full-draft writing. If the user changes
 section order, figure/table arrangement, experiment emphasis, or contribution wording, update the

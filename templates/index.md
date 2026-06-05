@@ -8,7 +8,7 @@ writing references unless editing the LaTeX project itself.
 
 | Venue target | Primary template | Required companion files | Citation style | Notes |
 |---|---|---|---|---|
-| Generic / venue TBD | `generic_article.tex` | `math_commands.tex` | natbib numeric | Non-submission draft template used only when the target venue is not selected. Replace with the official target-venue template before submission. |
+| Generic / venue TBD | `generic_article.tex` | `math_commands.tex` | natbib numeric | Non-submission single-column draft template used only when the target venue is not selected. Soft drafting budget: 6-8 main-text pages, excluding references and appendix. Replace with the official target-venue template before submission. |
 | ICLR | `iclr2026.tex` | official `iclr2026_conference.sty` must be available in the output project | natbib-style author-year | Template source noted in file header. |
 | NeurIPS | `neurips2025.tex` | official `neurips_2025.sty` must be available in the output project | natbib-style author-year | Template source noted in file header. |
 | ICML | `icml2025.tex` | official `icml2025.sty` must be available in the output project | natbib-style author-year | Template source noted in file header. |
@@ -22,8 +22,10 @@ writing references unless editing the LaTeX project itself.
 ## Selection Rules
 
 1. Select the template from the confirmed target venue in the Writing Policy or Paper Framework.
-2. If the target venue is not selected, use `generic_article.tex` only as a non-submission draft
-   template and record that the official venue template remains unresolved.
+2. If the target venue is not selected, use `generic_article.tex` only as a non-submission
+   single-column draft template. Record the page/length budget as a soft 6-8 main-text-page drafting
+   budget, excluding references and appendix, and record that the official venue template remains
+   unresolved.
 3. If no matching preloaded template exists, use a user-provided official template or the official
    template source recorded in the venue profile or maintenance records.
 4. Do not invent venue formatting from memory.

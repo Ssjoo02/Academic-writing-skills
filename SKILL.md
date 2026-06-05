@@ -21,16 +21,22 @@ minimal task-specific references.
 - Paper prose is English academic prose by default, regardless of interaction language.
 - Full Draft Workflow outputs a venue-formatted English LaTeX paper project by default. Do not
   generate a Chinese or Chinese-English parallel paper unless the user explicitly requests it.
-- Writing Policy uses an English/technical primary contract. When the interaction language is
-  Chinese, include a short Chinese confirmation summary inside the policy and in the checkpoint.
-- Paper Framework uses an English primary framework plus a concise user-language confirmation file
-  for user approval.
+- Writing Policy and Paper Framework artifacts are English by default. Before each stage, ask about
+  additional full-language artifact versions only when the question can be batched with another
+  required clarification; otherwise default to English only. If the user asks for another language,
+  create a complete same-content translated sibling artifact such as
+  `writing-policies/<paper-slug>-writing-policy.zh-CN.md` or
+  `writing-policies/<paper-slug>-paper-framework.zh-CN.md`. The translated artifact must preserve
+  the same sections, tables, claims, page budgets, figure plans, and open decisions; only the natural
+  language changes.
+- Do not create separate confirmation files. User approval happens through the conversation
+  checkpoint summary.
 - Draft Revision Workflow may include an interaction-language explanation when useful. Add a
   parallel-language version only when the user requests it or when it is necessary to verify intent.
 
 ## Entry Routing
 
-First decide the workflow. Do not load policy, workspace, framework, venue, archetype, domain,
+First decide the workflow. Do not load policy, workspace, framework, venue, paper type, domain,
 section, example, or check references until the selected workflow requires them.
 
 ## Workflow Planning Protocol
@@ -90,12 +96,11 @@ the interaction language when appropriate:
 ```text
 Checkpoint: <Writing Policy | Paper Framework | workflow-specific gate>
 Stage result: <1 sentence about the substantive content completed, not file existence>
-Content snapshot:
-- <3-5 short bullets with the key research/content decisions, evidence, current results, or plan>
 Output: <main artifact path or deliverable>
+Summary: <compact table or short paragraph showing the substantive stage result>
 Decisions to confirm:
 - Required: <identity, framing, claim boundary, or structure decisions needed for the next stage>
-- Optional: <venue, template, wording preference, or other non-blocking defaults>
+- Optional: <venue, template, additional language artifact, wording preference, or other non-blocking defaults>
 Unresolved blockers: <none or concise list>
 Recommended next action: confirm / request changes / pause
 User action required: Please confirm whether to proceed to <next stage>, or tell me what to change.
@@ -156,8 +161,7 @@ Stage outputs are created only after their stage is reached and the required con
 been satisfied:
 
 - Writing Policy gate: `writing-policies/<paper-slug>-writing-policy.md`
-- Paper Framework gate: `writing-policies/<paper-slug>-paper-framework.md` and
-  `writing-policies/<paper-slug>-paper-framework.confirmation.md`
+- Paper Framework gate: `writing-policies/<paper-slug>-paper-framework.md`
 - Full Draft stage: complete `paper/` LaTeX project
 
 Do not create downstream outputs before the required confirmation gate.
@@ -193,9 +197,11 @@ for decisive unknowns or decisive conflicts at the stage they affect. Writing Po
 limited to paper identity, central claim, evidence boundary, key terminology, and central result
 conflicts. Venue/template questions are deferred to Paper Framework unless the user already supplied
 them. Ask about venue at most once; if the user has not specified one, use `generic / venue TBD`
-with `generic_article.tex` as a non-submission draft template and do not ask again unless the user
-proactively changes the venue. Treat non-decisive uncertainty as an assumption, default, deferred
-decision, or drafting note.
+with `generic_article.tex` as a non-submission single-column draft template and do not ask again
+unless the user proactively changes the venue. In this fallback, use a soft drafting budget of 6-8
+main-text pages, excluding references and appendix; do not call it a venue page limit or
+submission-ready format. Treat non-decisive uncertainty as an assumption, default, deferred decision,
+or drafting note.
 
 When figures or tables are needed, use the concise Figure Plan in the Paper Framework and the
 figure-specific rules in `references/figures/figure-planning.md`. Use a configured paper-figure MCP

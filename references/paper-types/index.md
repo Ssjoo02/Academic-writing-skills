@@ -1,9 +1,9 @@
-# Paper Archetype Index
+# Paper Type Index
 
-The user may select the paper archetype. If not selected, infer it and mark the inference in the
+The user may select the paper type. If not selected, infer it and mark the inference in the
 writing policy.
 
-| Archetype | Profile | Story center |
+| Paper Type | Profile | Story center |
 |---|---|---|
 | Method paper | `method-paper.md` | A new method solves an important failure or capability gap. |
 | Benchmark/evaluation paper | `benchmark-evaluation-paper.md` | Existing evaluation is insufficient; a better protocol reveals useful findings. |

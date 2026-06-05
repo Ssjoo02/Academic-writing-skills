@@ -1,4 +1,4 @@
-# Dataset/Resource Paper Archetype
+# Dataset/Resource Paper Type
 
 ## Story Logic
 
