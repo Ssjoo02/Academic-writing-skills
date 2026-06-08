@@ -216,6 +216,8 @@ a "维度/内容" summary table or any other format.
 阶段结果：<一句话>
 输出：<framework 文件路径>
 
+论文标题：<从 Writing Policy 中确认的 working name / title>
+
 论文结构：
 
 | 顺序 | Section | 主要内容 |
@@ -243,6 +245,8 @@ English interaction:
 Checkpoint: Paper Framework
 Stage result: <one sentence>
 Output: <framework artifact path>
+
+Paper Title: <confirmed working name / title from Writing Policy>
 
 Section Plan:
 
