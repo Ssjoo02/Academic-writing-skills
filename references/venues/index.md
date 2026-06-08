@@ -4,16 +4,60 @@ Use venue profiles only after the Writing Policy has been confirmed and the work
 Paper Framework, drafting under a confirmed venue, or running a final submission-readiness check.
 Do not load these files during Workspace Discovery or Writing Policy generation.
 
-Venue profiles are constraint cards, not paper-story sources. They may influence template choice,
-page-budget arithmetic, anonymity, citation command style, required statements, figure/table
-planning, claim-strength calibration, and final checklist risks. They must not invent claims,
-results, citations, or paper identity.
+Venue profiles are dated constraint cards, not paper-story sources and not substitutes for the
+current official call for papers. They may influence template choice, page-budget arithmetic,
+anonymity, citation command style, required statements, figure/table planning, claim-strength
+calibration, and final checklist risks. They must not invent claims, results, citations, or paper
+identity.
 
-If a target venue is unavailable, choose the closest profile only for approximate planning and mark
-the fit as approximate in the Paper Framework. If a venue fact affects compilation or submission
-readiness and the profile does not record a current verified value, record it as an Open Decision
-and verify against the official venue page or a user-provided guideline before calling the draft
-submission-ready.
+The schema is strict; the facts are allowed to be incomplete. Prefer `not verified` or `verify
+current official page` over filling a field from memory, old calls, search snippets, or another
+venue's pattern. If a target venue is unavailable, choose the closest profile only for approximate
+planning and mark the fit as approximate in the Paper Framework. If a venue fact affects compilation,
+page counting, post-main section order, anonymity, or submission readiness and the profile does not
+record a current verified value, record it as an Open Decision and verify against the official venue
+page or a user-provided guideline before calling the draft submission-ready.
+
+## Required Profile Schema
+
+Every venue profile should use these sections. If a value is unknown, keep the field and write
+`not verified`.
+
+```text
+## Source Status
+- Official sources:
+- Access date:
+- Verified for:
+- Drift risk:
+
+## Scope
+- Applies to:
+- Submission version:
+
+## Length And Counting
+- Main text limit:
+- References count:
+- Appendix count:
+- Checklist count:
+- Ethics/limitations count:
+- Supplementary material count:
+
+## Post-Main Order
+- Required order:
+- Optional sections:
+- Not verified:
+
+## Drafting Implications
+- Main paper self-contained:
+- Appendix/supplement use:
+- Anonymity checks:
+
+## Final Gate
+- Before submission-ready:
+
+## Do Not Infer
+- 
+```
 
 ## Supported Venue Fact Cards
 

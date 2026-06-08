@@ -62,13 +62,17 @@ Use the lightest reliable route:
 | Route | Use for | Output |
 |---|---|---|
 | existing asset | screenshots, qualitative examples, already-drawn diagrams | copied asset under `paper/figures/` |
-| reproducible plot script | numeric results, ablations, scaling, heatmaps | script + PDF/PNG |
+| reproducible plot script | numeric results, ablations, scaling, heatmaps | Python script + PDF/PNG |
 | LaTeX table | result tables, feature comparison, benchmark statistics | `.tex` table or inline table |
 | FigureSpec MCP | architecture, pipeline, workflow, taxonomy diagrams | JSON spec + SVG/PDF |
-| manual drawing note | necessary visual but no reliable source/generator exists | `% FIGURE_NEEDED:` marker |
+| AI picture generation | teaser pictures, conceptual method illustrations, polished raster overview pictures | Picture Brief + generated PNG |
+| current-agent drawing | necessary picture but no user-configured image API exists | agent-created PNG plus Picture Brief |
 
-For plots, do not hardcode numbers from memory. Read from result files. For diagrams, keep the
-source specification or source file so the figure can be revised.
+For plots, data-driven plots default to Python. Do not hardcode numbers from memory. Read from
+result files and follow `plot-style.md`. For diagrams, keep the source specification or source file
+so the figure can be revised. For AI-generated pictures, follow `picture-generation.md`: always
+write `paper/figures/prompts/<figure-id>.md` before rendering, and do not let the image renderer
+invent claims, modules, datasets, results, or labels.
 
 ## MCP Contract
 
@@ -88,12 +92,15 @@ Suggested MCP outputs:
 ```text
 paper/figures/figure-plan.md
 paper/figures/specs/<figure-id>.json
+paper/figures/prompts/<figure-id>.md
 paper/figures/<figure-id>.svg
 paper/figures/<figure-id>.pdf
+paper/figures/<figure-id>.png
 paper/figures/latex_includes.tex
 ```
 
-If the MCP is unavailable, continue with local scripts or explicit `FIGURE_NEEDED` markers.
+If the MCP is unavailable, continue with current-agent drawing for pictures and direct Python
+generation for data charts.
 
 ## Caption Rule
 

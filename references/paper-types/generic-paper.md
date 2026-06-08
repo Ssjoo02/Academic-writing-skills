@@ -1,8 +1,8 @@
 # Generic Research Paper Type
 
-Use this profile when the paper type is unknown, mixed, or not well captured by the other profiles.
-It follows the common research-paper structure reflected in the reference writing skill while
-remaining neutral about contribution type.
+Use this profile when the paper type is unknown, mixed, early-stage, or not well captured by the
+other profiles. It follows a common research-paper structure while remaining neutral about
+contribution type.
 
 ## Use Only As Section Planning Reference
 
@@ -16,7 +16,8 @@ venue, contribution, evidence package, or page budget requires it.
 
 ## Section And Page-Budget Reference
 
-Assume an 8-page main-text conference paper when no venue-specific budget is known.
+When no venue-specific budget is known, use the workflow's soft 6-8 main-text-page drafting budget
+and treat 8 pages as an upper bound, not a venue limit.
 
 | Order | Candidate section | Typical budget | Section role |
 |---|---:|---:|---|

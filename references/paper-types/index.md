@@ -3,7 +3,9 @@
 First decide the paper type, then load the corresponding profile before building the Paper
 Framework. The user may select the paper type. If not selected, infer it from the main contribution,
 evidence package, target venue, and requested output, then mark the inference in the Writing Policy.
-Do not default to `generic-paper.md` before checking the specific profiles.
+Do not default to `generic-paper.md` before checking the specific profiles. Use `generic-paper.md`
+only as a provisional fallback when the type is unknown, mixed, early-stage, or not safely captured
+by a specific profile.
 
 Paper type profiles are section and page-budget references only. They help the agent decide which
 sections a paper probably needs and how much main-text space each section may require. They are not

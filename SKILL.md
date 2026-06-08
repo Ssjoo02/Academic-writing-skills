@@ -19,8 +19,9 @@ minimal task-specific references.
 - Keep file paths, shell commands, LaTeX commands, BibTeX keys, citation keys, template names,
   schema fields, and machine-parsed markers in their original language.
 - Paper prose is English academic prose by default, regardless of interaction language.
-- Full Draft Workflow outputs a venue-formatted English LaTeX paper project by default. Do not
-  generate a Chinese or Chinese-English parallel paper unless the user explicitly requests it.
+- Full Draft Workflow outputs a venue-formatted English LaTeX paper project when a target venue is
+  confirmed; otherwise it outputs a non-submission generic English LaTeX draft. Do not generate a
+  Chinese or Chinese-English parallel paper unless the user explicitly requests it.
 - Writing Policy and Paper Framework artifacts are English by default. Before each stage, ask about
   additional full-language artifact versions only when the question can be batched with another
   required clarification; otherwise default to English only. If the user asks for another language,
@@ -207,6 +208,11 @@ When figures or tables are needed, use the concise Figure Plan in the Paper Fram
 figure-specific rules in `references/figures/figure-planning.md`. Use a configured paper-figure MCP
 only for figure classification, FigureSpec skeletons, validation, rendering, or figure metadata; do
 not let figure tooling invent claims or results.
+For Full Draft data-driven plots, data-driven plots default to Python and are drawn directly by the
+current agent from workspace result files. For non-data picture or illustration figures, always
+create a Picture Brief at `paper/figures/prompts/<figure-id>.md` before any rendering attempt. If
+the user explicitly configures a picture API such as GPT-image2 or Gemini, use that renderer after
+the brief; otherwise the current executing agent draws the picture from the brief and inserts it.
 
 In Draft Revision Workflow, output revised text plus necessary notes. Do not generate a Writing
 Policy, Paper Framework, or files by default. For section-level revisions, run the internal Section

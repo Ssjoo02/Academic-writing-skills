@@ -15,7 +15,8 @@ venue, contribution, evidence package, or page budget requires it.
 
 ## Section And Page-Budget Reference
 
-Assume an 8-page main-text conference paper when no venue-specific budget is known.
+When no venue-specific budget is known, use the workflow's soft 6-8 main-text-page drafting budget
+and treat 8 pages as an upper bound, not a venue limit.
 
 | Order | Candidate section | Typical budget | Section role |
 |---|---:|---:|---|

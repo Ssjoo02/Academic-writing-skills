@@ -114,6 +114,8 @@ Optional context, record only when visible:
 - target venue, otherwise `generic / venue TBD`,
 - existing draft files and progress,
 - figures, tables, bibliography, code/data artifacts,
+- Image Renderer Preference for picture figures: user-configured `GPT-image2`, user-configured
+  `Gemini`, current executing agent, or other explicit renderer,
 - style sources or previous papers supplied by the user,
 - existing weakness or review notes found in workspace materials.
 
@@ -212,7 +214,8 @@ Prefer confirm/correct questions over open-ended questions:
 ```text
 Before Writing Policy, I need one decision: should this be treated as a method paper?
 I infer method paper from the README and ablation-heavy results. Please confirm or correct.
-Default if unanswered: write `paper type = method paper`.
+Default if unanswered: use `method-paper.md` because the evidence strongly supports it; correct this
+before Paper Framework if the paper identity is different.
 ```
 
 For target venue, do not ask before Writing Policy when it is merely unspecified. Record
@@ -281,11 +284,16 @@ Record venue status in the Writing Policy as one of:
 Do not include a section strategy in the Writing Policy. Section choices belong in the Paper
 Framework after the Writing Policy is confirmed.
 
-The paper type must be resolved before confirming the Writing Policy. If it cannot be inferred
-or safely defaulted, ask the user before finalizing the Writing Policy. Domain evidence adapters are
-optional evidence adapters, not required paper identity. Do not force a domain adapter match. If
-there is no clear match, record `domain evidence adapter = none / no matching profile` and continue.
-Do not defer unresolved paper type selection to Paper Framework.
+The paper type must be resolved before confirming the Writing Policy. Check
+`../references/paper-types/index.md` before defaulting. If one specific profile clearly controls the
+main evidence burden, use it and mark the inference in the Writing Policy. If the type is unknown,
+mixed, or too sparse to classify without distorting the paper, use `generic-paper.md` as a
+provisional section-planning fallback and record why. Do not use `method-paper.md` as a global
+default. Ask the user before finalizing the Writing Policy only when even the generic fallback would
+make the paper identity false or hide a decisive conflict. Domain evidence adapters are optional
+evidence adapters, not required paper identity. Do not force a domain adapter match. If there is no
+clear match, record `domain evidence adapter = none / no matching profile` and continue. Do not defer
+unresolved paper type selection to Paper Framework.
 
 Status vocabulary: `unknown`, `supported`, `partially supported`, `needs evidence`, `not verified`,
 `should avoid`.
@@ -373,11 +381,13 @@ Build the framework in this order:
 1. **Venue first**: if a target venue is confirmed, use the venue profile as a Paper Framework
    constraint card. Apply only facts recorded there or in a current official/user-provided venue
    guideline: official template source, single-column/two-column layout, page budget, anonymity,
-   citation style, required statements, and whether references count toward the limit. If a required
-   venue fact is missing, stale, or only generically described, record it in Open Decisions and do not
-   invent it from memory. If no target venue is confirmed, use a generic framework and record the
-   selected template as `generic_article.tex (non-submission single-column draft template)` with a
-   soft 6-8 main-text-page drafting budget, excluding references and appendix.
+   citation style, required statements, post-main section order, and whether references, appendices,
+   checklists, ethics, limitations, acknowledgments, or supplementary material count toward the
+   limit. The venue schema is strict but facts may be incomplete: if a required venue fact is missing,
+   stale, or only generically described, record the exact field as `not verified` or an Open Decision
+   and do not invent it from memory. If no target venue is confirmed, use a generic framework and
+   record the selected template as `generic_article.tex (non-submission single-column draft
+   template)` with a soft 6-8 main-text-page drafting budget, excluding references and appendix.
 2. **Paper type second**: load the confirmed paper type profile and use it only as a flexible
    section/page-budget reference. It helps decide candidate sections and approximate section budgets;
    it is not a fixed template and must be adapted to the actual paper, venue, evidence, and user
@@ -403,13 +413,13 @@ memory.
 Page-budget arithmetic:
 
 - If the target venue has a page limit, compute the total main-text budget first, including whether
-  references, appendix, ethics/limitations statements, or supplementary material count toward the
-  limit according to verified facts in the venue profile or a current official/user-provided venue
-  guideline. The Section Framework must include `Page budget` for every section, and the total
-  planned pages must not exceed the venue limit. If the venue limit is verified, the total planned
-  pages must not exceed the verified venue limit. If the venue limit is not verified, record the
-  current page budget as an Open Decision and use a conservative planning budget without calling it a
-  submission limit.
+  references, appendix, checklist, acknowledgments, ethics/limitations statements, or supplementary
+  material count toward the limit according to verified facts in the venue profile or a current
+  official/user-provided venue guideline. The Section Framework must include `Page budget` for every
+  section, and the total planned pages must not exceed the venue limit. If the venue limit is
+  verified, the total planned pages must not exceed the verified venue limit. If the venue limit is
+  not verified, record the current page budget as an Open Decision and use a conservative planning
+  budget without calling it a submission limit.
 - If the target venue is `generic / venue TBD`, use a soft drafting budget of 6-8 main-text pages,
   excluding references and appendix; this is not a submission limit.
 - Allocate section pages after loading the confirmed paper type profile. Treat
@@ -427,8 +437,34 @@ Current preloaded templates:
 - `../templates/index.md`
 - `../templates/generic_article.tex`
 - `../templates/iclr2026.tex`
-- `../templates/neurips2025.tex`
-- `../templates/icml2025.tex`
+- `../templates/iclr2026_conference.sty`
+- `../templates/iclr2026_conference.bst`
+- `../templates/neurips2026.tex`
+- `../templates/neurips_2026.sty`
+- `../templates/checklist.tex`
+- `../templates/icml2026.tex`
+- `../templates/icml2026.sty`
+- `../templates/icml2026.bst`
+- `../templates/algorithm.sty`
+- `../templates/algorithmic.sty`
+- `../templates/acl2026.tex`
+- `../templates/acl.sty`
+- `../templates/acl_natbib.bst`
+- `../templates/cvpr2026.tex`
+- `../templates/preamble.tex`
+- `../templates/cvpr.sty`
+- `../templates/ieeenat_fullname.bst`
+- `../templates/aaai2026.tex`
+- `../templates/aaai2026.sty`
+- `../templates/aaai2026.bst`
+- `../templates/aaai2026.bib`
+- `../templates/ijcai26.tex`
+- `../templates/ijcai26.sty`
+- `../templates/named.bst`
+- `../templates/ijcai26.bib`
+- `../templates/acm_mm2026.tex`
+- `../templates/acmart.cls`
+- `../templates/acm.bst`
 - `../templates/ieee_conference.tex`
 - `../templates/ieee_journal.tex`
 - `../templates/IEEEtran.cls`
@@ -474,15 +510,20 @@ writing-policies/<paper-slug>-paper-framework.md
 Paper Framework file format:
 
 1. **Inputs Used**: Writing Policy path, target venue, selected template path or template source,
-   venue format summary, page/length budget, paper type, optional domain evidence adapter, evidence snapshot.
+   venue format summary, venue source status, page/length budget, paper type, optional domain
+   evidence adapter, evidence snapshot.
 2. **Page Budget Summary**: total venue or generic page budget, what counts toward the limit, planned
-   main-text total, whether references/appendix count, and any overflow or compression decision.
+   main-text total, whether references, appendix, checklist, acknowledgments, ethics/limitations, and
+   supplementary material count, and any overflow or compression decision.
 3. **Section Framework**: ordered section list. For each section, include section name, main
    content, `Page budget`, key evidence or figure/table if any, and one writing caution if needed.
    The sum of section page budgets must fit the Page Budget Summary.
 4. **Figure Plan**: a short table with only figures/tables that are likely to appear in the main
    paper. Include `ID`, `type`, `section`, `message`, `source`, and `generation route`.
-5. **Open Decisions**: only blocking missing evidence, uncertain section choices, terminology,
+5. **Venue Assembly Plan**: post-main order, required statements or checklists, optional appendices
+   or supplementary material, and `not verified` venue fields that must be checked before
+   submission-ready status.
+6. **Open Decisions**: only blocking missing evidence, uncertain section choices, terminology,
    figure/table choices, or user decisions.
 
 When target venue is `generic / venue TBD`, Paper Framework should record:
@@ -506,7 +547,7 @@ Optional translated output files, only when requested before generation:
 writing-policies/<paper-slug>-paper-framework.<language-code>.md
 ```
 
-Output format: Markdown using the five sections above. The primary framework is English and
+Output format: Markdown using the six sections above. The primary framework is English and
 technical. A translated sibling artifact, when requested, must contain the same sections, page
 budgets, figure plan, and open decisions; only the natural language changes.
 
@@ -535,7 +576,7 @@ Output: <framework artifact path, plus translated artifacts if any>
 | Fig. 1 | Introduction | <message> |
 
 Decisions to confirm:
-- Required: <section order / page budget / figure plan decisions before creating paper/>
+- Required: <section order / page budget / venue assembly / figure plan decisions before creating paper/>
 - Optional: <venue/template/additional language artifact defaults>
 Unresolved blockers: <none or concise list>
 User action required: 请确认是否继续创建 `paper/`，或说明要改的章节、页数预算、图表或 venue。
@@ -550,10 +591,10 @@ Paper Framework and ask for confirmation again.
 
 ## 5. Full Draft LaTeX Project
 
-Use the confirmed Writing Policy, confirmed Paper Framework, relevant section guides,
-`../references/sections/paragraph-flow.md`, relevant experiment/figure/table materials, and
-`../references/figures/figure-planning.md` only when figures or tables will be generated, revised,
-or inserted.
+Use the confirmed Writing Policy, confirmed Paper Framework, the confirmed venue profile when a
+venue is selected, relevant section guides, `../references/sections/paragraph-flow.md`, relevant
+experiment/figure/table materials, and `../references/figures/figure-planning.md` only when figures
+or tables will be generated, revised, or inserted.
 
 The default full-draft deliverable is a complete English LaTeX paper project under `paper/`, not a
 Markdown prose draft and not a Chinese-English parallel draft. If the user explicitly requests a
@@ -570,9 +611,18 @@ Before creating or overwriting LaTeX files:
    venue `.sty` files, when the selected template needs them. If a required companion file is
    missing, keep drafting only if the Paper Framework allows a non-compilable draft; otherwise use
    `generic_article.tex` or ask the user for the official template source.
-4. Create `paper/sections/` files matching the confirmed Paper Framework section list.
-5. Update `paper/main.tex` so its `\input{sections/...}` calls match the confirmed section files.
-6. Remove stale section files not referenced by the updated `paper/main.tex`.
+4. Replace official sample or instruction body text in `paper/main.tex` with the confirmed Paper
+   Framework section inputs. Preserve the document class and venue options, required package/style
+   setup, title/author anonymity policy, bibliography commands, and verified post-main hooks. Do not
+   treat official sample prose as draft content.
+5. Create `paper/sections/` files matching the confirmed Paper Framework section list.
+6. Update `paper/main.tex` so its `\input{sections/...}` calls match the confirmed section files.
+7. Assemble post-main material according to the Paper Framework's `Venue Assembly Plan`: required
+   statements, references, checklists, appendices, acknowledgments, and supplementary pointers must
+   appear only in locations supported by the confirmed venue profile or a current official/user
+   guideline. If the order is `not verified`, keep the draft conservative, mark the field as an Open
+   Decision, and do not call the output submission-ready.
+8. Remove stale section files not referenced by the updated `paper/main.tex`.
 
 Default LaTeX project layout:
 
@@ -591,18 +641,38 @@ paper/
 Figure handling:
 
 1. Read the confirmed Figure Plan from the Paper Framework.
-2. For data-driven plots and tables, create reproducible scripts or table files under
-   `paper/figures/` and read data from workspace result files; do not hardcode results from memory.
-3. For architecture, pipeline, workflow, or system diagrams, prefer the configured paper-figure MCP
+2. Resolve the Image Renderer Preference recorded during intake or visible in the user request. If
+   the user explicitly configured a picture API such as `GPT-image2` or `Gemini`, use that API for
+   picture figures after the Picture Brief is written. If the user did not provide a picture API, the
+   current executing agent draws the picture from the brief. This preference affects only non-data
+   picture figures, not charts.
+3. Load `../references/figures/plot-style.md` for data-driven plots and tables. For these outputs,
+   data-driven plots default to Python and are drawn directly by the current agent. Write the final
+   chart files as `paper/figures/<figure-id>.pdf` plus `paper/figures/<figure-id>.png` when a preview
+   or raster fallback is useful, then include them in LaTeX. Do not create shared style modules,
+   scripts directories, derived data folders, or audit files by default. Read data from workspace
+   result files; do not hardcode results from memory.
+4. For architecture, pipeline, workflow, or system diagrams, prefer the configured paper-figure MCP
    or a deterministic FigureSpec-style JSON-to-SVG/PDF route when available. Keep the source spec in
    `paper/figures/specs/`.
-4. For screenshots or qualitative examples, use existing workspace assets and record their source.
-5. Insert each figure/table only in the section specified by the confirmed Paper Framework unless
+5. For non-data picture figures such as teasers, conceptual method illustrations, polished raster
+   overview pictures, or qualitative visual summaries, load
+   `../references/figures/picture-generation.md`. Always write the Picture Brief before attempting
+   image generation. Save it to `paper/figures/prompts/<figure-id>.md`.
+6. After the Picture Brief is written, generate `paper/figures/<figure-id>.png`. Use the user
+   configured `GPT-image2`/`Gemini`/other picture API when explicitly provided; otherwise use the
+   current executing agent's drawing or image-generation capability. Do not leave a planned picture
+   blank. If a high-fidelity external renderer is unavailable, create a simpler paper-safe picture
+   that follows the brief, then mark polish limitations in the final summary.
+7. For screenshots or qualitative examples, use existing workspace assets and record their source.
+8. Insert each figure/table only in the section specified by the confirmed Paper Framework unless
    drafting reveals a clear conflict; if conflict changes the paper structure, ask the user.
-6. Captions must state the figure's message and supported claim, not merely describe visual content.
+9. Captions must state the figure's message and supported claim, not merely describe visual content.
+10. Save LaTeX snippets in `paper/figures/latex_includes.tex` when useful. Keep extra scripts,
+   derived data files, or audits only when the user requests reproducibility packaging or when a
+   complex result figure cannot be regenerated otherwise.
 
-Load section references when drafting each section. Follow the `Research-Paper-Writing-Skills`
-pattern: load only the current section guide by default; load a local example only when the section
+Load section references when drafting each section, load only the current section guide by default; load a local example only when the section
 guide explicitly points to one, the section structure is uncertain, or the user asks to learn from
 examples. Learn structure, not phrasing.
 
@@ -692,13 +762,17 @@ Writing rules:
 Before returning the full draft, internally check paragraph flow, section alignment, figure/table
 placement, Abstract/Introduction consistency, Introduction claim support in Experiments, Method and
 Experiments correspondence, Related Work positioning, terminology, missing citations, conclusion
-overclaiming, and skeptical reviewer risk across Contribution, Writing clarity, Experimental
-strength, Evaluation completeness, and Method design soundness.
+overclaiming, venue page counting, post-main section order, required statements/checklists,
+appendix/supplement handling, anonymity-sensitive locations, and skeptical reviewer risk across
+Contribution, Writing clarity, Experimental strength, Evaluation completeness, and Method design
+soundness.
 
 If `latexmk` or `pdflatex` is available, compile the draft once from `paper/main.tex` and report the
 result. If compilation is skipped because tooling or template companions are missing, report the
 exact reason. Do not call the draft submission-ready unless template, citation, evidence, and
-compilation risks are resolved.
+compilation risks are resolved and all venue fields that affect page counting, post-main order,
+required statements/checklists, anonymity, and supplementary material are verified against the
+confirmed venue profile or a current official/user-provided guideline.
 
 Do not show paragraph, section, or full-paper review tables by default. Show review details only
 when the user asks or when a blocking issue remains unresolved.

@@ -1,35 +1,45 @@
 # ICLR Venue Profile
 
-## Official Sources
+## Source Status
 
-- ICLR 2026 Author Guide: https://iclr.cc/Conferences/2026/AuthorGuide
-- ICLR 2026 OpenReview venue: https://openreview.net/group?id=ICLR.cc/2026/Conference
+- Official sources:
+  - ICLR 2026 Author Guide: https://iclr.cc/Conferences/2026/AuthorGuide
+  - ICLR 2026 OpenReview venue: https://openreview.net/group?id=ICLR.cc/2026/Conference
 - Access date: 2026-06-08
+- Verified for: ICLR 2026 conference submission planning.
+- Drift risk: high; verify the current author guide before submission.
 
-## Verified Facts
+## Scope
 
-- Template/style: use the official ICLR 2026 LaTeX style files linked from the author guide.
-- Submission format: submit through OpenReview.
-- Page limit: submission main text is at most 9 pages; discussion/rebuttal and camera-ready main text allow 10 pages.
-- References and appendices: references do not count toward the page limit. Appendices may follow the bibliography, but reviewers are not required to read them.
-- Anonymity: double-blind submission; main paper and supplementary material must be anonymous.
-- Supplementary material: supplementary text may be included after references in the same PDF, and code or other material may be uploaded as supplementary material.
-- Required or expected statements: authors must acknowledge the ICLR Code of Ethics during submission. Ethics and reproducibility statements are encouraged, placed before references, and do not count toward the page limit under the guide's conditions.
-- AI/LLM disclosure: significant LLM involvement in ideation or writing should be disclosed in a separate LLM usage section; LLMs are not eligible for authorship.
+- Applies to: ICLR conference papers.
+- Submission version: review submission; discussion/rebuttal and camera-ready deltas must be rechecked.
 
-## Paper Framework Effects
+## Length And Counting
+
+- Main text limit: 9 pages for review submissions.
+- References count: no.
+- Appendix count: no, when appendices follow the bibliography; reviewers are not required to read them.
+- Checklist count: not verified as a separate required checklist.
+- Ethics/limitations count: ethics and reproducibility statements are encouraged before references and do not count under the guide's stated conditions.
+- Supplementary material count: supplementary text may be included after references in the same PDF; code or other material may be uploaded separately.
+
+## Post-Main Order
+
+- Required order: main text, optional ethics/reproducibility/LLM-usage statements when applicable, references, optional appendices or supplementary text.
+- Optional sections: ethics statement, reproducibility statement, LLM usage section, appendices, supplementary material.
+- Not verified: exact acknowledgments placement for review submissions.
+
+## Drafting Implications
 
 - Use a 9-page submission Page Budget Summary unless the user explicitly plans a rebuttal or camera-ready version.
 - Put references outside the section page budget; place appendices after references and treat them as optional reviewer material.
 - Add Open Decisions for ethics, reproducibility, and LLM-usage statements when the project context suggests they may apply.
 - Keep all self-citations, code links, demonstrations, and supplementary files anonymous.
 
-## Final Check
+## Final Gate
 
-- Confirm the paper uses the official ICLR 2026 style files and does not exceed the verified page budget.
-- Confirm references, appendices, ethics/reproducibility statements, acknowledgments, and LLM disclosure are counted according to the author guide.
-- Confirm all submitted files and external links preserve double-blind anonymity.
+- Before submission-ready: confirm the current author guide, style files, page budget, statement placement, post-main order, supplementary handling, and double-blind requirements.
 
-## Unverified / Omit
+## Do Not Infer
 
 - Do not infer topic preferences, reviewer tastes, or claim-strength norms from this profile.

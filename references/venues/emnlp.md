@@ -1,34 +1,46 @@
 # EMNLP Venue Profile
 
-## Official Sources
+## Source Status
 
-- EMNLP 2025 Main Conference CFP: https://2025.emnlp.org/calls/main_conference_papers/
-- EMNLP 2025 Double-Blind Instructions: https://2025.emnlp.org/calls/papers/Instructions
-- ACLPUB Paper Formatting Guidelines: https://acl-org.github.io/ACLPUB/formatting.html
+- Official sources:
+  - EMNLP 2025 Main Conference CFP: https://2025.emnlp.org/calls/main_conference_papers/
+  - EMNLP 2025 Double-Blind Instructions: https://2025.emnlp.org/calls/papers/Instructions
+  - ACLPUB Paper Formatting Guidelines: https://acl-org.github.io/ACLPUB/formatting.html
 - Access date: 2026-06-08
+- Verified for: EMNLP 2025 plus shared ACLPUB formatting only.
+- Drift risk: high; do not use this card alone for a current-year EMNLP submission.
 
-## Verified Facts
+## Scope
 
-- Template/style: EMNLP uses the shared *ACL submission and template requirements.
-- Paper length: EMNLP 2025 lists long papers as 8 pages and short papers as 4 pages, following ARR submission requirements.
-- Camera-ready length: accepted final versions receive one additional content page, up to 9 pages for long papers and 5 pages for short papers.
-- Policies: submissions follow ARR requirements for two-way anonymized review, authorship, citation and comparison, multiple submission, ethics, limitations, templates, and optional supplementary materials.
-- Required sections/checklists: ARR/EMNLP materials point authors to the responsible NLP research checklist, limitations, ACL disclosure policy, and ethics policies.
-- Formatting details: use the ACLPUB guidance for abstract length, two-column A4 review format, citations, references, appendices, and supplementary material.
+- Applies to: approximate planning for EMNLP-style NLP papers.
+- Submission version: not current-year verified.
 
-## Paper Framework Effects
+## Length And Counting
 
-- Select long or short paper before page budgeting; use 8 or 4 content pages for review drafts.
-- Add Open Decisions for responsible NLP checklist, limitations, ethics, disclosure policy, data/code availability, and supplementary material.
+- Main text limit: EMNLP 2025 used 8 content pages for long papers and 4 content pages for short papers.
+- References count: no under the shared ACL pattern.
+- Appendix count: no under the shared ACL pattern, but appendices are optional reviewer material.
+- Checklist count: current-year handling not verified.
+- Ethics/limitations count: use ACLPUB placement only after confirming the current EMNLP call still follows it.
+- Supplementary material count: not verified.
+
+## Post-Main Order
+
+- Required order: not current-year verified; ACLPUB pattern is main content, `Limitations`, optional ethical considerations, references, appendices.
+- Optional sections: responsible NLP checklist, ethics/disclosure material, supplementary material.
+- Not verified: current EMNLP page limits, checklist mechanism, anonymity policy, and post-main order.
+
+## Drafting Implications
+
+- Select long or short paper before page budgeting, but mark the budget as provisional until the current official call is checked.
+- Add Open Decisions for current-year paper length, responsible NLP checklist, limitations, ethics, disclosure policy, data/code availability, and supplementary material.
 - Keep the review paper self-contained; put nonessential detail in appendices or supplementary material.
 - Audit all author-identifying content under ARR two-way anonymized review.
 
-## Final Check
+## Final Gate
 
-- Confirm current EMNLP and ARR pages still point to the same paper length and policy set.
-- Confirm the draft follows *ACL formatting and includes required limitations/checklist material where applicable.
-- Confirm anonymity across the paper, supplementary material, code, data, and links.
+- Before submission-ready: replace provisional 2025-derived fields with current official EMNLP and ARR facts.
 
-## Unverified / Omit
+## Do Not Infer
 
-- Do not infer EMNLP-specific empirical-story preferences from this profile.
+- Do not infer EMNLP-specific empirical-story preferences or current-year submission requirements from the 2025 sources.
