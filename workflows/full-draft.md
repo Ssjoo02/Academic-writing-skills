@@ -43,9 +43,9 @@ Mandatory gate behavior:
   Framework confirmation gates.
 - After writing the Writing Policy, return only the concise policy summary, stage ledger, and the
   required user action. **STOP HERE and wait for user response.** Do not load paper type, venue,
-  domain, section, figure, template, example, or check references until the user confirms the
-  Writing Policy. Ask exactly for confirmation or corrections to the Writing Policy before moving
-  to Paper Framework.
+  domain evidence adapter, section, figure, template, example, or check references until the user
+  confirms the Writing Policy. Ask exactly for confirmation or corrections to the Writing Policy
+  before moving to Paper Framework.
 - After writing the Paper Framework, return only the concise framework summary, stage ledger, and
   the required user action. **STOP HERE and wait for user response.** Do not create `paper/`, draft
   sections, generate figures/tables, or write BibTeX until the user confirms the Paper Framework.
@@ -103,7 +103,7 @@ workspace is ambiguous, ask for the paper project workspace.
 Minimum discovery targets:
 
 - paper type,
-- research domain, or `generic` / `no matching profile`,
+- optional domain evidence adapter, or `none / no matching profile`,
 - core contribution and central claim,
 - evidence boundary: available results, source evidence, and unsupported claims,
 - key terms and naming conflicts,
@@ -161,8 +161,8 @@ over.
 - If the user does not answer a decisive evidence conflict, avoid exact numbers or strong claims and
   mark affected claims as `partially supported`, `needs evidence`, or `not verified`.
 
-Do not load venue, paper type, domain, section, figure, style, or check references during workspace
-discovery. Discovery reads project materials only.
+Do not load venue, paper type, domain evidence adapter, section, figure, style, or check references
+during workspace discovery. Discovery reads project materials only.
 
 ## 2. Full Draft Clarification Boundaries
 
@@ -225,10 +225,10 @@ framework, `generic_article.tex`, and the 6-8 main-text-page drafting budget wit
 
 Load only `../references/principles/research-strategy.md`.
 
-Do not load venue, paper type, domain, template, section, figure, style, or check references by
-default during Writing Policy generation. Writing Policy should identify candidate venue, paper type,
-and domain from the workspace and user prompt, but detailed venue constraints and section templates
-are resolved in Paper Framework.
+Do not load venue, paper type, domain evidence adapter, template, section, figure, style, or check
+references by default during Writing Policy generation. Writing Policy should identify candidate
+venue, paper type, and any clear domain evidence adapter from the workspace and user prompt, but
+detailed venue constraints and section templates are resolved in Paper Framework.
 
 Only load `../references/checks/claim-evidence.md` during Writing Policy if the user explicitly asks
 for a claim audit or if a central claim is high-risk and cannot be safely classified using the
@@ -250,7 +250,7 @@ Writing Policy file format:
 1. **Source Snapshot**: project name, workspace path, files inspected, evidence snapshot date, and
    source traces for facts used in the paper contract.
 2. **Paper Identity**: target venue, paper type, paper type profile filename when available,
-   domain, domain profile filename or `generic` / `no matching profile`, intended reader, core
+   optional domain evidence adapter filename or `none / no matching profile`, intended reader, core
    research question, and venue/template constraints if already known.
 3. **Core Story**: problem, failure case or motivating gap, technical challenge, insight,
    proposed method/benchmark/system/study, one-sentence contribution, and final takeaway.
@@ -282,9 +282,10 @@ Do not include a section strategy in the Writing Policy. Section choices belong 
 Framework after the Writing Policy is confirmed.
 
 The paper type must be resolved before confirming the Writing Policy. If it cannot be inferred
-or safely defaulted, ask the user before finalizing the Writing Policy. The domain should also be
-resolved before Paper Framework as either a known domain profile, `generic`, or `no matching profile`.
-Do not defer unresolved paper type or domain selection to Paper Framework.
+or safely defaulted, ask the user before finalizing the Writing Policy. Domain evidence adapters are
+optional evidence adapters, not required paper identity. Do not force a domain adapter match. If
+there is no clear match, record `domain evidence adapter = none / no matching profile` and continue.
+Do not defer unresolved paper type selection to Paper Framework.
 
 Status vocabulary: `unknown`, `supported`, `partially supported`, `needs evidence`, `not verified`,
 `should avoid`.
@@ -296,7 +297,7 @@ confirmation.
 
 Writing Policy checkpoint summary must include:
 
-- paper identity: working name, paper type, domain, and target venue status,
+- paper identity: working name, paper type, optional domain evidence adapter, and target venue status,
 - research content: core research question, one-sentence contribution, and central claim boundary,
 - evidence snapshot: key source-evidence types and what they support,
 - experiment/result snapshot: current datasets/tasks/models/metrics/result ranges found, or
@@ -347,22 +348,21 @@ Inputs:
 Load only the references needed to resolve paper structure and physical format:
 
 - template selection: `../templates/index.md`,
-- venue format and submission constraints: `../references/venues/<venue>.md` when a target venue is
-  confirmed,
-- paper type section structure: `../references/paper-types/<paper-type>.md` from the confirmed
+- venue framework constraints: `../references/venues/<venue>.md` when a target venue is confirmed,
+- paper type section/page-budget reference: `../references/paper-types/<paper-type>.md` from the confirmed
   Writing Policy,
-- domain-specific evidence pressure and section content: `../references/domains/<domain>.md` only
-  when the confirmed domain has a matching profile,
+- optional domain evidence adapter: `../references/domains/<domain>.md` only when the Writing
+  Policy names a clear matching adapter,
 - figure/table planning: `../references/figures/figure-planning.md`.
 
 Use `../references/venues/index.md` only when a venue hint exists but the profile mapping is
-unclear, or when the user explicitly asks for venue options. Do not use paper type/domain indexes at
-this stage to decide paper identity; paper type and domain come from the confirmed Writing Policy.
-If the confirmed Writing Policy records only a human-readable paper type or domain label, use
-`../references/paper-types/index.md` or `../references/domains/index.md` only to resolve the profile
-filename, not to re-decide the paper identity.
-If the confirmed domain has no matching profile, skip the domain profile and rely on the Writing
-Policy plus paper type profile.
+unclear, or when the user explicitly asks for venue options. Do not use paper type or domain-adapter
+indexes at this stage to decide paper identity; paper type comes from the confirmed Writing Policy.
+If the confirmed Writing Policy records only a human-readable paper type label, use
+`../references/paper-types/index.md` only to resolve the profile filename, not to re-decide the paper
+identity. Use `../references/domains/index.md` only when the Writing Policy already points to a
+clear domain-adapter candidate and the filename needs resolution. If there is no clear match, skip
+the domain evidence adapter and rely on the Writing Policy plus paper type profile.
 
 Do not load section-level guide files, section examples, `paragraph-flow.md`, style references, or
 check references at this stage. Those files are used only when drafting, revising, or reviewing
@@ -370,17 +370,22 @@ specific text.
 
 Build the framework in this order:
 
-1. **Venue first**: if a target venue is confirmed, use the venue profile for physical format and
-   submission constraints, including official template source, single-column/two-column layout, page
-   budget, anonymity, citation style, required statements, and whether references count toward the
-   limit. If no target venue is confirmed, use a generic framework and record the selected template
-   as `generic_article.tex (non-submission single-column draft template)` with a soft 6-8
-   main-text-page drafting budget, excluding references and appendix.
-2. **Paper type second**: load the confirmed paper type profile and use its `Framework Effects`
-   as the primary source for section structure. The lightweight section roles below are fallback
-   guidance only, not a replacement for the paper type profile.
-3. **Domain third**: use the domain profile to add required content, evidence pressure, metrics,
-   figures/tables, and claim/evaluation risks inside those sections.
+1. **Venue first**: if a target venue is confirmed, use the venue profile as a Paper Framework
+   constraint card. Apply only facts recorded there or in a current official/user-provided venue
+   guideline: official template source, single-column/two-column layout, page budget, anonymity,
+   citation style, required statements, and whether references count toward the limit. If a required
+   venue fact is missing, stale, or only generically described, record it in Open Decisions and do not
+   invent it from memory. If no target venue is confirmed, use a generic framework and record the
+   selected template as `generic_article.tex (non-submission single-column draft template)` with a
+   soft 6-8 main-text-page drafting budget, excluding references and appendix.
+2. **Paper type second**: load the confirmed paper type profile and use it only as a flexible
+   section/page-budget reference. It helps decide candidate sections and approximate section budgets;
+   it is not a fixed template and must be adapted to the actual paper, venue, evidence, and user
+   request. The lightweight section roles below are fallback guidance only, not a replacement for
+   the paper type profile.
+3. **Domain evidence adapter third, optional**: when a clear adapter matches, use it to add evidence
+   pressure, metrics, baselines, figures/tables, and claim/evaluation risks inside those sections.
+   If there is no clear match, skip this step; do not force a domain adapter match.
 4. **Writing Policy last**: keep only sections and claims supported by available evidence; move
    unresolved structure, evidence, template, or venue decisions to Open Decisions.
 
@@ -399,16 +404,20 @@ Page-budget arithmetic:
 
 - If the target venue has a page limit, compute the total main-text budget first, including whether
   references, appendix, ethics/limitations statements, or supplementary material count toward the
-  limit according to the venue profile. The Section Framework must include `Page budget` for every
-  section, and the total planned pages must not exceed the venue limit.
+  limit according to verified facts in the venue profile or a current official/user-provided venue
+  guideline. The Section Framework must include `Page budget` for every section, and the total
+  planned pages must not exceed the venue limit. If the venue limit is verified, the total planned
+  pages must not exceed the verified venue limit. If the venue limit is not verified, record the
+  current page budget as an Open Decision and use a conservative planning budget without calling it a
+  submission limit.
 - If the target venue is `generic / venue TBD`, use a soft drafting budget of 6-8 main-text pages,
   excluding references and appendix; this is not a submission limit.
 - Allocate section pages after loading the confirmed paper type profile. Treat
-  `../references/paper-types/<paper-type>.md` as the primary source for section priorities and the
-  venue profile as the hard physical constraint.
-- If a paper type profile does not yet provide explicit section allocation guidance, infer a
-  conservative distribution from its `Framework Effects`, but still record numeric section budgets
-  and ensure their total fits the venue or generic budget.
+  `../references/paper-types/<paper-type>.md` as a flexible section and page-budget reference, and
+  verified venue facts as the hard physical constraint.
+- Adapt the profile instead of copying it mechanically: merge, rename, split, shrink, or omit
+  sections when the actual contribution, available evidence, user request, or venue budget requires
+  it. Still record numeric section budgets and ensure their total fits the venue or generic budget.
 - If the required content cannot fit the page budget, merge sections, move secondary analyses to
   appendix candidates, or mark the overflow as an Open Decision. Do not silently exceed the target
   budget.
@@ -465,7 +474,7 @@ writing-policies/<paper-slug>-paper-framework.md
 Paper Framework file format:
 
 1. **Inputs Used**: Writing Policy path, target venue, selected template path or template source,
-   venue format summary, page/length budget, paper type, domain, evidence snapshot.
+   venue format summary, page/length budget, paper type, optional domain evidence adapter, evidence snapshot.
 2. **Page Budget Summary**: total venue or generic page budget, what counts toward the limit, planned
    main-text total, whether references/appendix count, and any overflow or compression decision.
 3. **Section Framework**: ordered section list. For each section, include section name, main

@@ -1,9 +1,13 @@
-# Domain Profile Index
+# Domain Evidence Adapter Index
 
-The user may select the research domain. If not selected, infer the closest profile and mark the
-fit as approximate in the writing policy.
+These files are optional evidence adapters. They help the agent adjust metrics, baselines, figures,
+evidence expectations, and reviewer-risk notes for a few common AI/LLM domains.
 
-| Domain | Profile | Typical evidence pressure |
+Do not use this index as a complete research-domain taxonomy. Do not use it to decide paper type,
+venue, or section order. Do not force a match. If there is no clear match, use
+`none / no matching profile` and continue with the Writing Policy plus the paper type profile.
+
+| Domain evidence adapter | Profile | Typical evidence pressure |
 |---|---|---|
 | LLM agent | `llm-agent.md` | task success, tool-use robustness, cost, trajectory analysis, failure modes |
 | RAG | `rag.md` | retrieval quality, faithfulness, citation grounding, answer quality, corpus freshness |

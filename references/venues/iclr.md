@@ -1,51 +1,35 @@
 # ICLR Venue Profile
 
-## Source Status
+## Official Sources
 
-- Official template/guideline source status: `official source found`; see `../../maintenance/source-provenance.md`.
-- Profile guidance source status: `generic cross-venue guidance pending representative-paper analysis`.
-- The guidance below is `starter guidance`, not advice extracted from ICLR papers or reviews.
+- ICLR 2026 Author Guide: https://iclr.cc/Conferences/2026/AuthorGuide
+- ICLR 2026 OpenReview venue: https://openreview.net/group?id=ICLR.cc/2026/Conference
+- Access date: 2026-06-08
 
-## Reviewer Expectations
+## Verified Facts
 
-- Frame the learning problem, representation question, or capability gap early.
-- Explain the core modeling or optimization insight, not only the implementation.
-- Tie empirical claims to controlled comparisons, ablations, and analysis.
-- Clarify when a contribution is methodological, empirical, theoretical, or a combination.
+- Template/style: use the official ICLR 2026 LaTeX style files linked from the author guide.
+- Submission format: submit through OpenReview.
+- Page limit: submission main text is at most 9 pages; discussion/rebuttal and camera-ready main text allow 10 pages.
+- References and appendices: references do not count toward the page limit. Appendices may follow the bibliography, but reviewers are not required to read them.
+- Anonymity: double-blind submission; main paper and supplementary material must be anonymous.
+- Supplementary material: supplementary text may be included after references in the same PDF, and code or other material may be uploaded as supplementary material.
+- Required or expected statements: authors must acknowledge the ICLR Code of Ethics during submission. Ethics and reproducibility statements are encouraged, placed before references, and do not count toward the page limit under the guide's conditions.
+- AI/LLM disclosure: significant LLM involvement in ideation or writing should be disclosed in a separate LLM usage section; LLMs are not eligible for authorship.
 
-## Typical Story Rhythm
+## Paper Framework Effects
 
-- Learning gap or limitation in current approaches.
-- Core insight about model behavior, objective design, data, or training.
-- Method or framework.
-- Experimental setup and primary result.
-- Ablations, sensitivity analysis, or representation/behavior analysis.
-- Limitations, failure modes, and scope.
+- Use a 9-page submission Page Budget Summary unless the user explicitly plans a rebuttal or camera-ready version.
+- Put references outside the section page budget; place appendices after references and treat them as optional reviewer material.
+- Add Open Decisions for ethics, reproducibility, and LLM-usage statements when the project context suggests they may apply.
+- Keep all self-citations, code links, demonstrations, and supplementary files anonymous.
 
-## Evidence Pressure
+## Final Check
 
-- Main result should support the headline learning or representation claim.
-- Ablations should isolate the proposed mechanism or design choice.
-- Analysis should explain when and why the method works.
-- Baselines should be recent, relevant, and tuned fairly.
+- Confirm the paper uses the official ICLR 2026 style files and does not exceed the verified page budget.
+- Confirm references, appendices, ethics/reproducibility statements, acknowledgments, and LLM disclosure are counted according to the author guide.
+- Confirm all submitted files and external links preserve double-blind anonymity.
 
-## Claim Strength Preferences
+## Unverified / Omit
 
-- Use strong claims only when direct multi-setting evidence exists.
-- Use moderate claims for improvements shown on limited tasks or model scales.
-- Avoid broad generalization claims without evidence across datasets, models, or regimes.
-
-## Common Reviewer Risks
-
-- Novelty is only an engineering combination.
-- Ablations do not isolate the proposed insight.
-- Baselines are weak, outdated, or undertuned.
-- Results are sensitive to one dataset, seed, model size, or implementation detail.
-- The method's limitations are hidden in appendices or not discussed.
-
-## Writing Policy Effects
-
-- Fill `Venue constraints`.
-- Adjust `Claim Strength Policy`.
-- Adjust `Metric And Evidence Policy`.
-- Add venue-specific risks to `Reviewer Risk Register`.
+- Do not infer topic preferences, reviewer tastes, or claim-strength norms from this profile.

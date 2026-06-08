@@ -1,51 +1,34 @@
 # EMNLP Venue Profile
 
-## Source Status
+## Official Sources
 
-- Official template/guideline source status: `official source found`; see `../../maintenance/source-provenance.md`.
-- Profile guidance source status: `generic cross-venue guidance pending representative-paper analysis`.
-- The guidance below is `starter guidance`, not advice extracted from EMNLP papers or reviews.
+- EMNLP 2025 Main Conference CFP: https://2025.emnlp.org/calls/main_conference_papers/
+- EMNLP 2025 Double-Blind Instructions: https://2025.emnlp.org/calls/papers/Instructions
+- ACLPUB Paper Formatting Guidelines: https://acl-org.github.io/ACLPUB/formatting.html
+- Access date: 2026-06-08
 
-## Reviewer Expectations
+## Verified Facts
 
-- Emphasize empirical NLP contribution, task definition, and evaluation validity.
-- Make dataset composition, preprocessing, annotation, and splits transparent.
-- Show what model behavior changes, not only whether the headline score improves.
-- Discuss reproducibility, limitations, and ethical/data concerns where relevant.
+- Template/style: EMNLP uses the shared *ACL submission and template requirements.
+- Paper length: EMNLP 2025 lists long papers as 8 pages and short papers as 4 pages, following ARR submission requirements.
+- Camera-ready length: accepted final versions receive one additional content page, up to 9 pages for long papers and 5 pages for short papers.
+- Policies: submissions follow ARR requirements for two-way anonymized review, authorship, citation and comparison, multiple submission, ethics, limitations, templates, and optional supplementary materials.
+- Required sections/checklists: ARR/EMNLP materials point authors to the responsible NLP research checklist, limitations, ACL disclosure policy, and ethics policies.
+- Formatting details: use the ACLPUB guidance for abstract length, two-column A4 review format, citations, references, appendices, and supplementary material.
 
-## Typical Story Rhythm
+## Paper Framework Effects
 
-- Empirical NLP problem or capability gap.
-- Why current datasets, methods, or evaluations are insufficient.
-- Proposed method, resource, benchmark, or analysis.
-- Experimental design and main results.
-- Error analysis, robustness checks, domain/language breakdowns, or qualitative examples.
-- Limitations and responsible-use boundaries.
+- Select long or short paper before page budgeting; use 8 or 4 content pages for review drafts.
+- Add Open Decisions for responsible NLP checklist, limitations, ethics, disclosure policy, data/code availability, and supplementary material.
+- Keep the review paper self-contained; put nonessential detail in appendices or supplementary material.
+- Audit all author-identifying content under ARR two-way anonymized review.
 
-## Evidence Pressure
+## Final Check
 
-- Main result should be supported by appropriate task metrics and statistical or robustness checks where useful.
-- Error analysis should identify linguistic, domain, or data conditions behind failures.
-- Dataset/resource papers need documentation of collection, filtering, annotation, and intended use.
-- Reproducibility details should make training, prompting, evaluation, and data access clear.
+- Confirm current EMNLP and ARR pages still point to the same paper length and policy set.
+- Confirm the draft follows *ACL formatting and includes required limitations/checklist material where applicable.
+- Confirm anonymity across the paper, supplementary material, code, data, and links.
 
-## Claim Strength Preferences
+## Unverified / Omit
 
-- Use strong claims for empirically demonstrated task improvements in the tested settings.
-- Use moderate claims when results depend on specific datasets, prompts, languages, or model families.
-- Avoid claims about general language understanding without broad evidence.
-
-## Common Reviewer Risks
-
-- Evaluation metric does not reflect the NLP phenomenon or user-facing task.
-- Data leakage, contamination, or split construction is not ruled out.
-- Dataset or annotation details are insufficient.
-- Error analysis is missing despite nuanced language behavior.
-- Ethical, privacy, licensing, or social-impact concerns are under-discussed.
-
-## Writing Policy Effects
-
-- Fill `Venue constraints`.
-- Adjust `Claim Strength Policy`.
-- Adjust `Metric And Evidence Policy`.
-- Add venue-specific risks to `Reviewer Risk Register`.
+- Do not infer EMNLP-specific empirical-story preferences from this profile.

@@ -73,11 +73,11 @@ Do not load full-draft-only references by default:
 - `workflows/full-draft.md`
 - venue profiles
 - paper type profiles
-- domain profiles
+- optional domain evidence adapters
 
 Load those only when the user asks to revise using project evidence, the confirmed Writing Policy,
-the confirmed Paper Framework, venue-specific expectations, paper type, or domain-specific
-evidence pressure.
+the confirmed Paper Framework, venue-specific expectations, paper type, or adapter-specific evidence
+pressure from a clearly matching optional domain evidence adapter.
 
 ## State 3: Section Drafting Protocol
 

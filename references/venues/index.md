@@ -1,9 +1,21 @@
 # Venue Profiles Index
 
-Select the exact venue profile when available. If unavailable, choose the closest profile and
-mark venue fit as approximate in the writing policy.
+Use venue profiles only after the Writing Policy has been confirmed and the workflow is building a
+Paper Framework, drafting under a confirmed venue, or running a final submission-readiness check.
+Do not load these files during Workspace Discovery or Writing Policy generation.
 
-## Supported Starter Profiles
+Venue profiles are constraint cards, not paper-story sources. They may influence template choice,
+page-budget arithmetic, anonymity, citation command style, required statements, figure/table
+planning, claim-strength calibration, and final checklist risks. They must not invent claims,
+results, citations, or paper identity.
+
+If a target venue is unavailable, choose the closest profile only for approximate planning and mark
+the fit as approximate in the Paper Framework. If a venue fact affects compilation or submission
+readiness and the profile does not record a current verified value, record it as an Open Decision
+and verify against the official venue page or a user-provided guideline before calling the draft
+submission-ready.
+
+## Supported Venue Fact Cards
 
 | Venue family | Profile file | Use for |
 |---|---|---|

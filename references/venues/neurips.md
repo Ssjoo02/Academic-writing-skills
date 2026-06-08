@@ -1,51 +1,35 @@
 # NeurIPS Venue Profile
 
-## Source Status
+## Official Sources
 
-- Official template/guideline source status: `official source found`; see `../../maintenance/source-provenance.md`.
-- Profile guidance source status: `generic cross-venue guidance pending representative-paper analysis`.
-- The guidance below is `starter guidance`, not advice extracted from NeurIPS papers or reviews.
+- NeurIPS 2025 Call for Papers: https://nips.cc/Conferences/2025/CallForPapers
+- NeurIPS Paper Checklist Guidelines: https://nips.cc/public/guides/PaperChecklist
+- Access date: 2026-06-08
 
-## Reviewer Expectations
+## Verified Facts
 
-- Position the work for a broad machine learning audience.
-- State whether the main contribution is algorithmic, theoretical, empirical, systems-oriented, or societal.
-- Make experimental, theoretical, and reproducibility claims traceable to evidence.
-- Address limitations, broader impact, and checklist-style transparency where relevant.
+- Template/style: use the official NeurIPS 2025 LaTeX style file.
+- Submission format: submit a single PDF through OpenReview for the main conference track.
+- Page limit: submitted main text is limited to 9 content pages including figures and tables; accepted camera-ready papers get one additional content page.
+- References, checklist, and appendices: references, the paper checklist, and optional technical appendices do not count as content pages.
+- Checklist: the NeurIPS paper checklist is required, is part of the submission, and does not count toward the page limit.
+- Supplementary material: technical appendices and supplementary material may be submitted; reviewers decide whether to consult them. The material must be anonymized.
+- Anonymity: submissions and supplementary or linked material must be anonymized; acknowledgments should not appear at submission time.
+- Ethics review: reviewers and ACs may flag submissions for ethics review.
 
-## Typical Story Rhythm
+## Paper Framework Effects
 
-- Broad ML problem or gap.
-- Why existing methods, theory, or evaluations leave the gap unresolved.
-- Core contribution and assumptions.
-- Method, theorem, system, benchmark, or analysis.
-- Evidence sequence with primary results before supporting details.
-- Limitations, reproducibility notes, and risk boundaries.
+- Use a 9-page main-text Page Budget Summary and reserve separate space for references, checklist, and optional appendices.
+- Include checklist-facing support for claims, limitations, assumptions, reproducibility, ethics, and societal impact when relevant.
+- Treat appendices and supplementary material as support, not as required reading for the central argument.
+- Add an anonymity check for all external links, code, data, acknowledgments, and self-citations.
 
-## Evidence Pressure
+## Final Check
 
-- Main evidence should match the claimed contribution type.
-- Empirical papers need strong baselines, careful protocol, and analysis beyond leaderboard gains.
-- Theory papers need clear assumptions, proof intuition, and relation to known results.
-- Systems or benchmark papers need utility, reliability, and adoption-facing evidence.
+- Confirm the official style file is used and the main text stays within 9 content pages.
+- Confirm the checklist is present after references and optional appendix material.
+- Confirm supplementary material and links preserve anonymity.
 
-## Claim Strength Preferences
+## Unverified / Omit
 
-- Use strong claims only when the evidence covers the claimed scope.
-- Use moderate claims when improvements are convincing but narrow.
-- Avoid community-wide or field-wide claims without broad comparative support.
-
-## Common Reviewer Risks
-
-- Contribution is unclear across a broad reviewer pool.
-- Experiments are underpowered, poorly controlled, or hard to reproduce.
-- Theory assumptions are disconnected from the motivating setting.
-- The paper ignores limitations, societal risks, or checklist-relevant details.
-- Related work is too narrow for a broad ML venue.
-
-## Writing Policy Effects
-
-- Fill `Venue constraints`.
-- Adjust `Claim Strength Policy`.
-- Adjust `Metric And Evidence Policy`.
-- Add venue-specific risks to `Reviewer Risk Register`.
+- Do not infer area-specific review preferences from this profile.

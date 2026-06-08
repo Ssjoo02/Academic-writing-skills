@@ -1,51 +1,36 @@
 # ICCV/ECCV Venue Profile
 
-## Source Status
+## Official Sources
 
-- Official template/guideline source status: `official source found`; see `../../maintenance/source-provenance.md`.
-- Profile guidance source status: `generic cross-venue guidance pending representative-paper analysis`.
-- The guidance below is `starter guidance`, not advice extracted from ICCV/ECCV papers or reviews.
+- ECCV 2026 Submission Guide: https://eccv.ecva.net/Conferences/2026/AuthorGuide
+- ECCV 2026 Submission Policies and Author's Paper Kit: https://eccv.ecva.net/Conferences/2026/SubmissionPolicies
+- ICCV 2025 Submission Checklist: https://iccv.thecvf.com/Conferences/2025/SubmissionCheckList
+- Access date: 2026-06-08
 
-## Reviewer Expectations
+## Verified Facts
 
-- Frame the contribution around a clear computer vision or vision-language problem.
-- Define datasets, visual domains, protocols, and evaluation settings precisely.
-- Support the method story with both quantitative results and qualitative visual evidence.
-- Explain architecture, supervision, data, or training choices through ablations where applicable.
+- ECCV template/style: ECCV 2026 uses the LNCS style of Springer and the official ECCV 2026 Author Kit.
+- ECCV page limit: papers are limited to 14 pages including figures and tables; additional pages containing only cited references are allowed.
+- ECCV appendices: no appendices are permitted in the main submission; optional supplementary material may contain proofs, additional figures or tables, analysis, videos, or concurrent submissions.
+- ECCV anonymity: double-blind review; the paper and supplementary material must not identify the authors.
+- ECCV contribution types: authors select one primary contribution type during submission.
+- ECCV external links: content-expanding external links are not allowed in submissions, supplementary material, or rebuttal.
+- ECCV rebuttal: optional rebuttal is limited to one page including references and must remain anonymous.
+- ICCV source status: this profile only verifies that an official ICCV submission checklist exists for 2025; current ICCV year-specific page limits are not recorded here.
 
-## Typical Story Rhythm
+## Paper Framework Effects
 
-- Vision problem, benchmark gap, or deployment limitation.
-- Why existing visual methods are insufficient.
-- Core insight and method.
-- Evaluation protocol and main results.
-- Qualitative examples, ablations, and failure analysis.
-- Scope across categories, scenes, domains, and compute conditions.
+- For ECCV planning, use a 14-page Page Budget Summary in LNCS style and keep cited references outside that budget.
+- Do not put appendices in the ECCV main submission; move optional support to supplementary material and keep the paper self-contained.
+- Add an Open Decision for the selected ECCV contribution type.
+- For ICCV planning, verify the current ICCV author guideline before setting page budget, template, or supplementary rules.
 
-## Evidence Pressure
+## Final Check
 
-- Quantitative comparisons should use accepted protocols or justify deviations.
-- Visual examples should demonstrate strengths and limits of the method.
-- Ablations should test the major architecture, training, and data decisions.
-- Cross-dataset or cross-domain evidence is needed for broad generalization claims.
+- Confirm whether the target is ICCV or ECCV before submission-readiness checks.
+- For ECCV, confirm official ECCV 2026 Author Kit use, 14-page limit, no main-submission appendix, and double-blind anonymity.
+- For ICCV, replace this card's ICCV Open Decision with current official ICCV facts before submission.
 
-## Claim Strength Preferences
+## Unverified / Omit
 
-- Use strong claims only when multiple protocols or datasets support them.
-- Use moderate claims for benchmark-specific improvements.
-- Avoid claims about real-world robustness without stress tests or deployment-relevant evidence.
-
-## Common Reviewer Risks
-
-- Protocol details or data preprocessing are hard to audit.
-- The method is an incremental architecture variant without analysis.
-- Qualitative evidence is selective or disconnected from metrics.
-- Comparisons miss recent vision baselines.
-- Failure modes, bias, safety, or compute costs are ignored.
-
-## Writing Policy Effects
-
-- Fill `Venue constraints`.
-- Adjust `Claim Strength Policy`.
-- Adjust `Metric And Evidence Policy`.
-- Add venue-specific risks to `Reviewer Risk Register`.
+- Current ICCV page limit, template, appendix, and supplementary rules are not verified in this card.

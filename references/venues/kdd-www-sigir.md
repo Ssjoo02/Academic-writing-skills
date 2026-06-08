@@ -1,51 +1,39 @@
 # KDD/WWW/SIGIR Venue Profile
 
-## Source Status
+## Official Sources
 
-- Official template/guideline source status: `official source found`; see `../../maintenance/source-provenance.md`.
-- Profile guidance source status: `generic cross-venue guidance pending representative-paper analysis`.
-- The guidance below is `starter guidance`, not advice extracted from KDD/WWW/SIGIR papers or reviews.
+- KDD 2026 Research Track CFP: https://kdd2026.kdd.org/research-track-call-for-papers/
+- The Web Conference 2026 Research Tracks CFP: https://www2026.thewebconf.org/calls/research-tracks.html
+- SIGIR 2026 Full Papers Track CFP: https://sigir2026.org/en-AU/pages/submissions/full-papers-track
+- SIGIR 2026 Submission Policies and Information: https://sigir2026.org/en-AU/pages/submissions/submission-policies-and-information
+- Access date: 2026-06-08
 
-## Reviewer Expectations
+## Verified Facts
 
-- Frame the contribution around data mining, web systems, search, recommendation, or information retrieval.
-- Make dataset scale, sampling, logging, and temporal or user-interaction context clear.
-- Align offline metrics, online metrics, and user/system impact claims.
-- Address leakage, bias, feedback loops, privacy, and deployment constraints where relevant.
+- KDD format: single PDF; 8 content pages as main paper, followed by references and optional unlimited appendix. The first 8 pages must be self-contained.
+- KDD camera-ready: accepted papers allow 12 pages total, of which 9 are content pages and references/appendix are limited to 3 pages.
+- KDD transparency: original submission, reviews, meta-reviews, and discussions are made public in OpenReview for accepted papers.
+- KDD reproducibility: anonymized GitHub repositories may be referenced at submission and are recommended; accepted authors are encouraged to make code/data public.
+- WWW format: English, double-column ACM template; LaTeX recommendation is `\documentclass[sigconf, anonymous, review]{acmart}`.
+- WWW page limit: 8 main-paper pages, with references and optional appendix allowed up to 12 pages total. The first 8 pages must be self-contained.
+- WWW anonymity: double-blind; omit author names, affiliations, and identifying information.
+- SIGIR format: English PDF in current ACM two-column conference format; use `\documentclass[sigconf,natbib=true,anonymous=true]{acmart}` for LaTeX full papers.
+- SIGIR page limit: full papers are at most 9 pages excluding references; figures, tables, proofs, appendices, acknowledgments, and other content count within the 9 pages.
+- SIGIR anonymity: full papers are anonymous; source-code and artifact links should use anonymous repositories.
 
-## Typical Story Rhythm
+## Paper Framework Effects
 
-- Data/web/search/recommender/IR problem and stakeholder impact.
-- Gap in current modeling, ranking, retrieval, mining, or web-scale practice.
-- Core method, dataset, system, or analysis.
-- Experimental setup with datasets, splits, metrics, and baselines.
-- Validity analysis: leakage, bias, robustness, efficiency, or online/offline gap.
-- Limitations and operational implications.
+- Ask whether the target is KDD, WWW, or SIGIR before final page budgeting.
+- For KDD and WWW, keep the first 8 pages self-contained and treat appendices as optional support.
+- For SIGIR full papers, count appendices and acknowledgments inside the 9-page limit and leave only references outside.
+- Add Open Decisions for ACM template mode, artifact/repository anonymity, and accepted-paper public-review implications.
 
-## Evidence Pressure
+## Final Check
 
-- Dataset scale and construction should support the claimed real-world relevance.
-- Metrics should reflect the retrieval, ranking, recommendation, mining, or web objective.
-- Offline gains need careful interpretation if user or system impact is claimed.
-- Leakage checks, temporal splits, bias analysis, or counterfactual concerns may be needed.
+- Confirm the selected venue and apply only that venue's page-counting rule.
+- Confirm ACM template mode, anonymity, references/appendix counting, and artifact-link handling.
+- For KDD, confirm the public OpenReview record implication for accepted papers.
 
-## Claim Strength Preferences
+## Unverified / Omit
 
-- Use strong claims when results hold across datasets, time splits, or realistic traffic/user settings.
-- Use moderate claims for offline improvements without online or user-facing validation.
-- Avoid impact claims when only proxy metrics are measured.
-
-## Common Reviewer Risks
-
-- Dataset leakage, sampling bias, or temporal contamination is not addressed.
-- Offline metrics are treated as direct user-impact evidence.
-- Baselines are weak for the relevant IR/recommender/data-mining community.
-- Scalability, latency, or systems constraints are ignored.
-- Privacy, fairness, or feedback-loop risks are missing.
-
-## Writing Policy Effects
-
-- Fill `Venue constraints`.
-- Adjust `Claim Strength Policy`.
-- Adjust `Metric And Evidence Policy`.
-- Add venue-specific risks to `Reviewer Risk Register`.
+- Do not combine page limits across KDD, WWW, and SIGIR; they differ in appendix and total-page counting.

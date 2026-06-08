@@ -1,51 +1,37 @@
 # AAAI/IJCAI Venue Profile
 
-## Source Status
+## Official Sources
 
-- Official template/guideline source status: `official source found`; see `../../maintenance/source-provenance.md`.
-- Profile guidance source status: `generic cross-venue guidance pending representative-paper analysis`.
-- The guidance below is `starter guidance`, not advice extracted from AAAI/IJCAI papers or reviews.
+- AAAI-26 Main Technical Track CFP: https://aaai.org/conference/aaai/aaai-26/main-technical-track-call/
+- AAAI-26 Author Kit: https://aaai.org/conference/aaai/aaai-26/author-kit/
+- IJCAI-ECAI 2026 Main Track CFP: https://2026.ijcai.org/ijcai-ecai-2026-call-for-papers-main-track/
+- Access date: 2026-06-08
 
-## Reviewer Expectations
+## Verified Facts
 
-- Frame the work for a broad AI audience, not only one subcommunity.
-- State the problem significance and the AI contribution clearly.
-- Explain assumptions, method, and evaluation in accessible terms.
-- Connect technical results to problem-solving value, generality, or insight.
+- AAAI template/style: use the AAAI-26 Author Kit.
+- AAAI page limit: submissions may contain up to 7 pages of technical content plus additional pages solely for references.
+- AAAI supplementary material: authors may submit a technical appendix, multimedia, and code/data; reviewers are not required to review supplementary material.
+- AAAI reproducibility: authors must complete a reproducibility checklist.
+- AAAI generative-AI policy: authors remain responsible for submitted material; LLM-generated paper text is prohibited unless presented as part of experimental analysis, while editing/polishing author-written text is not prohibited.
+- IJCAI template/style: papers must follow the IJCAI-ECAI 2026 formatting guidelines and be self-contained PDFs.
+- IJCAI page limit: papers are at most 9 pages total, with 7 body pages including figures/tables and up to 2 reference pages; an optional ethics statement may be placed in the body or reference pages.
+- IJCAI supplementary material: up to 50MB in PDF or ZIP; it must be anonymized and reviewers may consult it at their discretion.
+- IJCAI anonymity: double-blind from the author perspective; submissions, supplementary material, code, metadata, and self-references must be anonymized.
 
-## Typical Story Rhythm
+## Paper Framework Effects
 
-- Broad AI problem and why it matters.
-- Gap in current methods, reasoning, planning, learning, knowledge, interaction, or application practice.
-- Core contribution and assumptions.
-- Method, model, algorithm, framework, or analysis.
-- Evaluation aligned with the AI claim.
-- Limitations, applicability, and cross-community relevance.
+- Ask whether the target is AAAI or IJCAI before final page budgeting.
+- For AAAI, use 7 technical-content pages plus references and add a reproducibility-checklist Open Decision.
+- For IJCAI, use 7 body pages plus up to 2 reference pages and keep optional ethics placement explicit.
+- Keep supplementary material nonessential for both venues and audit all IJCAI materials for anonymity.
 
-## Evidence Pressure
+## Final Check
 
-- Evidence should match the claimed contribution type: empirical, theoretical, algorithmic, or applied.
-- Evaluation should show problem significance, not only metric movement.
-- Cross-community terms should be defined for readers outside the immediate niche.
-- Reproducibility and ethical considerations should be explicit where relevant.
+- Confirm the selected venue before applying page and template constraints.
+- For AAAI, confirm Author Kit use, 7-page technical-content limit, references-only extra pages, and reproducibility checklist.
+- For IJCAI, confirm 9-page total limit, 7 body pages, up to 2 reference pages, optional ethics placement, and anonymized supplementary material.
 
-## Claim Strength Preferences
+## Unverified / Omit
 
-- Use strong claims when evidence supports both technical validity and problem significance.
-- Use moderate claims for subarea-specific improvements or preliminary applied findings.
-- Avoid claims that assume reviewers share a narrow subfield's unstated priorities.
-
-## Common Reviewer Risks
-
-- Contribution is hard for a broad AI reviewer to categorize.
-- Problem significance is asserted but not demonstrated.
-- Evaluation does not match the stated AI contribution.
-- Method details are inaccessible outside the subcommunity.
-- Ethical, societal, or application constraints are ignored.
-
-## Writing Policy Effects
-
-- Fill `Venue constraints`.
-- Adjust `Claim Strength Policy`.
-- Adjust `Metric And Evidence Policy`.
-- Add venue-specific risks to `Reviewer Risk Register`.
+- Do not merge AAAI and IJCAI rules; when a field differs, use only the selected venue's official facts.

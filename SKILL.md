@@ -1,6 +1,6 @@
 ---
 name: academic-writing
-description: Generate and use a policy-driven research paper writing strategy before drafting or revising academic papers. Use when planning, drafting, revising, or reviewing a research paper with venue, paper type, domain, metric, claim-evidence, citation, reviewer-risk, or style constraints.
+description: Generate and use a policy-driven research paper writing strategy before drafting or revising academic papers. Use when planning, drafting, revising, or reviewing a research paper with venue, paper type, domain evidence adapter, metric, claim-evidence, citation, reviewer-risk, or style constraints.
 ---
 
 # Academic Writing
@@ -36,8 +36,8 @@ minimal task-specific references.
 
 ## Entry Routing
 
-First decide the workflow. Do not load policy, workspace, framework, venue, paper type, domain,
-section, example, or check references until the selected workflow requires them.
+First decide the workflow. Do not load policy, workspace, framework, venue, paper type, domain
+evidence adapter, section, example, or check references until the selected workflow requires them.
 
 ## Workflow Planning Protocol
 

@@ -1,4 +1,13 @@
-# LLM Training/Alignment Domain Profile
+# LLM Training/Alignment Domain Evidence Adapter
+
+## Use Only As Optional Evidence Adapter
+
+Do not use this file to decide paper type, venue, or section order. Use it only to adjust evidence
+expectations, metrics, baselines, figures, and reviewer-risk notes.
+
+Load this adapter only when the paper clearly studies LLM training, preference optimization, reward
+modeling, safety alignment, data filtering, or alignment-oriented evaluation. If the match is weak,
+skip it rather than forcing an adapter label.
 
 ## Typical Problem Settings
 
@@ -24,7 +33,7 @@
 - Safety claims exceed evidence.
 - Compute cost makes method impractical.
 
-## Policy Effects
+## Framework Effects
 
 - Require explicit data and evaluation scope.
 - Treat safety and alignment claims as high-risk.

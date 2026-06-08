@@ -1,51 +1,36 @@
 # CVPR Venue Profile
 
-## Source Status
+## Official Sources
 
-- Official template/guideline source status: `official source found`; see `../../maintenance/source-provenance.md`.
-- Profile guidance source status: `generic cross-venue guidance pending representative-paper analysis`.
-- The guidance below is `starter guidance`, not advice extracted from CVPR papers or reviews.
+- CVPR 2026 Author Guidelines: https://cvpr.thecvf.com/Conferences/2026/AuthorGuidelines
+- CVPR 2026 Submission Template: https://github.com/cvpr-org/author-kit/releases
+- Access date: 2026-06-08
 
-## Reviewer Expectations
+## Verified Facts
 
-- State the visual recognition, generation, geometry, perception, or vision-language problem clearly.
-- Make dataset, protocol, and evaluation setup unambiguous.
-- Pair quantitative comparisons with visual evidence that reveals behavior.
-- Use ablations or analysis to isolate architecture, data, training, or inference choices.
+- Template/style: use the official CVPR 2026 submission template.
+- Submission format: CVPR 2026 uses OpenReview.
+- Page limit: papers are limited to 8 pages including figures and tables; additional pages containing only cited references are allowed.
+- Anonymity: double-blind review; main paper and supplementary material must not reveal author identity.
+- Supplementary material: optional; reviewers are encouraged but not required to inspect it.
+- External links: links that expand submission content are not allowed in submissions, supplementary material, or rebuttal.
+- Rebuttal: optional rebuttal is a one-page PDF using the rebuttal template and must remain anonymous.
+- Ethics and data: personal or human-subjects data should be handled under the ethics guidelines; discussion may appear in the main paper or supplementary material.
+- Compute reporting: CVPR 2026 introduces an experimental compute reporting initiative; reports are not visible to reviewers and do not influence acceptance decisions.
 
-## Typical Story Rhythm
+## Paper Framework Effects
 
-- Visual problem and why current methods fail.
-- Key insight about representation, architecture, data, supervision, or inference.
-- Method with enough detail for reproduction.
-- Dataset/protocol setup and main quantitative results.
-- Qualitative comparisons, failure cases, and ablations.
-- Limitations across scenes, categories, domains, or deployment conditions.
+- Use an 8-page Page Budget Summary for all main-text content including figures and tables.
+- Put references outside the page budget, but do not move essential evidence into supplementary material.
+- Add final checks for anonymous supplementary files, no content-expanding links, no acknowledgments, and no identifying video or repository details.
+- Add Open Decisions for compute reporting and ethics discussion when the work uses substantial compute, personal data, or human-subjects data.
 
-## Evidence Pressure
+## Final Check
 
-- Main metrics should match the visual task and protocol.
-- Qualitative examples should be representative, not cherry-picked.
-- Ablations should isolate architecture/training/data choices behind the claimed gain.
-- Dataset splits, preprocessing, and evaluation code/protocol should be clear enough to audit.
+- Confirm official CVPR 2026 template use and 8-page main-paper limit.
+- Confirm references-only pages contain no extra content.
+- Confirm double-blind anonymity across paper, supplementary material, links, and rebuttal.
 
-## Claim Strength Preferences
+## Unverified / Omit
 
-- Use strong claims for improvements shown across relevant datasets and protocols.
-- Use moderate claims for gains on one benchmark or constrained visual domain.
-- Avoid visual generalization claims without cross-dataset or out-of-domain evidence.
-
-## Common Reviewer Risks
-
-- Dataset or evaluation protocol is unclear or nonstandard without justification.
-- Qualitative results do not support the quantitative story.
-- Ablations are missing for key architecture or training choices.
-- Comparisons omit recent vision or vision-language baselines.
-- Failure cases, compute, or ethical concerns are under-discussed.
-
-## Writing Policy Effects
-
-- Fill `Venue constraints`.
-- Adjust `Claim Strength Policy`.
-- Adjust `Metric And Evidence Policy`.
-- Add venue-specific risks to `Reviewer Risk Register`.
+- Do not infer computer-vision evidence preferences beyond the official submission constraints.

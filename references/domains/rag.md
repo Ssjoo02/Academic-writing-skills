@@ -1,4 +1,13 @@
-# RAG Domain Profile
+# RAG Domain Evidence Adapter
+
+## Use Only As Optional Evidence Adapter
+
+Do not use this file to decide paper type, venue, or section order. Use it only to adjust evidence
+expectations, metrics, baselines, figures, and reviewer-risk notes.
+
+Load this adapter only when the paper clearly studies retrieval-augmented generation, retrieval
+quality, citation-grounded generation, or corpus-grounded answering. If the match is weak, skip it
+rather than forcing an adapter label.
 
 ## Typical Problem Settings
 
@@ -30,7 +39,7 @@
 - Corpus freshness or leakage is unclear.
 - Long-context baselines are missing.
 
-## Policy Effects
+## Framework Effects
 
 - Separate retrieval evidence from generation evidence.
 - Require citation-grounding checks for factual claims.

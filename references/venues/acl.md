@@ -1,51 +1,37 @@
 # ACL Venue Profile
 
-## Source Status
+## Official Sources
 
-- Official template/guideline source status: `official source found`; see `../../maintenance/source-provenance.md`.
-- Profile guidance source status: `generic cross-venue guidance pending representative-paper analysis`.
-- The guidance below is `starter guidance`, not advice extracted from ACL papers or reviews.
+- ACLPUB Paper Formatting Guidelines: https://acl-org.github.io/ACLPUB/formatting.html
+- ACL Rolling Review Author Guidelines: https://aclrollingreview.org/authors
+- ACL 2026 Main Conference CFP: https://2026.aclweb.org/calls/main_conference_papers/
+- Access date: 2026-06-08
 
-## Reviewer Expectations
+## Verified Facts
 
-- Frame the contribution in terms of language, tasks, data, evaluation, or linguistic insight.
-- Define datasets, annotation choices, languages, domains, and task assumptions clearly.
-- Connect model or system claims to linguistic/task behavior, not only aggregate scores.
-- Address reproducibility, data rights, bias, and ethical concerns where relevant.
+- Template/style: use official *ACL style files for LaTeX or Word.
+- Paper length: review-version long papers may have up to 8 content pages plus unlimited references; short papers may have up to 4 content pages plus unlimited references.
+- Camera-ready length: final long papers may use up to 9 content pages; final short papers may use up to 5 content pages; acknowledgments and references are unlimited in final versions.
+- Appendices and supplementary material: encouraged but optional for reviewers; review versions must be self-contained.
+- Format: review versions use A4 paper, two columns, page numbers, and line-number rulers.
+- Abstract: at most 200 words.
+- Citations: ACL-style author-year citation format; references should be alphabetized and include DOIs where possible.
+- Required sections: ACL formatting guidance requires a section titled `Limitations`; ethical considerations are optional and placed after the conclusion and before references.
+- Anonymity: follow ARR two-way anonymized review requirements; ACL 2026 states there is no anonymity-period requirement.
 
-## Typical Story Rhythm
+## Paper Framework Effects
 
-- NLP or computational linguistics problem.
-- Dataset, task, or modeling gap.
-- Core method, resource, analysis, or linguistic hypothesis.
-- Evaluation setup and primary findings.
-- Error analysis, qualitative examples, or linguistic/task breakdowns.
-- Limitations across languages, domains, data sources, and use cases.
+- Select long or short paper before page budgeting; use 8 or 4 content pages for review drafts.
+- Keep limitations outside the main content page budget when the official ACL formatting rule applies.
+- Put appendices and supplementary details after references, and keep the main paper self-contained.
+- Add checks for title/abstract plain-text metadata, A4 output, line numbers, and DOI or ACL Anthology links where possible.
 
-## Evidence Pressure
+## Final Check
 
-- Metrics should match the task and be supplemented with analysis when aggregate scores hide behavior.
-- Dataset claims need clear provenance, annotation protocol, and quality checks.
-- Error analysis should explain what the system fails to capture.
-- Reproducibility details should cover data splits, prompts/settings, preprocessing, and evaluation scripts where applicable.
+- Confirm the paper uses current *ACL style files and the selected long/short page budget.
+- Confirm the `Limitations` section appears after the conclusion and before references.
+- Confirm review-version anonymity, citation style, abstract length, and appendix/supplement placement.
 
-## Claim Strength Preferences
+## Unverified / Omit
 
-- Use strong claims only for task, language, and domain scopes directly tested.
-- Use moderate claims when evidence is limited to selected datasets or languages.
-- Avoid language-general or human-language claims from English-only or narrow-domain evidence.
-
-## Common Reviewer Risks
-
-- Task framing is unclear or mismatched to the evaluation.
-- Dataset construction or annotation quality is under-specified.
-- Results rely on weak baselines or opaque prompting/evaluation details.
-- Error analysis is missing or too shallow.
-- Ethical, privacy, licensing, or bias concerns are ignored.
-
-## Writing Policy Effects
-
-- Fill `Venue constraints`.
-- Adjust `Claim Strength Policy`.
-- Adjust `Metric And Evidence Policy`.
-- Add venue-specific risks to `Reviewer Risk Register`.
+- Do not infer ACL-specific topical or reviewer preferences from this profile.

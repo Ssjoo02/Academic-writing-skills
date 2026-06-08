@@ -1,51 +1,37 @@
 # CHI/UIST Venue Profile
 
-## Source Status
+## Official Sources
 
-- Official template/guideline source status: `official source found`; see `../../maintenance/source-provenance.md`.
-- Profile guidance source status: `generic cross-venue guidance pending representative-paper analysis`.
-- The guidance below is `starter guidance`, not advice extracted from CHI/UIST papers or reviews.
+- CHI 2026 Papers CFP: https://chi2026.acm.org/authors/papers/
+- CHI 2026 Publication Formats: https://chi2026.acm.org/chi-publication-formats/
+- UIST 2026 Author Guide: https://uist.acm.org/2026/author-guide/
+- Access date: 2026-06-08
 
-## Reviewer Expectations
+## Verified Facts
 
-- Frame the contribution around people, interaction, design, systems, methods, or human-centered understanding.
-- State who the work affects and what human, social, design, or interaction problem it addresses.
-- Match evaluation to the claim: study, deployment, prototype, design process, system analysis, or technical evaluation.
-- Discuss implications, limitations, ethics, accessibility, and participant/user context where relevant.
+- CHI template/style: initial review submissions use the ACM single-column review format; anonymous LaTeX submissions use `\documentclass[manuscript,review,anonymous]{acmart}`.
+- CHI length: paper length excludes references, figure/table captions, and appendices. Short papers are 5,000 words or less; standard-length papers are 5,000 to 12,000 words; submissions over 12,000 words are desk-rejected unless strongly justified.
+- CHI standalone rule: the main paper must contain all important information needed to understand the contribution; appendices and supplementary materials are optional for reviewers.
+- CHI anonymity: submissions must be anonymized, including supplemental materials and external links to data/code repositories.
+- CHI accessibility: submissions must follow the SIGCHI Guide to an Accessible Submission.
+- CHI publication workflow: CHI uses ACM Primary Article Templates and ACM TAPS for publication.
+- UIST novelty: UIST paper submissions must not have been previously published; the guide specifies thresholds for new content over prior archival or non-archival work.
+- UIST writing/quality checks: the author guide asks authors to make the problem, prior work comparison, contribution, completeness, measurements, and production quality clear.
+- UIST generative-AI policy: authors should avoid generating content using AI agents; editing/checking author-written text is allowed under the guide's stated policy.
 
-## Typical Story Rhythm
+## Paper Framework Effects
 
-- Human-centered problem, opportunity, or interaction gap.
-- Prior systems, studies, design practice, or theory that leaves the gap unresolved.
-- Contribution: empirical insight, artifact, technique, system, design framework, or method.
-- Study, prototype, deployment, or technical evaluation.
-- Findings, design implications, and tradeoffs.
-- Limitations across users, contexts, accessibility needs, and deployment settings.
+- Ask whether the target is CHI or UIST before final template and length checks.
+- For CHI, use word-budget planning rather than page-budget planning and keep all central claims in the main paper.
+- Add CHI Open Decisions for short versus standard length, accessibility checks, anonymized links, optional video figures, and supplementary material.
+- For UIST, add novelty/new-content and production-quality checks based on the author guide.
 
-## Evidence Pressure
+## Final Check
 
-- User evidence should match claims about usability, behavior, experience, collaboration, or social impact.
-- Prototype/system papers should explain what was built and how its contribution was evaluated.
-- Technical systems papers may use baselines or ablations when they support a technical interaction claim.
-- Study papers should make recruitment, procedure, analysis, and validity limits clear.
+- For CHI, confirm ACM single-column review template use, anonymity, word count, standalone main-paper status, accessibility, and TAPS-ready source planning.
+- For UIST, confirm novelty over prior work, citation/comparison clarity, measurement support, and generative-AI compliance.
+- Confirm the selected venue's current CFP before submission readiness.
 
-## Claim Strength Preferences
+## Unverified / Omit
 
-- Use strong claims when supported by the study, deployment, or system evidence actually collected.
-- Use moderate claims for formative findings, small studies, or prototype-limited evaluations.
-- Avoid generalizing across users or contexts beyond the evidence.
-
-## Common Reviewer Risks
-
-- Human-centered motivation is thin or technology-led without user/problem grounding.
-- Evaluation method does not support the claimed contribution.
-- Design implications are vague or disconnected from findings.
-- Participant context, accessibility, ethics, or positionality concerns are omitted.
-- Technical claims use ML-style evidence without explaining the interaction relevance.
-
-## Writing Policy Effects
-
-- Fill `Venue constraints`.
-- Adjust `Claim Strength Policy`.
-- Adjust `Metric And Evidence Policy`.
-- Add venue-specific risks to `Reviewer Risk Register`.
+- UIST 2026 page or word limits were not verified from the author guide page; omit until a current CFP page states them.

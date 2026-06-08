@@ -1,4 +1,12 @@
-# LLM Agent Domain Profile
+# LLM Agent Domain Evidence Adapter
+
+## Use Only As Optional Evidence Adapter
+
+Do not use this file to decide paper type, venue, or section order. Use it only to adjust evidence
+expectations, metrics, baselines, figures, and reviewer-risk notes.
+
+Load this adapter only when the paper clearly studies LLM agents, tool use, multi-step task
+completion, or agentic workflows. If the match is weak, skip it rather than forcing an adapter label.
 
 ## Typical Problem Settings
 
@@ -39,7 +47,7 @@
 - Success metric hides failure modes.
 - Method is brittle across environments.
 
-## Policy Effects
+## Framework Effects
 
 - Require metric/evidence mapping for success, robustness, and cost.
 - Require clear distinction between method insight and prompt engineering.

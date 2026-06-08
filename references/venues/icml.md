@@ -1,51 +1,34 @@
 # ICML Venue Profile
 
-## Source Status
+## Official Sources
 
-- Official template/guideline source status: `official source found`; see `../../maintenance/source-provenance.md`.
-- Profile guidance source status: `generic cross-venue guidance pending representative-paper analysis`.
-- The guidance below is `starter guidance`, not advice extracted from ICML papers or reviews.
+- ICML 2026 Author Instructions: https://icml.cc/Conferences/2026/AuthorInstructions
+- ICML 2026 OpenReview venue: https://openreview.net/group?id=ICML.cc/2026/Conference
+- Access date: 2026-06-08
 
-## Reviewer Expectations
+## Verified Facts
 
-- Make the learning contribution precise: method, objective, theory, evaluation, or system.
-- Connect claims to learning behavior, sample efficiency, optimization, generalization, or robustness.
-- Use experiments and analysis to separate the proposed idea from implementation details.
-- Keep assumptions, limitations, and reproducibility constraints visible.
+- Template/style: use the official ICML 2026 LaTeX style files; the instructions state that other typesetting software is not supported.
+- Submission format: one PDF containing main body, references, and appendices.
+- Page limit: main body is at most 8 pages; accepted final versions are allowed one extra page.
+- References and appendices: references and appendices may follow the main body and are not part of the 8-page main-body limit.
+- Supplementary material: supplementary manuscripts and code/data can be uploaded; all supplementary material must be anonymized.
+- Anonymity: double-blind review; submissions must be anonymized and use third-person references to prior work where possible.
+- Reproducibility: authors are encouraged to submit code; reproducibility and code availability are considered in decision making.
 
-## Typical Story Rhythm
+## Paper Framework Effects
 
-- Learning problem and why it matters.
-- Gap in existing methods or theory.
-- Core idea and formal or algorithmic statement.
-- Method details needed to reproduce the result.
-- Evidence through benchmarks, ablations, analysis, or proofs.
-- Scope, limitations, and practical constraints.
+- Use an 8-page main-body Page Budget Summary; separate references and appendices from the main-body allocation.
+- Keep all critical evaluation material in the main body, because reviewers decide whether to read appendices or supplementary files.
+- Add Open Decisions for code/data availability and anonymous repository handling.
+- Audit all self-citations, acknowledgments, grants, public code links, and supplementary files for double-blind compliance.
 
-## Evidence Pressure
+## Final Check
 
-- Main result should validate the learning claim, not just a surface metric.
-- Ablations should test objective terms, architecture choices, data choices, or training procedure.
-- Theory should state assumptions and explain practical relevance.
-- Comparisons should be fair, recent, and matched to the stated setting.
+- Confirm the official ICML 2026 LaTeX style is used and the main body is within 8 pages.
+- Confirm references, appendices, and supplementary files are placed and counted according to the author instructions.
+- Confirm code/data links and supplementary material are anonymous.
 
-## Claim Strength Preferences
+## Unverified / Omit
 
-- Use strong claims for directly demonstrated learning improvements or proven guarantees.
-- Use moderate claims for gains shown in constrained settings.
-- Avoid implying general ML progress from a narrow benchmark slice.
-
-## Common Reviewer Risks
-
-- Method novelty is hard to separate from engineering choices.
-- Theoretical framing does not match experiments.
-- Empirical gains lack ablations or robustness checks.
-- Baselines or hyperparameter budgets are unfair.
-- Reproducibility details are incomplete.
-
-## Writing Policy Effects
-
-- Fill `Venue constraints`.
-- Adjust `Claim Strength Policy`.
-- Adjust `Metric And Evidence Policy`.
-- Add venue-specific risks to `Reviewer Risk Register`.
+- Do not infer reviewer expectations beyond the official format, anonymity, reproducibility, and supplementary-material rules.
