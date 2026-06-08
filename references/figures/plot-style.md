@@ -13,12 +13,6 @@ previewing, and exporting. Do not cross-render with the other language. If the
 selected backend's runtime or packages are missing, stop and report the blocker
 before rendering.
 
-## Backend Default
-
-Python is the default plotting backend. Use matplotlib, and seaborn only when it
-reduces plot complexity. Use R only when the user explicitly requests R or the
-workspace already provides an R plotting pipeline.
-
 Do not hardcode results from memory. Every chart must read from a concrete
 workspace result file or table recorded in the Figure Plan.
 
@@ -41,14 +35,15 @@ The canonical chart output path is `paper/figures/<figure-id>.pdf`, with
 
 ## Python Style Contract
 
-Use a restrained publication style:
+Sensible defaults for publication plots. Adjust per figure context — these are
+starting points, not fixed rules.
 
 ```python
 import matplotlib as mpl
 
 mpl.rcParams.update({
-    "font.family": "serif",
-    "font.serif": ["Times New Roman", "Times", "DejaVu Serif"],
+    "font.family": "sans-serif",
+    "font.sans-serif": ["Arial", "Helvetica", "DejaVu Sans", "sans-serif"],
     "font.size": 9,
     "axes.labelsize": 9,
     "xtick.labelsize": 8,
@@ -61,7 +56,7 @@ mpl.rcParams.update({
     "axes.spines.top": False,
     "axes.spines.right": False,
     "pdf.fonttype": 42,
-    "svg.fonttype": "none",
+    "svg.fonttype": "none",       # keeps text as editable <text> nodes
 })
 
 COLORBLIND = [
@@ -72,14 +67,14 @@ COLORBLIND = [
 
 Rules:
 
-- Prefer PDF for LaTeX inclusion; add PNG only as a preview or fallback.
-- Use SVG only when the target venue or editing workflow needs it.
+- Primary output is PDF for LaTeX charts; PNG as preview fallback. SVG when
+  editable text matters.
 - Avoid in-figure titles; put the message in the caption.
-- Axis labels must be readable labels, not raw variable names.
-- Add units and metric direction when relevant.
-- Use colorblind-safe palettes and avoid red/green as the only encoding.
-- Use one visual message per plot.
-- If fewer than three data points are present, consider a table or text instead.
+- Axis labels must be readable labels, not raw variable names. Add units and
+  metric direction when relevant.
+- Use colorblind-safe palettes; avoid red/green as the only encoding.
+- One visual message per plot.
+- If fewer than three data points, consider a table or text instead.
 
 ## Chart Contract
 

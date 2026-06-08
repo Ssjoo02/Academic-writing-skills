@@ -95,9 +95,11 @@ When filling the Direct Image Prompt, keep these quality rules in mind — they 
 not pre-baked style, but guardrails that ensure the figure looks like an academic
 paper figure rather than a slide or advertisement:
 
-- **Academic aesthetic**: flat vector illustration style with clean lines.
-- **Legible text**: all labels must be readable at paper scale.
+- **Academic aesthetic**: flat vector illustration, clean lines, minimalist.
+- **Legible text**: all labels readable at paper scale. No long sentences,
+  descriptive paragraphs, or complex formulas in the figure.
 - **Organized flow**: clear left-to-right or top-to-bottom logic.
+- **Restrained color**: no overly saturated colors; prefer soft professional tones.
 - **Avoid**: photorealistic renderings, messy sketch lines, unreadable tiny text,
   heavy drop shadows, rainbow gradients, 3D effects, glowing effects.
 

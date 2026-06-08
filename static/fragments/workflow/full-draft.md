@@ -206,8 +206,65 @@ figures during framework writing.
 
 Generic fallback: keep the main Figure Plan to 3-5 figures/tables for the generic draft.
 
-Show the framework to the user for confirmation. Use the checkpoint summary shape from
-`static/core/gates.md`.
+Show the framework to the user for confirmation using this exact format. Do not output
+a "维度/内容" summary table or any other format.
+
+中文交互时（用户使用中文），使用此格式：
+
+```text
+检查点：Paper Framework
+阶段结果：<一句话>
+输出：<framework 文件路径>
+
+论文结构：
+
+| 顺序 | Section | 主要内容 |
+|---:|---|---|
+| 1 | Abstract | <该节主要内容，一句话> |
+| 2 | Introduction | <该节主要内容，一句话> |
+| ... | ... | ... |
+
+图表计划：
+
+| ID | 类型 | 所在 Section | 核心信息 |
+|---|---|---|---|
+| Fig. 1 | <teaser/pipeline/bar/...> | Introduction | <图表要传达的信息> |
+| ... | ... | ... | ... |
+
+需确认的决策：
+- 必须：<section 顺序/页面分配/venue assembly 决策>
+- 可选：<template/语言版本等默认值>
+未解决的阻塞项：<无，或简洁列表>
+需要用户操作：请确认是否继续创建 paper/，或说明要修改的章节、图表或 venue。
+```
+
+English interaction:
+```text
+Checkpoint: Paper Framework
+Stage result: <one sentence>
+Output: <framework artifact path>
+
+Section Plan:
+
+| # | Section | Main Content |
+|---:|---|---|
+| 1 | Abstract | <main content, one sentence> |
+| 2 | Introduction | <main content, one sentence> |
+| ... | ... | ... |
+
+Figure Plan:
+
+| ID | Type | Section | Message |
+|---|---|---|---|
+| Fig. 1 | <teaser/pipeline/bar/...> | Introduction | <what the figure shows> |
+| ... | ... | ... | ... |
+
+Decisions to confirm:
+- Required: <section order / page budget / venue assembly>
+- Optional: <template / language variant defaults>
+Unresolved blockers: <none or concise list>
+User action required: Please confirm whether to proceed to paper/, or what to change.
+```
 
 Gate: the user must confirm the Paper Framework before full-draft writing.
 

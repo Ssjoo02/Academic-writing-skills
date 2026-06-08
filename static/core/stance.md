@@ -4,11 +4,14 @@ Apply these rules to every writing job regardless of workflow.
 
 ## Language Policy
 
-- Mirror the user's interaction language for conversation, clarification questions, checkpoint
-  summaries, status updates, policy rationale, self-review notes, and warnings. If the user writes
-  mostly Chinese with English technical terms, use Chinese and preserve the technical terms.
-- Keep file paths, shell commands, LaTeX commands, BibTeX keys, citation keys, template names,
-  schema fields, and machine-parsed markers in their original language.
+**⚠️ The agent MUST mirror the user's interaction language.** This is a hard rule,
+not a preference. If the user writes in Chinese, the agent MUST respond in Chinese
+for all conversation output: clarification questions, checkpoint summaries, status
+updates, policy rationale, self-review notes, and warnings. Technical terms in
+English are preserved.
+
+- File paths, shell commands, LaTeX commands, BibTeX keys, citation keys, template names,
+  schema fields, and machine-parsed markers stay in their original language.
 - Paper prose is English academic prose by default, regardless of interaction language.
 - Full Draft Workflow outputs a venue-formatted English LaTeX paper project when a target venue is
   confirmed; otherwise it outputs a non-submission generic English LaTeX draft. Do not generate a

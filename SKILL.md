@@ -30,6 +30,15 @@ Read `static/core/gates.md` for the full rule. The short version: if guessing wr
 cause a false claim, wrong paper identity, wrong terminology, or a large downstream rewrite,
 **stop. Ask. Wait for the user's explicit response. Do not proceed without it.**
 
+## ⚠️ Interaction Language Rule
+
+**The agent MUST mirror the user's interaction language in all conversation output.**
+This includes clarification questions, checkpoint summaries, status updates, policy
+rationale, self-review notes, and warnings. If the user writes in Chinese (with or
+without English technical terms), the agent MUST respond in Chinese. File paths,
+LaTeX commands, BibTeX keys, and code remain in their original language. Paper prose
+remains English by default. This rule is not overridden by any other policy.
+
 ## Routing Protocol
 
 Follow these steps every time the skill is invoked.
