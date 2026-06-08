@@ -52,6 +52,7 @@ Use this file shape:
 
 ## Figure Identity
 - Figure ID:
+- Title:
 - Section:
 - Figure type:
 - One-sentence message:
@@ -113,19 +114,57 @@ current agent from data.
 After writing the Picture Brief, generate the picture. For every renderer, use
 the exact `Direct Image Prompt` block as the image prompt. Do not rewrite,
 shorten, translate, or embellish it for the API call unless the user explicitly
-asks for a different image language or renderer-specific syntax. Supported
-renderer classes:
+asks for a different image language or renderer-specific syntax.
 
-| Renderer | Use when | Notes |
-|---|---|---|
-| GPT-image2 or equivalent user-configured API | The user explicitly provides this picture renderer | Save the accepted result as `paper/figures/<figure-id>.png`. |
-| Gemini-compatible API | `GEMINI_API_KEY` or an equivalent configured Gemini client is explicitly provided | Use the current official image-generation API and runtime model configuration. |
-| current executing agent | No user picture API is provided | Draw a paper-safe picture from the Picture Brief and save it as `paper/figures/<figure-id>.png`. |
+### Gemini API
 
-For Gemini, use official current documentation at execution time. As of the
-2026-06-08 workflow update, Google's Gemini API image-generation examples use
-`generateContent` with image response modalities, but model names and regional
-availability may drift.
+Detected when `GEMINI_API_KEY` is set.
+
+```bash
+# Construct the endpoint from env vars
+GEMINI_BASE_URL="${GEMINI_BASE_URL:-https://generativelanguage.googleapis.com}"
+MODEL="${GEMINI_IMAGE_MODEL:-gemini-2.5-flash-image}"
+URL="${GEMINI_BASE_URL}/v1beta/models/${MODEL}:generateContent"
+
+# Call the API
+curl -s -X POST "$URL" \
+  -H "Content-Type: application/json" \
+  -H "x-goog-api-key: $GEMINI_API_KEY" \
+  -d '{
+    "contents": [{"parts": [{"text": "<Direct Image Prompt here>"}], "role": "user"}],
+    "generationConfig": {"responseModalities": ["IMAGE", "TEXT"]}
+  }'
+
+# Extract base64 image from response: candidates[0].content.parts[*].inlineData.data
+# Save as paper/figures/<figure-id>.png
+```
+
+### OpenAI / GPT-Image API
+
+Detected when `OPENAI_API_KEY` is set (and `GEMINI_API_KEY` is not).
+
+```bash
+OPENAI_BASE_URL="${OPENAI_BASE_URL:-https://api.openai.com}"
+MODEL="${OPENAI_IMAGE_MODEL:-gpt-image-2}"
+URL="${OPENAI_BASE_URL}/v1/images/generations"
+
+curl -s -X POST "$URL" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $OPENAI_API_KEY" \
+  -d '{
+    "model": "'"$MODEL"'",
+    "prompt": "<Direct Image Prompt here>",
+    "n": 1,
+    "size": "1024x1024"
+  }'
+# Response: data[0].b64_json or data[0].url
+```
+
+### Current Agent Fallback
+
+If neither `GEMINI_API_KEY` nor `OPENAI_API_KEY` is set, the current executing
+agent draws the picture from the Direct Image Prompt. A lower-fidelity but
+accurate paper-safe picture is better than an empty figure slot.
 
 ## Review Gate
 

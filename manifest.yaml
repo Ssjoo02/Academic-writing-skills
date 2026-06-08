@@ -1,0 +1,145 @@
+name: academic-writing
+version: 2.0.0
+description: >
+  Declarative manifest for the static/dynamic split. SKILL.md uses this to
+  decide which fragments to load for a given writing request. The main axes are
+  workflow (full-draft or draft-revision), paper_type, and venue. The large
+  body of section guides, check references, figure references, domain adapters,
+  and style references stays in on-demand references.
+
+always_load:
+  # Core stance, gates, and contract — apply to every writing job
+  - static/core/stance.md
+  - static/core/gates.md
+  - static/core/contract.md
+
+axes:
+  workflow:
+    detect: |
+      BLOCKING GATE. Decide the workflow from the user request. Full Draft
+      Workflow when the user provides a workspace or asks for a complete first
+      paper draft from project materials. Draft Revision Workflow when the user
+      provides existing prose and asks to rewrite, polish, diagnose, review,
+      compress, weaken claims, or improve flow. If ambiguous, ask one concise
+      question and stop.
+    values:
+      full-draft: static/fragments/workflow/full-draft.md
+      draft-revision: static/fragments/workflow/draft-revision.md
+    multi: false
+
+  paper_type:
+    detect: |
+      Infer from workspace evidence during Writing Policy stage. Check
+      references/paper-types/index.md before defaulting. Use generic-paper
+      when unknown, mixed, or too sparse to classify. Do not use method-paper
+      as a global default. Domain evidence adapters are optional and separate.
+    values:
+      method: references/paper-types/method-paper.md
+      benchmark-dataset: references/paper-types/benchmark-dataset-paper.md
+      survey: references/paper-types/survey-paper.md
+      systems-implementation: references/paper-types/systems-implementation-paper.md
+      imrad: references/paper-types/imrad-paper.md
+      generic: references/paper-types/generic-paper.md
+    default: generic
+    multi: false
+
+  venue:
+    detect: |
+      From user input or workspace evidence. If unspecified, use generic with
+      generic_article.tex template and a soft 6-8 main-text-page drafting budget.
+      Ask about venue at most once in the whole workflow. Do not ask before
+      Writing Policy when merely unspecified.
+    values:
+      generic: references/venues/index.md
+      iclr: references/venues/iclr.md
+      neurips: references/venues/neurips.md
+      icml: references/venues/icml.md
+      acl: references/venues/acl.md
+      emnlp: references/venues/emnlp.md
+      naacl: references/venues/naacl.md
+      cvpr: references/venues/cvpr.md
+      iccv-eccv: references/venues/iccv-eccv.md
+      aaai: references/venues/aaai-ijcai.md
+      ijcai: references/venues/aaai-ijcai.md
+      kdd: references/venues/kdd-www-sigir.md
+      www: references/venues/kdd-www-sigir.md
+      sigir: references/venues/kdd-www-sigir.md
+      chi-uist: references/venues/chi-uist.md
+    default: generic
+    multi: false
+
+references:
+  on_demand:
+    # Figure references
+    - condition: "Paper Framework or full draft needs figure/table planning"
+      path: references/figures/figure-planning.md
+    - condition: "non-data picture figure (teaser, illustration, conceptual picture)"
+      path: references/figures/picture-generation.md
+    - condition: "data-driven plots, metric visualizations, or generated tables"
+      path: references/figures/plot-style.md
+
+    # Section guides (loaded during section drafting)
+    - condition: "drafting or revising Abstract"
+      path: references/sections/abstract.md
+    - condition: "drafting or revising Introduction"
+      path: references/sections/introduction.md
+    - condition: "drafting or revising Related Work"
+      path: references/sections/related-work.md
+    - condition: "drafting or revising Method / System"
+      path: references/sections/method.md
+    - condition: "drafting or revising Experiments / Evaluation"
+      path: references/sections/experiments.md
+    - condition: "drafting or revising Demo / Application"
+      path: references/sections/demo-application.md
+    - condition: "drafting or revising Conclusion / Limitations"
+      path: references/sections/conclusion.md
+    - condition: "paragraph flow diagnosis or section-level revision"
+      path: references/sections/paragraph-flow.md
+    - condition: "figures or tables are used in a section"
+      path: references/sections/figures-and-tables.md
+    - condition: "full-paper review before final delivery"
+      path: references/sections/paper-review.md
+
+    # Section examples (loaded only when structure is uncertain or user asks)
+    - condition: "Abstract structure is uncertain or user asks for examples"
+      path: references/sections/examples/abstract.md
+    - condition: "Introduction structure is uncertain or user asks for examples"
+      path: references/sections/examples/introduction.md
+    - condition: "Related Work structure is uncertain or user asks for examples"
+      path: references/sections/examples/related-work.md
+    - condition: "Method structure is uncertain or user asks for examples"
+      path: references/sections/examples/method.md
+    - condition: "Experiments structure is uncertain or user asks for examples"
+      path: references/sections/examples/experiments.md
+
+    # Check references (loaded when risks are unresolved)
+    - condition: "claim-evidence audit or high-risk central claim"
+      path: references/checks/claim-evidence.md
+    - condition: "citation integrity check needed"
+      path: references/checks/citation-integrity.md
+    - condition: "metric design audit for experiments"
+      path: references/checks/metric-design.md
+    - condition: "reviewer-risk audit before submission"
+      path: references/checks/reviewer-risk.md
+
+    # Domain evidence adapters (optional, loaded only when Writing Policy names a clear match)
+    - condition: "clear LLM-agent domain match in Writing Policy"
+      path: references/domains/llm-agent.md
+    - condition: "clear LLM-training-alignment domain match"
+      path: references/domains/llm-training-alignment.md
+    - condition: "clear RAG domain match"
+      path: references/domains/rag.md
+
+    # Style references
+    - condition: "user provides reference papers for style learning"
+      path: references/style/reference-paper-learning.md
+    - condition: "user style profile is active"
+      path: references/style/user-style-profile.md
+
+    # Principles
+    - condition: "Writing Policy generation"
+      path: references/principles/research-strategy.md
+
+    # Templates
+    - condition: "template selection for LaTeX project"
+      path: templates/index.md

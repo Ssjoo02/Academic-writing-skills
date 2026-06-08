@@ -13,6 +13,56 @@ Figure planning decides three things:
 
 It does not decide the paper's core claims. Claims and evidence come from the Writing Policy.
 
+## Figure Contract
+
+A publication-quality academic figure is a visual argument, not a decorative chart. Before filling
+the Figure Plan routing table, establish the contract below for each planned figure. This applies
+to all figure types: data plots, architecture diagrams, pipeline figures, teaser pictures, and
+qualitative grids.
+
+### The Five-Point Figure Contract
+
+Before assigning a generation route or writing code, establish:
+
+1. **Core conclusion**: the one-sentence claim this figure must defend. Every panel, label, and
+   visual choice must serve this conclusion. If a planned panel does not carry a unique piece of
+   evidence for the conclusion, drop it or merge it.
+
+2. **Evidence chain**: map each planned panel/subfigure to a specific piece of evidence from the
+   Writing Policy. A panel without a mapped claim or evidence source is decoration and should be
+   removed. The chain must trace back to concrete workspace result files or confirmed paper facts.
+
+3. **Archetype**: classify the figure into one of:
+   - `quantitative comparison`: bar, line, scatter, heatmap, or table driven by result data,
+   - `pipeline-architecture`: ordered stages, system components, or workflow with node-edge
+     relationships,
+   - `teaser-composite`: overview illustration combining problem, method, and evidence visually,
+   - `qualitative-grid`: example cases, screenshots, or image panels showing representative outputs.
+   The archetype determines the generation route, not the other way around.
+
+4. **Backend**: for data-driven plots, confirm the plotting backend. Python (matplotlib/seaborn) is
+   the default. If R (ggplot2/patchwork) is preferred, the user must explicitly request it. For
+   non-data pictures, the backend is the configured picture API or current-agent drawing. For
+   architecture diagrams, the backend is FigureSpec MCP + renderer or current-agent drawing.
+
+5. **Export contract**: set final dimensions (single-column or double-column), primary output format
+   (PDF for LaTeX data charts; PNG for AI-generated pictures; SVG for editable diagrams), target
+   DPI, color space, and whether editable text is required. For data charts, PDF is the canonical
+   output with PNG as raster fallback.
+
+### Figure Review Gate
+
+Before accepting a generated figure, inspect it against the contract:
+
+- All planned panels appear and serve the core conclusion,
+- No extra claim, dataset, metric, or module was invented by the renderer,
+- Visible text is readable at paper scale and matches the allowed labels from the Writing Policy,
+- Arrows, relationships, and data direction are correct,
+- The figure is paper-ready rather than slide-deck decorative,
+- The generated file is non-empty and stored at the recorded output path.
+
+If any check fails, revise and regenerate. Keep rejected versions only when useful for audit.
+
 ## Figure Plan Format
 
 Use a compact table in the Paper Framework:

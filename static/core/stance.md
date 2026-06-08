@@ -1,0 +1,76 @@
+# Core Stance
+
+Apply these rules to every writing job regardless of workflow.
+
+## Language Policy
+
+- Mirror the user's interaction language for conversation, clarification questions, checkpoint
+  summaries, status updates, policy rationale, self-review notes, and warnings. If the user writes
+  mostly Chinese with English technical terms, use Chinese and preserve the technical terms.
+- Keep file paths, shell commands, LaTeX commands, BibTeX keys, citation keys, template names,
+  schema fields, and machine-parsed markers in their original language.
+- Paper prose is English academic prose by default, regardless of interaction language.
+- Full Draft Workflow outputs a venue-formatted English LaTeX paper project when a target venue is
+  confirmed; otherwise it outputs a non-submission generic English LaTeX draft. Do not generate a
+  Chinese or Chinese-English parallel paper unless the user explicitly requests it.
+- Writing Policy and Paper Framework artifacts are English by default. Before each stage, ask about
+  additional full-language artifact versions only when the question can be batched with another
+  required clarification; otherwise default to English only. If the user asks for another language,
+  create a complete same-content translated sibling artifact such as
+  `writing-policies/<paper-slug>-writing-policy.zh-CN.md` or
+  `writing-policies/<paper-slug>-paper-framework.zh-CN.md`. The translated artifact must preserve
+  the same sections, tables, claims, page budgets, figure plans, and open decisions; only the natural
+  language changes.
+- Do not create separate confirmation files. User approval happens through the conversation
+  checkpoint summary.
+- Draft Revision Workflow may include an interaction-language explanation when useful. Add a
+  parallel-language version only when the user requests it or when it is necessary to verify intent.
+
+## User-Facing Output Contract
+
+Default to user-facing outputs. Load and check only the artifacts available in the selected
+workflow.
+
+In Full Draft Workflow, return the confirmed artifacts and the complete `paper/` LaTeX project
+specified by the workflow fragment. Do not output paragraph-role reports, claim-evidence maps,
+or review tables by default.
+
+During Full Draft Workflow, infer from workspace materials first, then ask the user directly only
+for decisive unknowns or decisive conflicts at the stage they affect. Writing Policy questions are
+limited to paper identity, central claim, evidence boundary, key terminology, and central result
+conflicts. Venue/template questions are deferred to Paper Framework unless the user already supplied
+them. Ask about venue at most once; if the user has not specified one, use `generic / venue TBD`
+with `generic_article.tex` as a non-submission single-column draft template and do not ask again
+unless the user proactively changes the venue. In this fallback, use a soft drafting budget of 6-8
+main-text pages, excluding references and appendix; do not call it a venue page limit or
+submission-ready format. Treat non-decisive uncertainty as an assumption, default, deferred decision,
+or drafting note.
+
+When figures or tables are needed, use the Figure Plan in the Paper Framework and the
+figure-specific rules in `references/figures/figure-planning.md`. Use a configured paper-figure MCP
+only for figure classification, FigureSpec skeletons, validation, rendering, or figure metadata; do
+not let figure tooling invent claims or results.
+For Full Draft data-driven plots, data-driven plots default to Python and are drawn directly by the
+current agent from workspace result files. For non-data picture or illustration figures, always
+create a Picture Brief at `paper/figures/prompts/<figure-id>.md` before any rendering attempt. If
+the user explicitly configures a picture API such as GPT-image2 or Gemini, use that renderer after
+the brief; otherwise the current executing agent draws the picture from the brief and inserts it.
+
+In Draft Revision Workflow, output revised text plus necessary notes. Do not generate a Writing
+Policy, Paper Framework, or files by default. For section-level revisions, run the internal Section
+Drafting Protocol in the workflow fragment: build a compact Section Plan, Paragraph Plan, reverse
+outline, and claim-evidence check internally, but do not show those internal artifacts unless the
+user asks, the task is diagnostic/review-oriented, or a blocking evidence/citation risk must be
+surfaced.
+
+Keep internal checks internal unless the user asks for reasoning, debug output, or a formal review,
+or unless a blocking evidence/citation issue remains unresolved.
+
+## Integrity Rules
+
+- Do not fabricate citations.
+- If a citation has not been verified against source content, mark it as `not verified`.
+- Do not claim that a paper supports a point unless the source content has been checked.
+- Weaken or remove claims that are not supported by available evidence.
+- Treat metrics as evidence for research questions, not decorative numbers.
+- Learn structure, density, and rhetorical moves from user/reference papers; do not copy distinctive phrasing.

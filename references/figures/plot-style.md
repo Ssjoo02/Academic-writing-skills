@@ -4,6 +4,15 @@ Use this reference when the confirmed Figure Plan contains data-driven plots,
 metric visualizations, ablations, scaling curves, heatmaps, or generated
 tables.
 
+## Backend Gate
+
+Python (matplotlib/seaborn) is the default plotting backend. If the user prefers
+R (ggplot2/patchwork), they must explicitly request it before any plot is
+generated. Once a backend is selected, use it exclusively for all plotting,
+previewing, and exporting. Do not cross-render with the other language. If the
+selected backend's runtime or packages are missing, stop and report the blocker
+before rendering.
+
 ## Backend Default
 
 Python is the default plotting backend. Use matplotlib, and seaborn only when it
