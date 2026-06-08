@@ -79,8 +79,6 @@ Message: ...
 Show exactly these components: ...
 Use exactly these labels: ...
 Relationships/arrows: ...
-Style constraints: clean white background, restrained academic palette,
-readable English labels, no decorative clip art, no unsupported numbers.
 Avoid: ...
 
 ## Renderer Route
@@ -90,6 +88,22 @@ Avoid: ...
 - API prompt source: use the exact `Direct Image Prompt` block above
 - Review notes:
 ```
+
+## Writing the Direct Image Prompt
+
+When filling the Direct Image Prompt, keep these quality rules in mind — they are
+not pre-baked style, but guardrails that ensure the figure looks like an academic
+paper figure rather than a slide or advertisement:
+
+- **Academic aesthetic**: flat vector illustration style with clean lines.
+- **Legible text**: all labels must be readable at paper scale.
+- **Organized flow**: clear left-to-right or top-to-bottom logic.
+- **Avoid**: photorealistic renderings, messy sketch lines, unreadable tiny text,
+  heavy drop shadows, rainbow gradients, 3D effects, glowing effects.
+
+The rest — palette, background, specific layout, icon choice — is decided per
+figure based on the Evidence Boundary and Visual Plan above. Do not copy a
+fixed style string into every prompt.
 
 ## Image Renderer Preference
 
