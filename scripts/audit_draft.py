@@ -41,6 +41,8 @@ Checks (errors block; warnings inform):
   Resolves the body across the main.tex-heading + \\input-body split.
 - no invalid section environments such as \\end{section}; LaTeX sectioning commands are commands,
   not begin/end environments.
+- no hard-coded structural reference numbers such as `Section~5.4` or `Table 2`; source must use
+  \\label / \\ref so renumbering cannot render `??` or stale references.
 - no duplicate \\label{...}
 - \\input/\\include consistency between main.tex and section files
 - compile-log signals when main.log exists (undefined refs/citations, multiply
@@ -107,6 +109,9 @@ POSTMATTER_HEADING_RE = re.compile(
 UNRESOLVED_RENDERED_REF_RE = re.compile(
     r"\b(?:Table|Figure|Fig\.|Section|Sec\.|Appendix|Eq\.|Equation)\s+\?\?"
 )
+HARDCODED_STRUCTURAL_REF_RE = re.compile(
+    r"\b(?:Table|Figure|Fig\.|Section|Sec\.|Appendix|Eq\.|Equation)~?\s+\d+(?:\.\d+)?\b"
+)
 # Limitations declared as a structural unit. A dedicated \section{Limitations} (numbered or
 # starred) is the correct home; a \subsection / \paragraph / \textbf run-in titled
 # "Limitation(s)" inside another section is misplaced and must move to the dedicated section.
@@ -149,7 +154,7 @@ NEXT_HEADING_RE = re.compile(r"\\section\*?\s*\{")
 LIM_NEXT_BOUNDARY_RE = re.compile(
     r"\\section\*?\s*\{|\\appendix\b|\\bibliography\b|\\begin\{thebibliography\}|\\end\{document\}"
 )
-LIMITATIONS_MAX_WORDS = 190   # target 120-180; warn beyond ~190
+LIMITATIONS_MAX_WORDS = 180   # target 120-180; block beyond the target cap
 LIMITATIONS_MAX_POINTS = 5    # >= this many enumerated limitations is too many
 LIM_ORDINAL_RE = re.compile(r"(?:^|(?<=[.\n]))\s*(?:First|Second|Third|Fourth|Fifth|Sixth)\b", re.M)
 # bold-lead paragraphs (\textbf{Task coverage.} ...) are an enumeration form too
@@ -584,7 +589,7 @@ def check_enumeration(path: Path, base: Path, warnings: list[str]) -> None:
             )
 
 
-def check_wide_tables(path: Path, base: Path, warnings: list[str]) -> None:
+def check_wide_tables(path: Path, base: Path, errors: list[str], warnings: list[str]) -> None:
     """Heuristic: flag wide plain-`tabular` tables in single-column floats (likely overflow).
 
     Applies to body and appendix alike. Warnings only.
@@ -598,12 +603,12 @@ def check_wide_tables(path: Path, base: Path, warnings: list[str]) -> None:
         for tm in PLAIN_TABULAR_RE.finditer(body):
             ncols = count_columns(tm.group(1))
             if not starred and ncols >= WIDE_SINGLE_COL_COLS:
-                warnings.append(
+                errors.append(
                     f"wide table ({ncols} columns) in a single-column float: {name}:{lineno}; "
                     f"use table* (fill \\textwidth), rotate, or split — it will overflow the column"
                 )
             if ncols >= VERY_WIDE_COLS:
-                warnings.append(
+                errors.append(
                     f"very wide table ({ncols} columns): {name}:{lineno}; even table* may overflow "
                     f"\\textwidth — rotate (sidewaystable) or split by column groups"
                 )
@@ -693,7 +698,7 @@ def _split_cells(row: str) -> list[str]:
     return re.split(r"(?<!\\)&", row)
 
 
-def check_prose_in_narrow_column(path: Path, base: Path, warnings: list[str]) -> None:
+def check_prose_in_narrow_column(path: Path, base: Path, errors: list[str]) -> None:
     """Heuristic: a prose cell sitting in a non-wrapping l/c/r column cannot break and overflows.
 
     Targets the defect where a 'Description'/'Notes' column is declared r/l/c instead of a wrapping
@@ -724,7 +729,7 @@ def check_prose_in_narrow_column(path: Path, base: Path, warnings: list[str]) ->
         if offending:
             lineno = text.count("\n", 0, tm.start()) + 1
             cols = ", ".join(f"col {i + 1} ({types[i]})" for i in sorted(offending))
-            warnings.append(
+            errors.append(
                 f"prose in a non-wrapping column: {name}:{lineno}; {cols} hold multi-word text in an "
                 f"l/c/r column that cannot line-break and will run off the page — use a wrapping "
                 f"column (tabularx Y/X or p{{...}}) for the prose column"
@@ -778,6 +783,24 @@ def check_invalid_latex_environments(files: list[Path], base: Path, errors: list
                 errors.append(
                     f"invalid LaTeX section environment: {name}:{lineno}: "
                     f"use \\section{{...}} commands only; remove \\begin/\\end{{section}}"
+                )
+
+
+def check_hardcoded_structural_refs(files: list[Path], base: Path, errors: list[str]) -> None:
+    """Flag hand-written Table/Figure/Section numbers in source.
+
+    Drafts must use `\\label{...}` and `\\ref{...}` for structural references. Hard-coded numbers
+    silently go stale after float movement or appendix insertion, and they hide missing labels until
+    the rendered PDF shows `Table ??` / `Section ??`.
+    """
+    for path in files:
+        text = strip_comments(path.read_text(encoding="utf-8", errors="ignore"))
+        name = rel(path, base)
+        for lineno, line in enumerate(text.splitlines(), 1):
+            for m in HARDCODED_STRUCTURAL_REF_RE.finditer(line):
+                errors.append(
+                    f"hard-coded structural reference: {name}:{lineno}: '{m.group(0)}'; "
+                    f"use \\label{{...}} and \\ref{{...}} instead of manual numbering"
                 )
 
 
