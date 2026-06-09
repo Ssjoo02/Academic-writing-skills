@@ -315,7 +315,6 @@ Load only the references needed to resolve paper structure and physical format:
 - Template selection: `templates/index.md`,
 - Venue framework constraints: `references/venues/<venue>.md` when a target venue is confirmed,
 - Paper type section/page-budget reference: the manifest-mapped paper type profile path,
-- Optional domain evidence adapter: `references/domains/<domain>.md` only when a clear match exists,
 - Figure/table planning: `references/figures/figure-planning.md`,
 - Journal-only (when `venue_kind=journal`): `references/venues/journal-vs-conference.md` for drafting
   posture, and `references/checks/journal-submission-elements.md` for the mandatory statements and

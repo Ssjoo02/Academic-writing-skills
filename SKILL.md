@@ -160,10 +160,8 @@ The files under `references/` are deep references, not defaults. Open them on de
 - Claim-evidence audit → `references/checks/claim-evidence.md`
 - Citation integrity → `references/checks/citation-integrity.md`
 - Final submission-readiness check → `references/checks/submission-readiness.md`
-- Domain-specific evidence pressure → `references/domains/<domain>.md`
 - Template selection → `templates/index.md` (preloaded official templates are the **first and
   authoritative** source; do not web-search/download when the venue maps to a bundled template)
-- Reference paper style learning → `references/style/reference-paper-learning.md`
 
 ## Why This Split
 

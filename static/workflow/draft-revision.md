@@ -73,7 +73,7 @@ extra.
 
 | Grain / task | Required references | Conditional references |
 |---|---|---|
-| Sentence polish | `references/style/copyediting-standard.md` | `references/style/user-style-profile.md`, `references/style/reference-paper-learning.md`, `references/checks/claim-evidence.md` |
+| Sentence polish | `references/style/copyediting-standard.md` | `references/checks/claim-evidence.md` |
 | Paragraph polish / flow | `references/sections/paragraph-flow.md`, `references/style/copyediting-standard.md` | style references, `references/checks/claim-evidence.md` |
 | Caption rewrite | `references/sections/figures-and-tables.md` | `references/checks/claim-evidence.md`, `references/checks/metric-design.md` |
 | Abstract rewrite | `references/sections/abstract.md`, `references/sections/paragraph-flow.md` | `references/sections/examples/abstract.md`, `references/checks/claim-evidence.md`, `references/checks/reviewer-risk.md` |

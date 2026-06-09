@@ -188,21 +188,9 @@ references:
     - condition: "Venue Kind is journal: plan mandatory statements, display-item caps/tiers, methods placement, and word/length budget early, and re-check before submission-ready"
       path: references/checks/journal-submission-elements.md
 
-    # Domain evidence adapters (optional, loaded only when Writing Policy names a clear match)
-    - condition: "clear LLM-agent domain match in Writing Policy"
-      path: references/domains/llm-agent.md
-    - condition: "clear LLM-training-alignment domain match"
-      path: references/domains/llm-training-alignment.md
-    - condition: "clear RAG domain match"
-      path: references/domains/rag.md
-
     # Style references
     - condition: "drafting or polishing English prose (sentence/paragraph/abstract/section): apply the copyediting and language standard while writing, and verify its mechanical subset in final review"
       path: references/style/copyediting-standard.md
-    - condition: "user provides reference papers for style learning"
-      path: references/style/reference-paper-learning.md
-    - condition: "user style profile is active"
-      path: references/style/user-style-profile.md
 
     # Principles
     - condition: "Writing Policy generation"
