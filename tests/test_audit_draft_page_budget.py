@@ -133,6 +133,61 @@ class CompileIntegrityTests(unittest.TestCase):
 
         self.assertTrue(any("invalid LaTeX section environment" in e for e in errors), errors)
 
+    def test_hardcoded_structural_reference_is_error(self) -> None:
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            path = base / "sections" / "appendix.tex"
+            path.parent.mkdir()
+            path.write_text("This supplements the analysis in Section~5.4.\n", encoding="utf-8")
+            errors: list[str] = []
+
+            audit_draft.check_hardcoded_structural_refs([path], base, errors)
+
+        self.assertTrue(any("hard-coded structural reference" in e for e in errors), errors)
+
+    def test_wide_single_column_table_is_error(self) -> None:
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            path = base / "sections" / "appendix.tex"
+            path.parent.mkdir()
+            path.write_text(
+                "\\begin{table}[t]\n"
+                "\\begin{tabular}{l r r r r r}\n"
+                "App & A & B & C & D & E \\\\\n"
+                "\\end{tabular}\n"
+                "\\end{table}\n",
+                encoding="utf-8",
+            )
+            errors: list[str] = []
+            warnings: list[str] = []
+
+            audit_draft.check_wide_tables(path, base, errors, warnings)
+
+        self.assertTrue(any("wide table" in e for e in errors), errors)
+
+    def test_prose_in_non_wrapping_table_column_is_error(self) -> None:
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            path = base / "sections" / "appendix.tex"
+            path.parent.mkdir()
+            path.write_text(
+                "\\begin{tabular}{l l}\n"
+                "ID & This cell contains several prose words \\\\\n"
+                "\\end{tabular}\n",
+                encoding="utf-8",
+            )
+            errors: list[str] = []
+
+            audit_draft.check_prose_in_narrow_column(path, base, errors)
+
+        self.assertTrue(any("prose in a non-wrapping column" in e for e in errors), errors)
+
 
 if __name__ == "__main__":
     unittest.main()

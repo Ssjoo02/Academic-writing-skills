@@ -36,7 +36,7 @@ Checks (errors block; warnings inform):
   appendix) and will overflow; suggest table*/rotate/split
 - prose in a non-wrapping column: warn when a multi-word cell sits in an l/c/r column (cannot
   line-break, runs off the page); suggest a wrapping column (tabularx Y/X or p{..})
-- limitations length: warn when a standalone Limitations section is over-long (>~190 words),
+- limitations length: fail when a standalone Limitations section is over-long (>180 words),
   over-enumerated (5+ points incl. bold-lead paragraphs), or wrapped in boilerplate opener/closer.
   Resolves the body across the main.tex-heading + \\input-body split.
 - no invalid section environments such as \\end{section}; LaTeX sectioning commands are commands,
@@ -110,7 +110,7 @@ UNRESOLVED_RENDERED_REF_RE = re.compile(
     r"\b(?:Table|Figure|Fig\.|Section|Sec\.|Appendix|Eq\.|Equation)\s+\?\?"
 )
 HARDCODED_STRUCTURAL_REF_RE = re.compile(
-    r"\b(?:Table|Figure|Fig\.|Section|Sec\.|Appendix|Eq\.|Equation)~?\s+\d+(?:\.\d+)?\b"
+    r"\b(?:Table|Figure|Fig\.|Section|Sec\.|Appendix|Eq\.|Equation)(?:~|\s)+\d+(?:\.\d+)?\b"
 )
 # Limitations declared as a structural unit. A dedicated \section{Limitations} (numbered or
 # starred) is the correct home; a \subsection / \paragraph / \textbf run-in titled
@@ -640,7 +640,7 @@ def check_limitations(paper_dir: Path, errors: list[str], warnings: list[str]) -
     """Heuristic: a standalone Limitations section that is over-long / over-enumerated / boilerplate.
 
     Resolves the section body even when the heading lives in main.tex and the prose arrives via
-    \\input (the common split that silently defeats a per-file check). Warns past ~190 words, on 5+
+    \\input (the common split that silently defeats a per-file check). Fails past 180 words, on 5+
     separate limitations (\\item, ordinals, or bold-lead paragraphs), or on boilerplate framing.
     Over-long or over-enumerated limitations are blocking for first-draft delivery because they are
     easy to fix in writing and otherwise hand reviewers avoidable objections.
@@ -1001,8 +1001,8 @@ def audit(paper_dir: Path, max_content_pages: int | None = None) -> tuple[list[s
         check_subsection_budget(path, paper_dir, errors)
         check_tables(path, paper_dir, errors, warnings)
         check_enumeration(path, paper_dir, warnings)
-        check_wide_tables(path, paper_dir, warnings)
-        check_prose_in_narrow_column(path, paper_dir, warnings)
+        check_wide_tables(path, paper_dir, errors, warnings)
+        check_prose_in_narrow_column(path, paper_dir, errors)
         check_disclosure(path, paper_dir, naming_map, do_not_disclose, errors)
         check_internal_id_heuristic(path, paper_dir, allow, warnings)
     check_limitations(paper_dir, errors, warnings)
@@ -1011,6 +1011,7 @@ def audit(paper_dir: Path, max_content_pages: int | None = None) -> tuple[list[s
     check_appendix_substance(paper_dir, warnings)
     check_limitations_placement(files, paper_dir, errors)
     check_invalid_latex_environments(files, paper_dir, errors)
+    check_hardcoded_structural_refs(files, paper_dir, errors)
     check_labels(files, paper_dir, errors)
     check_input_consistency(paper_dir, errors, warnings)
     check_log(paper_dir, errors, warnings)

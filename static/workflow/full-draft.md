@@ -640,6 +640,13 @@ misspells. Do **not** hand-draw pipeline boxes in matplotlib.
    (iii) only then apply `\small`/`\footnotesize`/`\resizebox` as a last touch for short-cell numeric
    tables. A numeric table with ≳6 columns or long header labels (e.g. full model names) defaults to
    `table*`; ≳10 columns usually needs rotation or splitting even at full width.
+3e. **Generate width-safe table source on the first pass.** Do not write a table first and hope the
+   audit catches it later. If a table has long task IDs, definitions, examples, or notes, use
+   `tabularx{\linewidth}` / `tabularx{\textwidth}` with a wrapping `Y`/`X` or fractional `p{...}`
+   column; do not put prose-heavy cells in plain `l`, `c`, or `r` columns. If a table has six or more
+   numeric/model columns, start from `table*` + `\textwidth`, abbreviate headers, and expand names in
+   the caption or lead paragraph. A generated `\begin{table}[H] ... \begin{tabular}{l r r r r r}`
+   appendix matrix is a workflow violation, not a draft to "polish later."
 4. Use `single-column` `table` only when the full table fits within `\linewidth` / `\columnwidth`.
 5. **Column types must match cell content.** Use `r` (or `c`, or `siunitx` `S` for decimal
    alignment) for numeric columns — never stretch numbers with `tabularx` `Y`/`Z`, which left-rags
@@ -670,6 +677,11 @@ misspells. Do **not** hand-draw pipeline boxes in matplotlib.
     `\label{...}` / `\ref{...}` / BibTeX entry, remove invalid LaTeX such as `\end{section}`, and
     recompile until the rendered PDF contains no unresolved reference markers. Never return text like
     `Table ?? provides ...` to the user.
+10c. **Never hard-code structural numbers in source.** Write `Section~\ref{...}`,
+    `Table~\ref{...}`, `Figure~\ref{...}`, and `Appendix~\ref{...}`; do not write `Section~5.4`,
+    `Table 2`, or similar manual numbers. Add labels at generation time for every section, subsection,
+    figure, table, equation, and appendix target that is referenced. Hard-coded structural numbers are
+    stale-reference defects and are blocked by `audit_draft.py`.
 11. **Design the appendix against the opposite defect — sparseness, not overflow.** Once the page
     budget is gone, the failure mode flips: short floats scatter across half-empty pages and each
     appendix section becomes a one-line pointer (`Table~N provides ...`) plus a bare float ("太空").

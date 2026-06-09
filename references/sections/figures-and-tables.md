@@ -113,6 +113,14 @@ Rule of thumb: a numeric table with **≳6 columns**, or with long header text, 
 column — default it to `table*`. A table with **≳10 columns** usually needs rotation or splitting
 even at full width. Treat any compile-time overfull `\hbox` originating in a `tabular` as this defect.
 
+Generate the correct structure on the first pass. For long task IDs, definitions, examples, notes,
+or any prose-heavy cell, use `tabularx` or fractional `p{...}` widths tied to `\linewidth` /
+`\textwidth`; never place those cells in plain `l`, `c`, or `r` columns. For per-model /
+per-application numeric matrices, abbreviate model headers and use a `table*` bounded by
+`\textwidth`; expand full model names in the caption or lead paragraph. A single-column appendix
+`table` with six numeric/model columns is a blocking source defect even before the PDF visibly
+overflows.
+
 #### The appendix has the opposite failure: sparse, scattered floats ("太空")
 
 In the **body** the risk is *overflow* (content too wide for its budget). In the **appendix** the
@@ -211,6 +219,14 @@ Every table must declare its target layout before it is written:
 
 Do not rely on `\small`, `\footnotesize`, or `\resizebox` as the primary solution for long-text
 tables. Font reduction is only a secondary adjustment after the column layout is correct.
+
+### Reference Contract
+
+Every generated figure, table, equation, main section, appendix section, and referenced subsection
+must receive a stable `\label{...}` at generation time. Prose must refer to structural items with
+`\ref` (`Table~\ref{...}`, `Figure~\ref{...}`, `Section~\ref{...}`, `Appendix~\ref{...}`), never
+manual numbers such as `Section~5.4` or `Table 2`. Manual numbers go stale when floats move or
+sections are inserted, and they can mask missing labels until the PDF renders `??`.
 
 ### Table Toolbox
 

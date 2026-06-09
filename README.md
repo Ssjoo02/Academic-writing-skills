@@ -1,100 +1,100 @@
 # Academic Writing
 
-**Academic Writing** is a skill focused on academic paper writing. It is designed to generate complete manuscript drafts that follow the format requirements of specific conferences or journals, and can be used in local skill environments such as Claude Code and Codex.
+**Academic Writing** 是一个专注于学术论文写作的 skill，用于生成符合具体会议或期刊格式要求的完整论文初稿，可在 Claude Code、Codex 等本地 skill 环境中使用。
 
-中文: [README_CN.md](README_CN.md)
+English: [README_EN.md](README_EN.md)
 
-## Use Cases
+## 适用场景
 
-Academic Writing is designed for the **paper construction stage** of the research workflow: turning experimental results, research notes, figures, evidence, and claims into a complete, well-structured, and logically coherent paper draft.
+Academic Writing 面向研究流程中的**论文建构阶段**：将实验结果、研究笔记、图表、证据和 claim 组织成一篇结构完整、论证连贯的论文初稿。
 
-By default, it only handles writing-related tasks and does not change the research itself. In other words, it can help improve paper structure, argumentation flow, section logic, claim-evidence alignment, venue fit, citation hygiene, figure/table presentation, and reviewer-facing clarity. However, it will not silently modify the research idea, run experiments, fabricate results, invent citations, or overstate claims that lack sufficient evidence.
+它默认只处理写作相关任务，不会改变研究本身。也就是说，它可以帮助你改进论文结构、论证链、章节逻辑、claim-evidence 对齐、venue fit、引用卫生、图表表达和 reviewer-facing clarity；但不会默认修改研究 idea、运行实验、编造结果、伪造引用，或将证据不足的 claim 写得过强。
 
-This skill is suitable for the following scenarios:
+该 skill 适合以下场景：
 
-- **You have partial experimental results and want to write a paper draft**: The experiments are complete or partially complete, and you already have results and research notes that need to be organized into a complete and coherent manuscript draft.
-- **You already have a draft and want to polish or rewrite it**: Revise, restructure, or rewrite sections such as the Introduction, Method, or Experiments, or polish the paper according to the style of a specific venue.
-- **You need a manuscript for a specific venue**: You have a target conference or journal, such as EMNLP, NeurIPS, or JMLR, and need to organize the paper according to its template, page budget, and submission requirements.
-- **You want a step-by-step writing workflow**: Generate only the Writing Policy or Paper Framework first, then continue to full drafting after confirming the paper identity, evidence boundaries, and section structure.
-- **You want a pre-submission check**: Review an existing manuscript before submission and identify potential risks related to evidence, citations, formatting, and venue limits.
-- **You need to switch between conference and journal modes**: Organize the paper under either conference or journal mode, including journal-specific section overlays and submission requirement checks.
+- **已有部分实验结果，想写论文初稿**：实验已经完成或部分完成，手中已有结果与研究笔记，希望将其组织成一篇结构完整、逻辑连贯的论文初稿。
+- **已有初稿，希望润色或重写**：针对 Introduction、Method、Experiments 等章节进行起草、重构，或按照特定 venue 风格进行润色。
+- **指定 venue 的成稿需求**：明确目标会议或期刊，例如 EMNLP、NeurIPS、JMLR，需要根据对应模板、篇幅预算和投稿要求组织论文。
+- **分步推进写作流程**：只想先生成 Writing Policy 或 Paper Framework，在确认论文身份、证据边界和章节结构后，再继续生成正文。
+- **投稿前自检**：在提交前对已有手稿进行 review 和 readiness pass，暴露证据、引用、排版和 venue-limit 等潜在风险。
+- **会议与期刊模式切换**：在 conference 与 journal 两种模式之间组织论文，包括期刊特有的 section overlay 与投稿要素检查。
 
-The core premise of this skill is:
+这个 skill 的核心前提是：
 
 ```text
-Problem -> Gap -> Challenge -> Insight -> Method / Study / Benchmark -> Evidence -> Claim
+问题 -> 缺口 -> 挑战 -> 洞察 -> 方法 / 研究 / benchmark -> 证据 -> 主张
 ```
 
-A paper is not a pile of results, but a defensible chain of argument. Every major claim must have a clear evidence boundary.
+论文不是结果的堆砌，而是一条可辩护的论证链。每个主要 claim 都必须有清晰的证据边界。
 
-## Writing Philosophy and References
+## 写作理念与参考来源
 
-The writing approach of this skill is distilled from widely recognized research writing practices. The most direct source of inspiration is the research and paper-writing experience summarized in *learning_research* by Peng Sida, combined with several classic pieces of scientific writing advice:
+该 skill 的写作方式提炼自被广泛认可的科研写作经验。最直接的参考来源是彭思达老师整理的 *learning_research* 中关于科研与论文写作的方法总结，同时也结合了若干经典科学写作建议：
 
-- *learning_research* — Peng Sida’s research experience:  
+- *learning_research* — 彭思达的科研经验：  
   <https://github.com/pengsida/learning_research/tree/master>
-- *Ten Tips for Writing CS Papers* — Sebastian Nowozin:  
+- *Ten Tips for Writing CS Papers* — Sebastian Nowozin：  
   <https://www.nowozin.net/sebastian/blog/ten-tips-for-writing-cs-papers-part-1.html>
-- *Writing a Good Introduction* — Henning Schulzrinne, adapted from Jim Kurose:  
+- *Writing a Good Introduction* — Henning Schulzrinne，源自 Jim Kurose：  
   <https://www.cs.columbia.edu/~hgs/etc/intro-style.html>
 
-Our goal is to help AI learn practical and realistic paper-writing experience, so that the generated papers better match the writing habits and expression style of real researchers.
+我们的目标是让 AI 学习这些真实可用的论文写作经验，使生成的论文更贴近真实研究者的写作习惯与表达风格。
 
-## Core Workflow
+## 核心流程
 
-The full manuscript drafting workflow consists of three stages and two mandatory checkpoints:
+完整论文初稿 workflow 分为三个阶段，并包含两个强制检查点：
 
 ```text
 Workspace Discovery
   -> Writing Policy
-  -> Checkpoint 1: Confirm or revise the policy
+  -> Checkpoint 1：确认或修改 policy
   -> Paper Framework
-  -> Checkpoint 2: Confirm or revise the framework
-  -> Manuscript Draft
+  -> Checkpoint 2：确认或修改 framework
+  -> 论文初稿
 ```
 
-To avoid the common problem that “one-click generated” drafts do not match real paper-writing habits, Academic Writing introduces two checkpoints before generating a complete manuscript draft. The agent must stop at the Writing Policy and Paper Framework stages, respectively, and expose decisions that might otherwise be made silently, including paper identity, evidence boundaries, target venue, section structure, and figure/table plans.
+为了避免“一键生成”的初稿不符合真实论文写作习惯，Academic Writing 在生成完整初稿之前设置了两个检查点：agent 必须分别在 Writing Policy 和 Paper Framework 阶段停下来，将原本可能被静默决定的内容展示给作者确认或修改，包括论文身份、证据边界、目标 venue、section 结构和图表计划等。
 
-Therefore, when a user asks to “write a full paper,” the request only starts the workflow; it does not skip these two checkpoints. The final output should be a manuscript draft built around the author’s own research logic, rather than a templated automatic product.
+因此，用户提出“写完整论文”的请求只会启动 workflow，而不会跳过这两个检查点。最终生成的应当是一篇围绕作者思路展开的论文初稿，而不是模板化的自动产物。
 
 ### 1. Writing Policy
 
-The Writing Policy is the writing contract for the paper. It records the source snapshot, paper identity, core story, claim-evidence map, key terminology, visible assets, and open decisions.
+Writing Policy 是论文写作契约，用于记录 source snapshot、paper identity、core story、claim-evidence map、关键术语、可见资产和 open decisions。
 
-It is recommended to specify the target conference or journal at the beginning. If no venue is specified, the skill defaults to a generic conference-mode template.
+建议在使用 skill 之初先指定目标会议或期刊。若未指定，则默认采用 conference 模式下的通用模板。
 
 ### 2. Paper Framework
 
-The skill includes multiple paper-type profiles for common paper structures and writing strategies. These profiles cover section organization, section goals, and content planning, helping prevent the AI’s writing from becoming too scattered.
+skill 内置了多种 paper-type profile，用于匹配不同类型论文的常见结构和写作思路，主要包括 section 分布、章节目标和内容组织方式，从而避免 AI 写作思路过于发散。
 
-The Paper Framework turns the Writing Policy into a section-level plan. It defines the section list, the core content of each section, venue/template assembly, body-text budget, and the display-item budget for figures and tables. Users can adjust and confirm the Paper Framework before moving on to full drafting.
+Paper Framework 会将 Writing Policy 转化为 section-level 计划，明确章节列表、每个 section 的核心内容、venue/template 组装方式、正文预算，以及图表和表格的 display-item budget。用户可以先基于 Paper Framework 进行调整与确认，再进入正文生成阶段。
 
-### 3. Manuscript Draft
+### 3. 论文初稿
 
-After the user confirms the Paper Framework, the skill creates a complete LaTeX paper project, including the confirmed structure, template, citations, sections, and figure/table plan.
+用户确认 Paper Framework 后，skill 会创建完整的 LaTeX 论文项目，包括确认后的论文结构、模板、引用、章节和图表计划。
 
-Official venue templates are used only as formatting shells: sample text and instructional content are removed before the paper content is written in.
+官方 venue template 仅作为格式壳使用：示例文字和说明内容会被移除，然后写入论文正文。
 
-Before delivery, the draft goes through an internal review and readiness pass.
+初稿交付前，skill 会完成内部 review 和 readiness pass。
 
-## Conference and Journal Support
+## 会议和期刊支持
 
-Academic Writing includes templates and paper-type profiles for both conferences and journals. It is not limited to conference papers.
+Academic Writing 同时内置会议和期刊的模板与 paper-type profile，并不只服务于会议论文。
 
-Conference templates cover ICLR, NeurIPS, ICML, CVPR, ACL, EMNLP, NAACL, AAAI, IJCAI, and more. Journal support includes IEEE Transactions, JMLR, and a generic journal profile for journals that are not separately modeled.
+会议模板覆盖 ICLR、NeurIPS、ICML、CVPR、ACL、EMNLP、NAACL、AAAI、IJCAI 等；期刊方向支持 IEEE Transactions、JMLR，以及面向未单独建模期刊的通用 journal profile。
 
-| Scenario | Behavior |
+| 情况 | 行为 |
 | --- | --- |
-| The user explicitly names a conference | Load the corresponding venue profile if available. |
-| The user does not specify a venue | Default to conference mode and mark the venue as generic / venue TBD. |
-| The user explicitly names a journal | Use journal mode and journal paper-type profiles. |
-| The user names an unsupported journal | Use the generic journal profile and keep journal-specific fields as open decisions. |
+| 用户明确点名会议 | 若对应 venue profile 可用，则加载该 profile。 |
+| 用户未指定 venue | 默认使用 conference 模式，并标记为 generic / venue TBD。 |
+| 用户明确点名期刊 | 使用 journal 模式和 journal paper-type profiles。 |
+| 用户点名未建模期刊 | 使用 generic journal profile，并将期刊特定字段保留为待确认。 |
 
-This conservative routing prevents the system from mistakenly organizing a paper as a journal manuscript when the user simply says “write a paper.”
+这种保守路由可以避免用户只是说“写论文”时，系统误将其组织成期刊论文。
 
-## Installation
+## 安装
 
-Please copy the entire directory instead of copying only `SKILL.md`, because this skill depends on `manifest.yaml`, `static/`, `references/`, `templates/`, and supporting scripts.
+请复制完整目录，不要只复制 `SKILL.md`，因为该 skill 依赖 `manifest.yaml`、`static/`、`references/`、`templates/` 和相关支持脚本。
 
 **Clone the repo**
 
@@ -105,14 +105,14 @@ cd Academic-writing-skills
 
 ### 1. Codex
 
-Copy the skill to `$CODEX_HOME/skills/`:
+将 skill 复制到 `$CODEX_HOME/skills/`：
 
 ```bash
 mkdir -p "$CODEX_HOME/skills"
 cp -R Academic-writing-skills "$CODEX_HOME/skills/academic-writing"
 ```
 
-Example usage:
+使用示例：
 
 ```text
 Use academic-writing to revise my paper's Introduction.
@@ -120,81 +120,81 @@ Use academic-writing to revise my paper's Introduction.
 
 ### 2. CC / Claude Code
 
-Both global installation and project-level installation are supported.
+支持全局安装或项目级安装。
 
-Global installation:
+全局安装：
 
 ```bash
 mkdir -p "$HOME/.claude/skills"
 cp -R Academic-writing-skills "$HOME/.claude/skills/academic-writing"
 ```
 
-Project-level installation:
+项目级安装：
 
 ```bash
 mkdir -p .claude/skills
 cp -R Academic-writing-skills .claude/skills/academic-writing
 ```
 
-After installation, restart Claude Code and explicitly mention this skill in your prompt, for example:
+安装后重启 Claude Code，并在 prompt 中明确点名该 skill，例如：
 
 ```text
 Please use the academic-writing skill to revise my Introduction.
 ```
 
-## Figure Generation
+## 绘图
 
-Data figures, such as bar charts, line charts, radar charts, heatmaps, scatter plots, and tables, are generated directly by the current agent from project data and do not require additional configuration.
+数据图表，如柱状图、折线图、雷达图、热力图、散点图和表格，会由当前 agent 直接根据项目数据生成，不需要额外配置。
 
-For non-data paper visuals such as teasers, conceptual figures, and overview images, the skill can optionally connect to Gemini or GPT-image models.
+对于 teaser、概念图、overview image 等非数据类论文图片，skill 可选接入 Gemini 或 GPT-image 生图模型。
 
-If no image-generation API is configured, the current agent will draw the figure by default. If an image API is configured, the corresponding model will be used for rendering.
+未配置图片 API 时，默认由当前 agent 直接绘制；若配置了生图 API，则使用对应模型进行渲染。
 
-### Image Generation API Configuration
+### 生图模型 API 配置
 
-The skill automatically detects available image-generation APIs through environment variables:
+skill 会通过环境变量自动检测可用的生图 API：
 
-- If `GEMINI_API_KEY` is set, Gemini will be used.
-- If `OPENAI_API_KEY` is set, GPT-image will be used.
-- If both are set, Gemini takes priority.
+- 设置 `GEMINI_API_KEY` 时，使用 Gemini；
+- 设置 `OPENAI_API_KEY` 时，使用 GPT-image；
+- 两者都设置时，优先使用 Gemini。
 
-Standard official API keys can be used. Relay or self-hosted gateway base URLs are also supported.
+普通官方 key 即可使用，也支持中继或自建网关的 base URL。
 
 **Gemini**
 
 ```bash
-export GEMINI_API_KEY="your_key"
+export GEMINI_API_KEY="你的_key"
 
-# Optional: override the base URL when using a relay or self-hosted gateway
-# Default: https://generativelanguage.googleapis.com
+# 可选：使用中继或自建网关时覆盖 base URL
+# 默认：https://generativelanguage.googleapis.com
 export GEMINI_BASE_URL="https://your-relay.example.com"
 
-# Optional: override the model
-# Default: gemini-2.5-flash-image
+# 可选：覆盖模型
+# 默认：gemini-2.5-flash-image
 export GEMINI_IMAGE_MODEL="gemini-2.5-flash-image"
 ```
 
 **OpenAI / GPT-image**
 
 ```bash
-export OPENAI_API_KEY="your_key"
+export OPENAI_API_KEY="你的_key"
 
-# Optional: override the base URL when using a relay or self-hosted gateway
-# Default: https://api.openai.com
+# 可选：使用中继或自建网关时覆盖 base URL
+# 默认：https://api.openai.com
 export OPENAI_BASE_URL="https://your-relay.example.com"
 
-# Optional: override the model
-# Default: gpt-image-2
+# 可选：覆盖模型
+# 默认：gpt-image-2
 export OPENAI_IMAGE_MODEL="gpt-image-2"
 ```
 
-Please configure these variables in the environment where the agent runs, such as in your shell’s `~/.bashrc` / `~/.zshrc`, or by running `export` before starting the agent. The skill will automatically read these variables when generating images, so no custom prefix variables are needed.
+请将这些变量配置到运行 agent 的环境中，例如写入 shell 的 `~/.bashrc` / `~/.zshrc`，或在启动 agent 前执行 `export`。skill 在生成图片时会自动读取这些变量，无需设置任何自定义前缀变量。
 
-You can also directly tell the agent your API key and target model in the conversation, and let the agent call the corresponding API to complete figure generation.
+你也可以在对话中直接告诉 agent API key 和指定模型，让 agent 调用对应 API 完成绘图。
 
-## Compile to PDF
+## 编译为 PDF
 
-The skill produces a **complete, compilable LaTeX project**, located by default under the `paper/` directory. It usually contains:
+skill 产出的是一个**可编译的完整 LaTeX 项目**，默认位于 `paper/` 目录下，通常包含：
 
 ```text
 paper/
@@ -205,39 +205,39 @@ paper/
   venue template files
 ```
 
-It is not just a loose `.tex` snippet, but a complete paper project. To compile it into a PDF and make layout checks effective, we recommend installing the following tools in the runtime environment:
+它不是一段零散的 `.tex` 文本，而是一个完整论文项目。为了将其编译为 PDF，并让版面检查真正生效，建议在运行环境中安装以下工具：
 
-- `latexmk` or `pdflatex`: from TeX Live / MacTeX, used to compile LaTeX;
-- `pdfinfo` / `pdftotext`: from poppler-utils, used to read the compiled PDF and check page budgets.
+- `latexmk` 或 `pdflatex`：来自 TeX Live / MacTeX，用于编译 LaTeX；
+- `pdfinfo` / `pdftotext`：来自 poppler-utils，用于读取编译后的 PDF，并进行页数预算等检查。
 
-As long as `latexmk` or `pdflatex` exists in the environment, the agent will **automatically compile the paper during the writing workflow and use the compiled PDF as the source of truth** for layout checks. These checks include, but are not limited to:
+只要环境中存在 `latexmk` 或 `pdflatex`，agent 在写作流程中会**自动编译论文，并以编译出的 PDF 为准**进行版面检查。检查内容包括但不限于：
 
-- Whether figures overflow the page;
-- Whether `Overfull \hbox` appears;
-- Whether tables overflow;
-- Whether appendix formatting is abnormal;
-- Whether the page count exceeds the target venue’s budget.
+- 图表是否出界；
+- 是否存在 `Overfull \hbox`；
+- 表格是否溢出；
+- 附录排版是否异常；
+- 页数是否超过目标 venue 的预算。
 
-If these tools are not available in the environment, the agent will still generate the complete LaTeX source and run static audits, but it cannot verify the final PDF layout.
+如果环境中没有这些工具，agent 仍会生成完整的 LaTeX 源码并进行静态审计，但无法验证最终 PDF 的真实版面。
 
-To compile locally:
+本地编译方式如下：
 
 ```bash
 cd paper
 latexmk -pdf main.tex
 ```
 
-We recommend installing the LaTeX and poppler toolchain before asking the agent to generate a complete draft. This allows layout-related gates to take effect properly.
+建议先装好 LaTeX 与 poppler 工具链，再让 agent 生成完整初稿。这样，版面相关的 gate 才能真正生效。
 
-## Example Requests
+## 示例请求
 
-We recommend specifying the experiment directory and target conference at the beginning, for example:
+推荐在一开始就指定实验目录和目标会议，例如：
 
 ```text
 Use academic-writing to build a first manuscript from this workspace for EMNLP, my workspace is xxx/xxx.
 Use academic-writing to revise this Introduction for ACL-style clarity, this is my paper xxx/xxx.
 ```
 
-## Maintenance Note
+## 维护声明
 
-This project is under continuous development. Everyone is welcome to try it, and any feedback, suggestions, or revision comments would be greatly appreciated.
+本项目会持续更新。欢迎大家试用，也非常感谢任何形式的反馈、建议或修改意见。

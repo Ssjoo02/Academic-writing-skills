@@ -143,6 +143,13 @@ def validate_final_quality_gates(root: Path) -> None:
         "audit_draft.py must scan the rendered PDF for Table ?? / Figure ?? references",
     )
     require(
+        "check_hardcoded_structural_refs" in audit_script
+        and "HARDCODED_STRUCTURAL_REF_RE" in audit_script
+        and "Never hard-code structural numbers" in full_draft
+        and "Reference Contract" in figures_tables,
+        "skill must block hard-coded structural references such as Section~5.4",
+    )
+    require(
         "undefined references present" in audit_script
         and "errors.append" in audit_script,
         "audit_draft.py must treat undefined references as errors",
@@ -150,6 +157,7 @@ def validate_final_quality_gates(root: Path) -> None:
     require(
         "section is long" in audit_script
         and "errors.append" in audit_script
+        and "LIMITATIONS_MAX_WORDS = 180" in audit_script
         and "120-180 words" in conclusion
         and "blocking" in conclusion.lower(),
         "over-long Limitations must be a blocking defect, not a warning-only style note",
@@ -159,6 +167,12 @@ def validate_final_quality_gates(root: Path) -> None:
         and "hard defect" in figures_tables
         and "appendix" in figures_tables.lower(),
         "figure/table guide must make body and appendix overflow a hard defect",
+    )
+    require(
+        "Generate width-safe table source on the first pass" in full_draft
+        and "prose in a non-wrapping column" in audit_script
+        and "wide table" in audit_script,
+        "skill must prevent width-unsafe table source, not only inspect rendered PDFs",
     )
     require(
         "undefined references or citations" in submission_readiness
