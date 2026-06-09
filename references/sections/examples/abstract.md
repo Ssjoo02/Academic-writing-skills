@@ -1,17 +1,10 @@
-# Abstract Examples Skeleton
+# Abstract Example Index
 
-## Example Slot: Challenge -> Insight -> Contribution
+After selecting a section template, open only the matching example file. Reuse sentence logic and
+structure, not exact wording, task names, claims, metrics, or citation framing.
 
-- Source:
-- Use when: the paper has a clear technical challenge and one central insight.
-- Structure to learn: task -> challenge -> insight -> mechanism -> evidence.
-- Transferable move: introduce the insight before listing implementation details.
-- Do not copy: wording, technical names, rhetorical rhythm, or unsupported claim strength.
+## Files
 
-## Example Slot: Multiple Contributions
-
-- Source:
-- Use when: the policy contains several independent contributions.
-- Structure to learn: task -> shared challenge -> contribution plus advantage per sentence -> evidence.
-- Transferable move: pair each contribution with a concrete advantage.
-- Do not copy: contribution wording or metric framing from the source.
+1. Challenge -> Contribution: `references/sections/examples/abstract/challenge-contribution.md`
+2. Challenge -> Insight -> Contribution: `references/sections/examples/abstract/challenge-insight-contribution.md`
+3. Multiple Contributions: `references/sections/examples/abstract/multiple-contributions.md`

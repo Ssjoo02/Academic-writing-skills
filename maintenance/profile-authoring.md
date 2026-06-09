@@ -2,10 +2,10 @@
 
 This file guides maintainers when converting external material into skill references.
 
-`workflows/full-draft.md` and `workflows/draft-revision.md` are runtime workflow and loading
-guidance. `references/principles/research-strategy.md` and `references/sections/*.md` are runtime
-writing guidance. `maintenance/profile-authoring.md` is maintenance guidance for expanding the
-skill.
+`static/workflow/full-draft.md` and `static/workflow/draft-revision.md` are
+runtime workflow and loading guidance. `references/principles/research-strategy.md` and
+`references/sections/*.md` are runtime writing guidance. `maintenance/profile-authoring.md` is
+maintenance guidance for expanding the skill.
 
 Before using any extracted principle or profile, record its provenance in
 `maintenance/source-provenance.md`.

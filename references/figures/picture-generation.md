@@ -13,11 +13,67 @@ datasets, results, or labels. Every visible element must come from the
 confirmed Writing Policy, confirmed Paper Framework, or concrete workspace
 source files.
 
-For formal architecture, workflow, topology, audit cascade, or node-edge
-diagrams, prefer FigureSpec when deterministic editable SVG matters. Use AI
-picture generation when the figure needs a polished raster illustration,
-teaser, qualitative method scene, or concept visual that a deterministic diagram
-would not express well.
+This route now covers **both** conceptual teasers **and** pipeline / architecture
+/ workflow concept figures, because the goal is a polished *illustrative* figure
+(devices, UI panels, icons, actors, a scene), not a flowchart of rounded
+rectangles. Use AI generation for the **visual**; do not use it for the **text**
+(see the next section). Reserve a deterministic node-edge diagram (FigureSpec /
+TikZ) only when the user explicitly asks for an editable schematic, or when the
+figure is genuinely a formal graph/state machine where a clean schematic reads
+better than an illustration.
+
+## Text Is Never Rendered By The Image Model (critical)
+
+Raster image models **cannot spell**. They reliably corrupt exact labels — real
+generations from this skill produced `Indulator` (Emulator), `Doicker`
+(Docker), `Missformation` (Misinformation), and `pipeine` (pipeline). Garbled
+text in a paper figure is fatal. Therefore:
+
+- **The image model renders only the illustration, with no text.** State this in
+  the prompt explicitly: *"Do not render any text, letters, words, numbers, or
+  labels anywhere in the image."* Any text the model adds is treated as noise to
+  be cropped or covered, never trusted.
+- **All exact labels are added deterministically after generation**, as a LaTeX /
+  TikZ overlay on top of `\includegraphics`, so every word is spelled from the
+  Writing Policy and stays editable. This is the **hybrid pattern** and it is the
+  default for every picture figure.
+- **Never paste the prompt scaffolding into the image.** The lines `Message:`,
+  `Show exactly these components:`, and `Use exactly these labels:` are
+  instructions to *you*, not text to be drawn. A clean Direct Image Prompt is a
+  single visual description with no rubric headers (a past run drew the literal
+  `Message:` sentence into the figure).
+
+### Hybrid Overlay Pattern (LaTeX/TikZ)
+
+Generate the text-free illustration, then place labels over it with TikZ in a
+normalized 0–1 coordinate space, tuning anchor positions by **looking at the
+rendered PNG** and adjusting:
+
+```tex
+\begin{figure*}[t]
+\centering
+\begin{tikzpicture}
+  % background illustration drawn by the image model (text-free)
+  \node[anchor=south west,inner sep=0] (img) at (0,0)
+    {\includegraphics[width=\textwidth]{figures/fig1_teaser.png}};
+  % overlay exact labels in normalized (x,y) ∈ [0,1] over the image
+  \begin{scope}[x={(img.south east)},y={(img.north west)}]
+    \node[font=\sffamily\small\bfseries] at (0.10,0.52) {User};
+    \node[font=\sffamily\small\bfseries] at (0.46,0.55) {GUI Agent};
+    \node[font=\sffamily\footnotesize]   at (0.86,0.74) {HARM};
+    % ... place each label, then recompile and re-inspect alignment
+  \end{scope}
+\end{tikzpicture}
+\caption{...}
+\label{fig:teaser}
+\end{figure*}
+```
+
+Requires `\usepackage{tikz}` in the preamble. Iterate: compile → look at the PDF
+→ nudge coordinates until every label sits on its element. If precise overlay is
+impractical for a dense figure, fall back to a clean deterministic figure (TikZ
+schematic or a compact labeled illustration) rather than shipping garbled
+in-image text.
 
 ## Required Dual Output
 
@@ -73,13 +129,12 @@ Use this file shape:
 - Accessibility:
 
 ## Direct Image Prompt
-Create a publication-quality academic figure for a research paper.
+<A single clean paragraph describing the illustration only. No rubric headers, no
+label lists, no spelled-out words to draw. End with the no-text instruction.>
 
-Message: ...
-Show exactly these components: ...
-Use exactly these labels: ...
-Relationships/arrows: ...
-Avoid: ...
+## Text Overlay Plan
+- Labels to overlay (exact spelling from Writing Policy): ...
+- Approximate normalized positions (x,y in 0–1): ...
 
 ## Renderer Route
 - Preferred renderer:
@@ -91,21 +146,42 @@ Avoid: ...
 
 ## Writing the Direct Image Prompt
 
-When filling the Direct Image Prompt, keep these quality rules in mind — they are
-not pre-baked style, but guardrails that ensure the figure looks like an academic
-paper figure rather than a slide or advertisement:
+The Direct Image Prompt is **one clean visual paragraph**, not a filled-in rubric.
+Describe the scene the way you would commission an illustrator, then end with the
+no-text instruction. Quality guardrails:
 
-- **Academic aesthetic**: flat vector illustration, clean lines, minimalist.
-- **Legible text**: all labels readable at paper scale. No long sentences,
-  descriptive paragraphs, or complex formulas in the figure.
-- **Organized flow**: clear left-to-right or top-to-bottom logic.
-- **Restrained color**: no overly saturated colors; prefer soft professional tones.
-- **Avoid**: photorealistic renderings, messy sketch lines, unreadable tiny text,
-  heavy drop shadows, rainbow gradients, 3D effects, glowing effects.
+- **Illustrative, not a flowchart.** Aim for a scene with concrete objects —
+  smartphone / device frames, app UI panels, channel icons (envelope, chat
+  bubble, browser, file), an attacker motif, harm/safe outcome icons — connected
+  by clean arrows. **Do not ask for "rounded rectangles", "boxes in a row", or a
+  "flat box-and-arrow flowchart"**; that is exactly the look the user rejected.
+- **Academic aesthetic**: flat vector illustration, clean lines, minimalist,
+  generous but balanced whitespace (no large empty bands; fill the canvas evenly).
+- **Restrained color**: soft professional tones, a small consistent palette; no
+  oversaturated colors.
+- **No text in the image**: finish every prompt with *"Do not render any text,
+  letters, words, numbers, or labels anywhere — leave clean space where labels
+  will be added later."* Labels come from the Text Overlay Plan, not the model.
+- **Avoid**: photorealism, messy sketch lines, heavy drop shadows, rainbow
+  gradients, 3D bevels, glow effects, and any embedded words.
 
-The rest — palette, background, specific layout, icon choice — is decided per
-figure based on the Evidence Boundary and Visual Plan above. Do not copy a
-fixed style string into every prompt.
+The rest — palette, exact layout, icon choice — is decided per figure from the
+Evidence Boundary and Visual Plan. Do not copy a fixed style string into every
+prompt.
+
+### Example Direct Image Prompt (pipeline, illustrative, text-free)
+
+> A clean flat vector academic illustration of a left-to-right process for
+> building a mobile-app safety benchmark. Six evenly spaced circular icon
+> medallions in a single horizontal row, equal spacing, connected by thin clean
+> right-pointing arrows: a checklist clipboard, a smartphone showing an app
+> screen, a hand typing a chat message, a magnifier over a warning shield, a
+> stack of Android emulator phone frames, and a padlocked archive box. Below the
+> row, a slim horizontal band suggesting a worked example with small app icons
+> (envelope, calendar) and an arrow flow. Soft professional palette of blue,
+> teal, amber, and slate on a white background, minimalist, balanced, filling the
+> full width evenly. Do not render any text, letters, words, numbers, or labels
+> anywhere — leave clean space where labels will be added later.
 
 ## Image Renderer Preference
 
@@ -184,14 +260,23 @@ accurate paper-safe picture is better than an empty figure slot.
 
 ## Review Gate
 
-Before accepting a generated picture, inspect it against the brief:
+Open the rendered PNG and inspect it (do not infer from the prompt). Reject and
+regenerate or redraw if **any** of these fail:
 
-- all required components appear,
-- no extra claim, dataset, metric, or module was invented,
-- visible text is readable and matches the allowed labels,
-- arrows and relationships are directionally correct,
-- the figure is paper-ready rather than slide-deck decorative,
-- the generated file is non-empty and stored at the recorded output path.
+- **No raw text rendered by the model.** If the illustration contains any words,
+  the model has spelled them — assume they are garbled. Either crop/cover them
+  and overlay correct labels, or regenerate with a stronger no-text instruction.
+- **No misspellings / no leaked scaffolding.** Specifically check for corrupted
+  words (e.g. `Indulator`, `Missformation`) and for prompt headers like
+  `Message:` drawn into the image. Either means reject.
+- **Illustrative, not a box-and-arrow flowchart.** If it is just rounded
+  rectangles in a row, the prompt was wrong — rewrite it toward a scene.
+- **No large empty bands**; the composition fills the canvas evenly.
+- All required components appear; no extra claim, dataset, metric, or module was
+  invented; arrows and relationships are directionally correct.
+- After the TikZ text overlay, **every label sits on its element** and is legible
+  at paper scale.
+- The generated file is non-empty and stored at the recorded output path.
 
-If any check fails, revise the prompt in the Picture Brief and regenerate or
-redraw. Keep rejected versions only when useful for audit.
+If any check fails, revise the prompt or the overlay coordinates and regenerate.
+Keep rejected versions only when useful for audit.

@@ -1,5 +1,9 @@
 # NAACL Venue Profile
 
+## Venue Kind
+
+- conference
+
 ## Source Status
 
 - Official sources:

@@ -1,17 +1,33 @@
 # Paper Type Index
 
-First decide the paper type, then load the corresponding profile before building the Paper
-Framework. The user may select the paper type. If not selected, infer it from the main contribution,
-evidence package, target venue, and requested output, then mark the inference in the Writing Policy.
-Do not default to `generic-paper.md` before checking the specific profiles. Use `generic-paper.md`
-only as a provisional fallback when the type is unknown, mixed, early-stage, or not safely captured
-by a specific profile.
+First decide `venue_kind`, then select the corresponding paper type family. Use this top-level index
+only when `venue_kind=conference`, which is the default unless the user explicitly specifies a
+journal target. The user may select the paper type. If not selected, infer it from the main
+contribution, evidence package, target venue, and requested output, then mark the inference in the
+Writing Policy. Do not default to `generic-paper.md` before checking the specific profiles. Use
+`generic-paper.md` only as a provisional fallback when the type is unknown, mixed, early-stage, or
+not safely captured by a specific profile.
 
 Paper type profiles are section and page-budget references only. They help the agent decide which
 sections a paper probably needs and how much main-text space each section may require. They are not
 fixed templates, and they must be adapted to the actual paper, venue, evidence, and user request.
 
-## Type Selection Map
+## Conference vs Journal: Pick The Family First
+
+Paper types are split by `Venue Kind` (see `references/venues/index.md`):
+
+- **Conference** (`Venue Kind: conference`, the default): use the conference paper-type files listed
+  in this file (`method-paper.md`, `systems-implementation-paper.md`, `benchmark-dataset-paper.md`,
+  `imrad-paper.md`, `survey-paper.md`, `generic-paper.md`). These assume a hard page limit.
+- **Journal** (`Venue Kind: journal`, e.g., JMLR, TPAMI): use the journal paper-type files under
+  `references/paper-types/journal/` (see `references/paper-types/journal/index.md`). Journal types
+  use different section conventions, are usually longer/complete, set a proportional budget, and take
+  absolute length from the venue card. Also load `references/venues/journal-vs-conference.md`.
+
+Conference and journal paper types are intentionally NOT shared. Do not draft a journal paper from a
+conference paper-type file, and vice versa.
+
+## Conference Type Selection Map
 
 Use the most specific matching profile. If a paper has multiple contribution types, choose the one
 that controls the main evidence burden and page budget, then borrow individual sections from another

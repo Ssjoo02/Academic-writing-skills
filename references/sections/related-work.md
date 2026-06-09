@@ -15,6 +15,31 @@ For each related-work group:
 4. Clarify how the current paper differs.
 5. Avoid overstating the gap.
 
+## Citation Use
+
+Use this compact paragraph shape:
+
+`research line -> representative methods -> limitation or scope boundary -> paper distinction`
+
+- Cite primary sources when they support a specific claim about a method, result, dataset, or
+  limitation.
+- Review papers may support background framing, not primary evidence claims.
+- Do not use a citation group unless the sentence states what the group has in common.
+
+## Citation Scope And Density
+
+Set citation density by paper type, venue/page pressure, and section role; do not use a fixed
+global reference count.
+
+- Short conference papers: cite closest baselines, representative method families, standard
+  benchmarks/datasets, and metric definitions needed for the argument.
+- Journal or extended papers: allow broader coverage, but keep each paragraph organized by claim
+  role instead of citation volume.
+- Benchmark/dataset papers: cover prior benchmarks, datasets, task protocols, annotation or
+  evaluation conventions, and metric definitions before general background.
+- Survey papers: require a declared search scope or corpus logic before applying ordinary
+  related-work density rules.
+
 ## Template Selection
 
 Choose one organization:

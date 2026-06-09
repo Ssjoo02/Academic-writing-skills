@@ -3,7 +3,7 @@ version: 2.0.0
 description: >
   Declarative manifest for the static/dynamic split. SKILL.md uses this to
   decide which fragments to load for a given writing request. The main axes are
-  workflow (full-draft or draft-revision), paper_type, and venue. The large
+  workflow (full-draft or draft-revision), venue_kind, venue, and paper_type. The large
   body of section guides, check references, figure references, domain adapters,
   and style references stays in on-demand references.
 
@@ -23,34 +23,43 @@ axes:
       compress, weaken claims, or improve flow. If ambiguous, ask one concise
       question and stop.
     values:
-      full-draft: static/fragments/workflow/full-draft.md
-      draft-revision: static/fragments/workflow/draft-revision.md
+      full-draft: static/workflow/full-draft.md
+      draft-revision: static/workflow/draft-revision.md
     multi: false
 
-  paper_type:
+  venue_kind:
     detect: |
-      Infer from workspace evidence during Writing Policy stage. Check
-      references/paper-types/index.md before defaulting. Use generic-paper
-      when unknown, mixed, or too sparse to classify. Do not use method-paper
-      as a global default. Domain evidence adapters are optional and separate.
+      Decide this immediately after workflow routing and before paper_type.
+      Allowed values are conference and journal. Select journal only when the
+      user explicitly says the target is a journal article or names a journal
+      venue/track (for example JMLR, TPAMI, TMLR, IEEE Transactions, ACM
+      Transactions, Elsevier/Springer/Wiley journal, or a "journal paper").
+      Default to conference otherwise.
+      Do not infer journal merely from long length, IMRaD structure, survey
+      style, complete experiments, or lack of a named conference. If the target
+      is not explicitly journal, route as conference. The venue_kind selects
+      the paper_type family: conference values use references/paper-types/*.md;
+      journal values use references/paper-types/journal/*.md.
     values:
-      method: references/paper-types/method-paper.md
-      benchmark-dataset: references/paper-types/benchmark-dataset-paper.md
-      survey: references/paper-types/survey-paper.md
-      systems-implementation: references/paper-types/systems-implementation-paper.md
-      imrad: references/paper-types/imrad-paper.md
-      generic: references/paper-types/generic-paper.md
-    default: generic
+      conference: references/venues/index.md
+      journal: references/venues/journal-vs-conference.md
+    default: conference
     multi: false
 
   venue:
     detect: |
-      From user input or workspace evidence. If unspecified, use generic with
-      generic_article.tex template and a soft 6-8 main-text-page drafting budget.
+      Decide after venue_kind and before paper_type. For venue_kind=conference,
+      select a modeled conference venue when the user explicitly names one;
+      otherwise use generic with generic_article.tex and a soft 6-8 main-text-page
+      drafting budget. For venue_kind=journal, name the modeled card (jmlr,
+      tpami) or fall back to journal (journal-generic) for any journal not
+      individually modeled, then verify its fields against the target journal.
       Ask about venue at most once in the whole workflow. Do not ask before
-      Writing Policy when merely unspecified.
+      Writing Policy when merely unspecified; unspecified means conference +
+      generic.
     values:
       generic: references/venues/index.md
+      # Conferences
       iclr: references/venues/iclr.md
       neurips: references/venues/neurips.md
       icml: references/venues/icml.md
@@ -65,6 +74,43 @@ axes:
       www: references/venues/kdd-www-sigir.md
       sigir: references/venues/kdd-www-sigir.md
       chi-uist: references/venues/chi-uist.md
+      # Journals
+      jmlr: references/venues/jmlr.md
+      tpami: references/venues/ieee-tpami.md
+      ieee-tpami: references/venues/ieee-tpami.md
+      journal: references/venues/journal-generic.md
+    default: generic
+    multi: false
+
+  paper_type:
+    detect: |
+      Decide only after venue_kind and venue. Infer from workspace evidence
+      during Writing Policy stage, then select from the family chosen by
+      venue_kind. If venue_kind=conference, check references/paper-types/index.md
+      and choose one of the conference values. If venue_kind=journal, check
+      references/paper-types/journal/index.md and choose one of the journal-*
+      values. Use generic for unknown conference papers and journal-generic for
+      unknown journal papers. Do not use method or journal-method as a global
+      default. Conference and journal paper types are not shared. Domain
+      evidence adapters are optional and separate.
+    values:
+      # Conference paper types (Venue Kind: conference)
+      method: references/paper-types/method-paper.md
+      benchmark-dataset: references/paper-types/benchmark-dataset-paper.md
+      survey: references/paper-types/survey-paper.md
+      systems-implementation: references/paper-types/systems-implementation-paper.md
+      imrad: references/paper-types/imrad-paper.md
+      generic: references/paper-types/generic-paper.md
+      # Journal paper types (Venue Kind: journal)
+      journal-theory: references/paper-types/journal/theory-paper.md
+      journal-method: references/paper-types/journal/method-scaling-paper.md
+      journal-systems-tools: references/paper-types/journal/systems-tools-paper.md
+      journal-evaluation: references/paper-types/journal/evaluation-benchmark-paper.md
+      journal-dataset: references/paper-types/journal/dataset-benchmark-paper.md
+      journal-application: references/paper-types/journal/application-paper.md
+      journal-survey: references/paper-types/journal/survey-paper.md
+      journal-position: references/paper-types/journal/position-governance-paper.md
+      journal-generic: references/paper-types/journal/generic-paper.md
     default: generic
     multi: false
 
@@ -77,6 +123,8 @@ references:
       path: references/figures/picture-generation.md
     - condition: "data-driven plots, metric visualizations, or generated tables"
       path: references/figures/plot-style.md
+    - condition: "data-driven plots require reusable code patterns (grouped bars, trend lines, heatmaps, radar, save helpers)"
+      path: references/figures/chart-patterns.md
 
     # Section guides (loaded during section drafting)
     - condition: "drafting or revising Abstract"
@@ -97,20 +145,30 @@ references:
       path: references/sections/paragraph-flow.md
     - condition: "figures or tables are used in a section"
       path: references/sections/figures-and-tables.md
-    - condition: "full-paper review before final delivery"
+    - condition: "automatic post-draft review immediately after a complete full draft exists and before any draft is delivered to the user"
       path: references/sections/paper-review.md
+
+    # Journal section overlays (Venue Kind: journal). Load the base section guide
+    # above first, then layer the matching overlay; the overlay states only the
+    # journal-specific deltas and does not replace the base.
+    - condition: "Venue Kind is journal AND the journal section overlay mechanism is needed (load before the first overlay)"
+      path: references/sections/journal/index.md
+    - condition: "Venue Kind is journal AND drafting or revising Abstract (overlay on references/sections/abstract.md)"
+      path: references/sections/journal/abstract.md
+    - condition: "Venue Kind is journal AND drafting or revising Introduction (overlay on references/sections/introduction.md)"
+      path: references/sections/journal/introduction.md
+    - condition: "Venue Kind is journal AND drafting or revising Method / System (overlay on references/sections/method.md)"
+      path: references/sections/journal/method.md
+    - condition: "Venue Kind is journal AND drafting or revising Discussion / Conclusion (overlay on references/sections/conclusion.md)"
+      path: references/sections/journal/discussion.md
 
     # Section examples (loaded only when structure is uncertain or user asks)
     - condition: "Abstract structure is uncertain or user asks for examples"
       path: references/sections/examples/abstract.md
     - condition: "Introduction structure is uncertain or user asks for examples"
       path: references/sections/examples/introduction.md
-    - condition: "Related Work structure is uncertain or user asks for examples"
-      path: references/sections/examples/related-work.md
     - condition: "Method structure is uncertain or user asks for examples"
       path: references/sections/examples/method.md
-    - condition: "Experiments structure is uncertain or user asks for examples"
-      path: references/sections/examples/experiments.md
 
     # Check references (loaded when risks are unresolved)
     - condition: "claim-evidence audit or high-risk central claim"
@@ -121,6 +179,12 @@ references:
       path: references/checks/metric-design.md
     - condition: "reviewer-risk audit before submission"
       path: references/checks/reviewer-risk.md
+    - condition: "final full-paper review, writing quality audit, or user asks to check writing craft"
+      path: references/checks/writing-craft.md
+    - condition: "final submission-readiness check after a full paper draft exists"
+      path: references/checks/submission-readiness.md
+    - condition: "Venue Kind is journal: plan mandatory statements, display-item caps/tiers, methods placement, and word/length budget early, and re-check before submission-ready"
+      path: references/checks/journal-submission-elements.md
 
     # Domain evidence adapters (optional, loaded only when Writing Policy names a clear match)
     - condition: "clear LLM-agent domain match in Writing Policy"
@@ -131,6 +195,8 @@ references:
       path: references/domains/rag.md
 
     # Style references
+    - condition: "drafting or polishing English prose (sentence/paragraph/abstract/section): apply the copyediting and language standard while writing, and verify its mechanical subset in final review"
+      path: references/style/copyediting-standard.md
     - condition: "user provides reference papers for style learning"
       path: references/style/reference-paper-learning.md
     - condition: "user style profile is active"
@@ -139,6 +205,12 @@ references:
     # Principles
     - condition: "Writing Policy generation"
       path: references/principles/research-strategy.md
+
+    # Journal drafting posture (load when the confirmed venue is a journal)
+    - condition: "confirmed venue is a journal (Venue Kind: journal); journal vs conference drafting posture, length, blinding, revision cycle, supplementary, extension"
+      path: references/venues/journal-vs-conference.md
+    - condition: "journal paper-type selection when Venue Kind is journal"
+      path: references/paper-types/journal/index.md
 
     # Templates
     - condition: "template selection for LaTeX project"

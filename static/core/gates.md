@@ -116,7 +116,6 @@ downstream files early, or bypassing mandatory checkpoints.
 At every confirmation gate, use this user-facing checkpoint shape. Localize user-facing labels to
 the interaction language when appropriate:
 
-English:
 ```text
 Checkpoint: <Writing Policy | Paper Framework | workflow-specific gate>
 Stage result: <1 sentence about the substantive content completed, not file existence>
@@ -128,20 +127,6 @@ Decisions to confirm:
 Unresolved blockers: <none or concise list>
 Recommended next action: confirm / request changes / pause
 User action required: Please confirm whether to proceed to <next stage>, or tell me what to change.
-```
-
-中文（用户使用中文交互时，必须使用此格式）：
-```text
-检查点：<Writing Policy | Paper Framework | 当前阶段>
-阶段结果：<1 句话总结实质性产出，不是文件是否存在>
-输出：<主要产物路径>
-摘要：<简洁表格或段落展示阶段实质性结果>
-需确认的决策：
-- 必须：<影响下一阶段的身份、框架、主张边界、结构决策>
-- 可选：<venue、模板、语言版本等非阻塞默认值>
-未解决的阻塞项：<无，或简洁列表>
-建议下一步：确认 / 修改 / 暂停
-需要用户操作：请确认是否继续进入<下一阶段>，或说明需要修改的内容。
 ```
 
 ## Clarification Protocol

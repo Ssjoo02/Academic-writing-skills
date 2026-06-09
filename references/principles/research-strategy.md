@@ -99,6 +99,3 @@ workspace-supported wording and record the use policy.
   - `https://github.com/pengsida/learning_research`
   - `https://pengsida.net/files/how_to_do_research_v3.pdf`
   - `https://pengsida.net/files/learning_research_v4.pdf`
-- Local reference structure:
-  - `Research-Paper-Writing-Skills/research-paper-writing/SKILL.md`
-  - section files under `Research-Paper-Writing-Skills/research-paper-writing/references/`

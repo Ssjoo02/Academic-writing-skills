@@ -1,25 +1,26 @@
-# Introduction Examples Skeleton
+# Introduction Example Index
 
-## Example Slot: New Setting
+After selecting a section template, open only the matching example file. Reuse sentence logic and
+structure, not exact wording, task names, claims, metrics, or citation framing.
 
-- Source:
-- Use when: the paper introduces a new task, benchmark, or setting.
-- Structure to learn: general task value -> specific setting -> challenge -> contribution -> evidence.
-- Transferable move: narrow from familiar context to new setting before naming the contribution.
-- Do not copy: opening hook, exact application list, or novelty phrasing.
+## Task And Application
 
-## Example Slot: Existing Task With Prior Methods
+1. Niche task: `references/sections/examples/introduction/task-then-application.md`
+2. Familiar task: `references/sections/examples/introduction/application-first.md`
+3. General-to-specific setting: `references/sections/examples/introduction/general-to-specific-setting.md`
+4. Open with challenge: `references/sections/examples/introduction/open-with-challenge.md`
 
-- Source:
-- Use when: there are established method families and a clear remaining technical challenge.
-- Structure to learn: traditional method -> recent method -> remaining limitation -> technical reason.
-- Transferable move: make the final prior-work limitation exactly match the solved challenge.
-- Do not copy: citation grouping or limitation wording without verifying sources.
+## Technical Challenge
 
-## Example Slot: Insight From Observation
+1. Existing task: `references/sections/examples/introduction/technical-challenge-existing-task.md`
+2. Historical insight: `references/sections/examples/introduction/technical-challenge-historical-insight.md`
+3. Novel task: `references/sections/examples/introduction/technical-challenge-novel-task.md`
+4. Novel-task decomposition: `references/sections/examples/introduction/novel-task-challenge-decomposition.md`
 
-- Source:
-- Use when: the contribution is best explained by a key observation.
-- Structure to learn: innovation -> observation -> implementation -> advantage -> evidence.
-- Transferable move: make the observation simple enough that the method feels motivated.
-- Do not copy: observation phrasing or figure composition.
+## Pipeline
+
+1. One contribution: `references/sections/examples/introduction/pipeline-one-contribution.md`
+2. Two contributions: `references/sections/examples/introduction/pipeline-two-contributions.md`
+3. New module: `references/sections/examples/introduction/pipeline-new-module.md`
+4. Observation-driven: `references/sections/examples/introduction/pipeline-observation-driven.md`
+5. Avoid abstract-only insight: `references/sections/examples/introduction/avoid-abstract-only-insight.md`

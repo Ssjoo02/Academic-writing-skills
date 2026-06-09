@@ -50,9 +50,11 @@ submission-ready format. Treat non-decisive uncertainty as an assumption, defaul
 or drafting note.
 
 When figures or tables are needed, use the Figure Plan in the Paper Framework and the
-figure-specific rules in `references/figures/figure-planning.md`. Use a configured paper-figure MCP
-only for figure classification, FigureSpec skeletons, validation, rendering, or figure metadata; do
-not let figure tooling invent claims or results.
+figure-specific rules in `references/figures/figure-planning.md`. The Figure Plan must declare the
+layout target for each figure or table (`single-column`, `double-column`, `appendix`, or
+`supplement`) before drafting. Use a configured paper-figure MCP only for figure classification,
+FigureSpec skeletons, validation, rendering, or figure metadata; do not let figure tooling invent
+claims or results.
 For Full Draft data-driven plots, data-driven plots default to Python and are drawn directly by the
 current agent from workspace result files. For non-data picture or illustration figures, always
 create a Picture Brief at `paper/figures/prompts/<figure-id>.md` before any rendering attempt. If
@@ -68,6 +70,23 @@ surfaced.
 
 Keep internal checks internal unless the user asks for reasoning, debug output, or a formal review,
 or unless a blocking evidence/citation issue remains unresolved.
+
+## Mechanical Non-Negotiables (always in effect)
+
+These hard rules apply to every generated paper regardless of which reference files are loaded. They
+are repeated in the workflow fragments, but they hold even if a fragment is not loaded.
+
+- **No `\footnote{...}` in prose.** Move the content inline or delete it.
+- **No file names or code artifacts in prose.** Do not write `\texttt{*.json}`, `\texttt{*.py}`,
+  `\texttt{*.csv}`, or raw code identifiers; use descriptive natural language.
+- **No local filesystem paths or directory names in prose.**
+- **No leftover missing-support markers** (`% CITATION_NEEDED`, `% EVIDENCE_NEEDED`,
+  `% FIGURE_NEEDED`, `% TABLE_NEEDED`) in a draft called clean; list any that remain in the summary.
+- **Paper-type profile is the default structure** (Full Draft): match its section list and count;
+  surface and justify every deviation at the Framework checkpoint.
+- **Subsection budget:** 0 subsections for short sections, at most 4 per main section.
+- **Run the static gates before declaring a draft clean:** `scripts/audit_citations.py` and
+  `scripts/audit_draft.py` must both report `PASS`.
 
 ## Integrity Rules
 

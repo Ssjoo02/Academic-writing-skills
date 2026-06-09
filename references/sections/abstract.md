@@ -10,51 +10,77 @@ claim must be technically correct and supported by available evidence.
 
 Answer these before writing:
 
-1. What technical problem does the paper solve?
-2. why there is no well-established solution for this problem?
-3. What is the technical contribution?
-4. Why does the contribution work in essence?
-5. What technical advantage or new insight should reviewers remember?
-6. Which experimental evidence can be safely stated in the Abstract?
+1. What technical problem does the paper solve, and why is there no well-established solution?
+2. What is the technical contribution?
+3. Why does the contribution work in essence?
+4. What technical advantage or new insight should reviewers remember?
+5. Which experimental evidence can be safely stated in the Abstract?
 
-## Version 1: technical challenge -> technical contribution
+## Version 1: Challenge -> Contribution
 
 Use when the paper has one clear contribution and the key task is to make the challenge legible.
 
-Template:
+Structure:
 
-1. Task or setting.
-2. Technical challenge for previous methods or current practice.
-3. One or two sentences introducing the technical contribution.
-4. Benefit or technical advantage.
-5. Experiment summary with verified evidence.
+1. Task.
+2. Technical challenge for previous methods.
+3. One to two sentences introducing the technical contribution.
+4. Benefits of the technical contribution.
+5. Experiment summary.
 
-## Version 2: technical challenge -> insight -> technical contribution
+Matching example: `references/sections/examples/abstract/challenge-contribution.md`.
+
+Expert notes:
+
+1. Discuss previous work around the technical challenge that we actually solve.
+2. For the contribution sentence(s), mention the technical term/name only; do not explain every
+   detailed step. The technical term must be easy to understand — readers should not feel a jump.
+3. This ability is very important for writing a good abstract.
+
+## Version 2: Challenge -> Insight -> Contribution
 
 Use when the main contribution is best explained through an insight. This is often stronger than
-listing modules because it teaches the reviewer a new way to see the problem.
+Version 1 because it teaches the reviewer a new way to see the problem.
 
-Template:
+Structure:
 
-1. Task or setting.
-2. Technical challenge and why prior/current methods struggle.
-3. One-sentence insight that resolves the challenge.
-4. One or two sentences describing the mechanism that implements the insight.
-5. Technical advantage and evidence.
+1. Task.
+2. Technical challenge for previous methods.
+3. One sentence introducing the insight for solving the challenge.
+4. One to two sentences introducing the technical contribution that implements the insight.
+5. Benefits of technical novelty.
+6. Experiment summary.
 
-## Version 3: multiple technical contributions
+Matching example: `references/sections/examples/abstract/challenge-insight-contribution.md`.
+
+Expert notes:
+
+1. Discuss previous work around the technical challenge that we actually solve.
+2. Introduce the insight in one clear sentence.
+3. For the implementation sentence(s), mention the technical term/name only; do not explain every
+   detailed step. The technical term must be easy to understand — do not create a reading jump.
+4. This ability is very important for writing a good abstract.
+
+## Version 3: Multiple Contributions
 
 Use when the paper has several contributions that each need a compact contribution-plus-advantage
 statement.
 
-Template:
+Structure:
 
-1. Task or setting.
-2. Shared technical challenge.
-3. Contribution 1 + advantage.
-4. Contribution 2 + advantage.
-5. Optional contribution 3 + advantage.
-6. Evidence summary.
+1. Task.
+2. If needed, one contrast sentence about prior methods.
+3. Contribution 1 + technical advantage.
+4. Contribution 2 + technical advantage.
+5. Contribution 3 + technical advantage (optional).
+6. Experiment summary.
+
+Matching example: `references/sections/examples/abstract/multiple-contributions.md`.
+
+Expert notes:
+
+1. When there are multiple technical contributions, describe each together with its technical
+   advantage. The ability to express "contribution + advantage" in one sentence is very important.
 
 ## Must Include
 
@@ -72,9 +98,17 @@ Template:
 
 ## Template Selection
 
-Before writing, select exactly one of Version 1, Version 2, or Version 3 internally. If the policy
-has one central insight, prefer Version 2. If the policy has several independent contributions, use
+Before writing, select exactly one of Version 1, Version 2, or Version 3 internally. If the paper
+has one central insight, prefer Version 2. If the paper has several independent contributions, use
 Version 3. Do not expose template-selection notes unless the user asks for reasoning.
+
+## Example Bank
+
+After selecting a section template, open only the matching example file if a concrete writing
+pattern is needed. Reuse sentence logic and structure, not exact wording, task names, claims,
+metrics, or citation framing.
+
+1. `references/sections/examples/abstract.md` (index)
 
 ## Required Output
 
@@ -83,9 +117,11 @@ Keep a compact `Section Plan`, sentence-level `Paragraph Plan`, and `Evidence An
 internally unless the user asks to see them. Do not create a Chinese parallel abstract during Full
 Draft Workflow. Run reverse outlining and claim-evidence mapping internally before returning.
 
-## Self-Check
+## Quality Checklist
 
-- Does every sentence map to the Writing Policy?
-- Is the central challenge clear before the contribution appears?
-- Are all metrics and comparisons supported by raw or confirmed derived evidence?
-- Would a skeptical reviewer know what is new, why it matters, and what evidence supports it?
+1. Can a reader identify task, challenge, insight/contribution, and results in one pass?
+2. Are all major claims supported by experiments?
+3. Are technical names self-contained and readable?
+4. Is there any sentence that mixes too many messages?
+5. Does every claim map to the Writing Policy?
+6. Would a skeptical reviewer know what is new, why it matters, and what evidence supports it?

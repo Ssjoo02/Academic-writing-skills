@@ -1,9 +1,27 @@
 ---
 name: academic-writing
-description: Generate and use a policy-driven research paper writing strategy before drafting or revising academic papers. Use when planning, drafting, revising, or reviewing a research paper with venue, paper type, domain evidence adapter, metric, claim-evidence, citation, reviewer-risk, or style constraints.
+description: Use when planning, drafting, revising, or reviewing a research paper with venue, paper type, domain evidence adapter, metric, claim-evidence, citation, reviewer-risk, or style constraints. Also trigger on general paper-writing requests even without these terms, such as writing a paper from scratch, drafting or restructuring a section, building a paper outline/framework, polishing or compressing prose, and Chinese phrasings like 学术写作、科研写作、论文写作、写论文、写paper、写一篇论文、帮我写论文、搭论文框架、起草论文、润色论文、改论文、写引言/摘要/方法/实验/相关工作/结论、投稿前自检. This skill writes and revises the paper only; it does not run experiments or conduct research.
 ---
 
 # Academic Writing — Router
+
+## ⚠️ Scope: Writing Only, Never Research
+
+**This skill produces and revises the paper artifact. It does not do the research.**
+It improves expression, structure, section logic, claim-evidence alignment, reviewer-facing
+framing, figures/tables presentation, and venue fit. It MUST NOT, by default:
+
+- change the research idea, problem scope, method mechanism, or contribution type,
+- design, run, or modify experiments, environments, or pipelines,
+- invent, alter, or "improve" results, numbers, baselines, ablations, or datasets,
+- fabricate citations, evidence, or experimental detail.
+
+If correct writing appears to require changing any of the above, **stop and ask the user**.
+If the user asks to "optimize the idea" or change results while using this skill, get explicit
+confirmation first; otherwise mark the issue as an `idea-level risk` or `needs evidence` (the
+status vocabulary is defined in `static/core/contract.md`), keep the wording bounded, and continue
+with writing-only revisions. Unsupported claims are
+weakened, marked `needs evidence`, or removed — never strengthened to look better.
 
 This skill is split into two layers:
 
@@ -45,7 +63,8 @@ Follow these steps every time the skill is invoked.
 
 ### 1. Load the manifest and the core layer
 
-Read [manifest.yaml](manifest.yaml). It declares the axes (`workflow`, `paper_type`, `venue`),
+Read [manifest.yaml](manifest.yaml). It declares the axes (`workflow`, `venue_kind`, `venue`,
+`paper_type`),
 the allowed values, and the file paths each value maps to.
 
 Also read every file listed under `always_load` (`static/core/stance.md`, `static/core/gates.md`,
@@ -62,16 +81,22 @@ Decide the `workflow` value from the user request. Every request must be routed 
   polish, diagnose, review, compress, weaken claims, or improve flow.
 
 If ambiguous, ask one concise question and stop. After routing, load the matching workflow fragment
-(`static/fragments/workflow/full-draft.md` or `static/fragments/workflow/draft-revision.md`).
+(`static/workflow/full-draft.md` or `static/workflow/draft-revision.md`).
 
-### 3. Detect the remaining axis values
+### 3. Detect the remaining axis values in order
 
-For each remaining axis in the manifest (`paper_type`, `venue`), decide the value using the
-manifest's `detect:` hint and the user's input. State the detected values briefly so the user can
-correct them cheaply.
+For each remaining axis in the manifest (`venue_kind`, `venue`, `paper_type`), decide the value
+using the manifest's `detect:` hint and the user's input. State the detected values briefly so the
+user can correct them cheaply.
 
-- `paper_type`: infer from workspace evidence; default to `generic`.
-- `venue`: from user input or workspace; default to `generic`. Ask about venue at most once.
+- `venue_kind`: decide first. Use `journal` only when the user explicitly says journal article /
+  journal paper or names a journal venue/track. If the user does not explicitly specify journal,
+  default to `conference`.
+- `venue`: decide second. For unspecified conference targets, use `generic`; for explicit but
+  unmodeled journal targets, use `journal`.
+- `paper_type`: decide third from workspace evidence and the selected `venue_kind`; conference uses
+  the top-level paper-type profiles, journal uses `journal-*` profiles. Default to `generic` for
+  conference and `journal-generic` for journal.
 
 ### 4. Build the paper using the loaded material
 
@@ -94,9 +119,32 @@ The files under `references/` are deep references, not defaults. Open them on de
 `references.on_demand` table in the manifest. Typical triggers:
 
 - Section drafting → `references/sections/<section>.md`
+- **Journal gating (read before loading any `journal/` content):** the `references/sections/journal/`
+  overlays, `references/paper-types/journal/`, `references/venues/journal-vs-conference.md`, and
+  `references/checks/journal-submission-elements.md` are **journal-only**. Load them **only when
+  `Venue Kind` is `journal`**. When `Venue Kind` is `conference`, do **not** load anything under
+  those journal paths at all — the base section guides and conference paper-types are complete on
+  their own. When `Venue Kind` is `journal`, load the base section guide first, then layer the
+  matching `references/sections/journal/<section>.md` overlay on top (it states only the journal
+  deltas; see `references/sections/journal/index.md`).
 - Figure/table planning → `references/figures/figure-planning.md`
+- Figure styling & code (mandatory before drawing any data-driven plot) →
+  `references/figures/plot-style.md` (rcParams, colors, per–chart-type rules) and
+  `references/figures/chart-patterns.md` (reusable plot helpers). Choose the color
+  palette from the **data structure first** (categorical→qualitative, ordered→sequential,
+  signed→diverging, one focus entity→hero-baseline), then render→inspect the PNG against
+  the Display Review Gate before accepting a figure.
+- Drafting or polishing English prose (apply while writing; verify in review) →
+  `references/style/copyediting-standard.md` (formal register, no contractions, no
+  possessive `'s` on names, simple words, abbreviations kept, LaTeX preserved, no added
+  emphasis, no list-ification)
+- Post-draft review (automatic after Full Draft) → `references/sections/paper-review.md`.
+  Load it immediately after the first complete `paper/` draft exists; do not wait for
+  the user to explicitly ask for review. The draft returned to the user is the
+  reviewed-and-revised draft.
 - Claim-evidence audit → `references/checks/claim-evidence.md`
 - Citation integrity → `references/checks/citation-integrity.md`
+- Final submission-readiness check → `references/checks/submission-readiness.md`
 - Domain-specific evidence pressure → `references/domains/<domain>.md`
 - Template selection → `templates/index.md`
 - Reference paper style learning → `references/style/reference-paper-learning.md`
@@ -109,5 +157,5 @@ The files under `references/` are deep references, not defaults. Open them on de
   context, instead of 1000+ lines of workflow and reference text.
 - The router itself is short on purpose. Update fragments and references, not this file, when
   adding scope.
-- This structure mirrors `nature-writing` and `nature-figure` so the pattern is consistent across
-  the skill ecosystem.
+- This structure keeps routing, reusable fragments, and deep references separated so each invocation
+  loads only the relevant material.

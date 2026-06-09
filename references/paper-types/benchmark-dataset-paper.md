@@ -29,8 +29,25 @@ and treat 8 pages as an upper bound, not a venue limit.
 | End | Limitations | venue-dependent | State dataset coverage limits, annotation limits, metric limits, intended non-uses, and ethical or access constraints. |
 | Back | Appendix | outside main budget when allowed | Put full data documentation, annotation guide, extra results, prompt details, examples, and release metadata here. |
 
+## Section Naming And Adaptation Notes
+
+The candidate section names above are defaults. Adapt to the actual paper:
+
+| Default name | When to keep | When to adapt |
+|---|---|---|
+| Benchmark / Dataset Construction | The paper's core contribution is the construction pipeline | If the paper splits construction into design + protocol, consider "Benchmark Design" and "Evaluation Protocol" |
+| Experiments and Empirical Findings | Standard for benchmark evaluation | If experiments are structured around research questions, "Results and Analysis" or "Empirical Evaluation" is fine |
+| Conclusion | Standard | If limitations need more space, merge into "Conclusion and Limitations" |
+
+If the contribution or experiments genuinely need a structure that doesn't map cleanly to the default sections, adapt and note the reason at the Paper Framework checkpoint. The goal is that section names reflect what the paper actually does, not that they match a template exactly.
+
 ## Flexible Adjustment Notes
 
+- The content elements listed for each section (e.g., data sources, preprocessing, annotation rules,
+  quality control, validation, coverage comparison) are **content blocks, not a mandatory numbered
+  subsection list**. Keep Construction and Experiments to roughly 2–4 subsections each; do not turn
+  every element into its own `3.1 … 3.6` / `4.1 … 4.6` heading. Group related elements into one
+  subsection or flowing prose, and move fine-grained detail to the appendix.
 - If construction quality is the main contribution, allocate more space to pipeline, annotation, and validation.
 - If empirical findings are the main contribution, allocate more space to research-question-driven analysis and case studies.
 - If the venue requires dataset documentation, datasheets, or checklists, include them in the Page Budget Summary or appendix plan.

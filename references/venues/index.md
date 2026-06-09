@@ -18,12 +18,33 @@ page counting, post-main section order, anonymity, or submission readiness and t
 record a current verified value, record it as an Open Decision and verify against the official venue
 page or a user-provided guideline before calling the draft submission-ready.
 
+## Venue Kind: Conference vs Journal
+
+Every venue card declares a `Venue Kind` of either `conference` or `journal`. The kind controls two
+things:
+
+- It changes which length/format/process fields matter (page limits and anonymity for conferences;
+  manuscript-type length, blinding, revision cycle, and supplementary handling for journals).
+- It selects the paper-type family. When `Venue Kind` is `journal`, choose the paper type from the
+  journal set under `references/paper-types/journal/` (manifest `paper_type` values prefixed
+  `journal-`). When it is `conference`, use the conference paper-type files at the top level of
+  `references/paper-types/`.
+
+For journals, also load `references/venues/journal-vs-conference.md` for the drafting-posture
+differences (complete story, more thorough evaluation, written to survive multi-round review,
+non-anonymous self-citation, supplementary material). Do not apply a conference page budget to a
+journal draft.
+
 ## Required Profile Schema
 
-Every venue profile should use these sections. If a value is unknown, keep the field and write
-`not verified`.
+Every venue profile should use these sections. Conference cards keep journal-only fields as `n/a`
+and journal cards keep conference-only fields as `n/a`. If a value is unknown, keep the field and
+write `not verified`.
 
 ```text
+## Venue Kind
+- conference | journal
+
 ## Source Status
 - Official sources:
 - Access date:
@@ -35,12 +56,26 @@ Every venue profile should use these sections. If a value is unknown, keep the f
 - Submission version:
 
 ## Length And Counting
+- Layout (single/double column):        # journals
 - Main text limit:
 - References count:
 - Appendix count:
-- Checklist count:
-- Ethics/limitations count:
+- Abstract limit:                        # journals (word/char cap, structured?)
+- Checklist count:                       # conferences
+- Ethics/limitations count:              # conferences
 - Supplementary material count:
+
+## Blinding                              # journals (conferences use Anonymity checks below)
+- single-blind | double-blind | open:
+
+## Revision Model                        # journals
+- Review/revision cycle:
+- Response-to-reviewers / rebuttal:
+- Camera-ready:
+
+## Supplementary And Extension           # journals
+- Supplementary handling:
+- Conference-to-journal extension:
 
 ## Post-Main Order
 - Required order:
@@ -50,7 +85,7 @@ Every venue profile should use these sections. If a value is unknown, keep the f
 ## Drafting Implications
 - Main paper self-contained:
 - Appendix/supplement use:
-- Anonymity checks:
+- Anonymity checks:                      # conferences
 
 ## Final Gate
 - Before submission-ready:
@@ -60,6 +95,8 @@ Every venue profile should use these sections. If a value is unknown, keep the f
 ```
 
 ## Supported Venue Fact Cards
+
+### Conferences
 
 | Venue family | Profile file | Use for |
 |---|---|---|
@@ -74,3 +111,11 @@ Every venue profile should use these sections. If a value is unknown, keep the f
 | AAAI/IJCAI | `aaai-ijcai.md` | broad AI |
 | KDD/WWW/SIGIR | `kdd-www-sigir.md` | data mining, web, search, recommender, IR |
 | CHI/UIST | `chi-uist.md` | HCI, interaction, user studies, systems for people |
+
+### Journals
+
+| Venue family | Profile file | Use for |
+|---|---|---|
+| JMLR | `jmlr.md` | machine learning journal articles (theory, method, application) and OSS/MLOSS tool papers; single column, no hard page limit |
+| IEEE TPAMI | `ieee-tpami.md` | pattern analysis, machine intelligence, computer vision; double column, Regular/Survey/Short types |
+| Generic journal | `journal-generic.md` | any journal not individually modeled (TMLR, IEEE TNNLS/TIP/TMM, ACM TODS/TOIS, Elsevier/Springer/Wiley); confirm all fields against the target journal |

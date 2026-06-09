@@ -1,5 +1,9 @@
 # AAAI/IJCAI Venue Profile
 
+## Venue Kind
+
+- conference
+
 ## Source Status
 
 - Official sources:

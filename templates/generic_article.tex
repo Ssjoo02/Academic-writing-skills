@@ -21,10 +21,15 @@
 \usepackage{graphicx}
 \usepackage{subcaption}
 \usepackage{multirow}
+\usepackage{array}
+\usepackage{tabularx}
 \usepackage{amsmath,amssymb,amsfonts,amsthm,mathtools}
 \usepackage[numbers,sort&compress]{natbib}
 
 \usepackage[capitalize,noabbrev]{cleveref}
+
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcolumntype{Z}{>{\centering\arraybackslash}X}
 
 \theoremstyle{plain}
 \newtheorem{theorem}{Theorem}[section]

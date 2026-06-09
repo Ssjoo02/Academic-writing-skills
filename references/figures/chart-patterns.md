@@ -1,0 +1,457 @@
+# Chart Code Patterns
+
+Reusable Python/matplotlib patterns for generating publication-quality figures.
+Load this file when the Figure Plan requires data-driven plots. Use the functions
+below as implementation shortcuts; adapt colors, sizes, and labels to the active
+Writing Policy.
+
+## Mandatory Setup
+
+Apply before any figure is created:
+
+```python
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import numpy as np
+import os
+
+plt.rcParams.update({
+    "font.family": "sans-serif",
+    "font.sans-serif": ["Arial", "Helvetica", "DejaVu Sans", "sans-serif"],
+    "font.size": 9,
+    "axes.labelsize": 9,
+    "xtick.labelsize": 8,
+    "ytick.labelsize": 8,
+    "legend.fontsize": 8,
+    "figure.dpi": 300,
+    "savefig.dpi": 300,
+    "savefig.bbox": "tight",
+    "savefig.pad_inches": 0.03,
+    "axes.spines.top": False,
+    "axes.spines.right": False,
+    "legend.frameon": False,
+    "pdf.fonttype": 42,
+    "svg.fonttype": "none",
+})
+```
+
+## Color Palette
+
+Choose the palette family from the **data structure** (see `plot-style.md` → Colors):
+categorical/peer → `PEER_PALETTE`; ordered magnitude → sequential ramp; signed →
+diverging `RdBu_r`; one focus entity → hero-baseline. Never a rainbow/jet colormap, and
+never hue as the only channel — pair categorical series with `PEER_MARKERS` / `HATCHES`.
+
+```python
+import numpy as np
+
+# ── Categorical / peer palette — Okabe–Ito (colorblind-safe, luminance-balanced) ──
+PEER_PALETTE = [
+    "#0072B2",   # blue
+    "#D55E00",   # vermillion
+    "#009E73",   # bluish green
+    "#CC79A7",   # reddish purple
+    "#E69F00",   # orange
+    "#56B4E9",   # sky blue
+    "#000000",   # black  (7th category only)
+    "#F0E442",   # yellow (weak on white; accent / last resort)
+]
+PEER_MARKERS = ['o', 's', '^', 'D', 'v', 'P', 'X', '*']   # pair 1:1 with PEER_PALETTE
+HATCHES      = ['/', '\\\\', '.', 'x', 'o', '+', '*', 'O']  # bars/areas redundant channel
+
+# ── Ordered magnitude — single-hue sequential ramp (low → high) ──
+def sequential_ramp(n, cmap='Blues', lo=0.35, hi=0.95):
+    return [plt.get_cmap(cmap)(t) for t in np.linspace(lo, hi, n)]
+
+# ── Hero-Baseline (one proposed method vs muted baselines) ──
+HERO_BLUE = "#3775BA"
+BASELINE_PALETTE = [
+    "#CFCECE", "#DDF3DE", "#FBDFE2", "#D9B9D4", "#DAA87C", "#B4C0E4",
+]
+
+# ── Delta markers (directional only, never entity identity) ──
+DELTA_UP   = "#2E9E44"
+DELTA_DOWN = "#E53935"
+
+# ── Neutral support ──
+NEUTRAL_DARK  = "#4D4D4D"
+NEUTRAL_MID   = "#767676"
+NEUTRAL_LIGHT = "#D8D8D8"
+```
+
+---
+
+## Helper: _luminance(hex_color)
+
+```python
+def _luminance(hex_color):
+    """Return 0-255 perceptual luminance. White text on dark, black on light."""
+    c = hex_color.lstrip('#')
+    r, g, b = int(c[0:2], 16), int(c[2:4], 16), int(c[4:6], 16)
+    return 0.299 * r + 0.587 * g + 0.114 * b
+```
+
+---
+
+## Pattern: save_figure(fig, name, output_dir, formats=None)
+
+```python
+def save_figure(fig, name, output_dir, formats=None):
+    """Save figure as SVG (primary), PDF, and PNG. Always close after saving."""
+    if formats is None:
+        formats = ['svg', 'pdf', 'png']
+    os.makedirs(output_dir, exist_ok=True)
+    saved = []
+    for fmt in formats:
+        path = os.path.join(output_dir, f'{name}.{fmt}')
+        if fmt == 'svg':
+            fig.savefig(path, bbox_inches='tight')
+        elif fmt == 'pdf':
+            fig.savefig(path, bbox_inches='tight')
+        elif fmt == 'png':
+            fig.savefig(path, dpi=300, bbox_inches='tight')
+        saved.append(path)
+        print(f'Saved: {path}')
+    plt.close(fig)
+    return saved
+```
+
+---
+
+## Pattern: grouped_bars(ax, categories, series, labels, colors, ...)
+
+```python
+def grouped_bars(ax, categories, series, labels, colors=None,
+                 ylabel='', annotate=True, bar_width=0.8,
+                 error_kw=None, fontsize=8, errors=None, dynamic_ylim=True,
+                 hatches=None):
+    """
+    Grouped bar chart — publication style.
+
+    Parameters
+    ----------
+    ax : matplotlib Axes
+    categories : list[str]       — x-axis category names (length K)
+    series : list[array]         — one array per group (each length K)
+    labels : list[str]           — legend label per group
+    colors : list[str] | None    — defaults to PEER_PALETTE for equal-weight comparison
+    ylabel : str
+    annotate : bool              — print value above each bar
+    bar_width : float            — total width for all bars in one category
+    error_kw : dict | None       — passed to ax.bar
+    fontsize : int               — annotation font size
+    errors : list | None         — per group, either array of symmetric errors
+                                   (length K) or (lower, upper) arrays. Drives both
+                                   the whiskers and the y-axis limits.
+    dynamic_ylim : bool          — set an error-bar-aware y-axis (recommended)
+    """
+    if colors is None:
+        colors = list(PEER_PALETTE[:len(series)])
+    if error_kw is None:
+        error_kw = {'elinewidth': 1.5, 'capthick': 1.5, 'capsize': 4}
+
+    n_groups = len(series)
+    n_cats = len(categories)
+    w = bar_width / n_groups
+    x = np.arange(n_cats)
+
+    tops, bots = [], []   # whisker extremes for ylim
+    for i, (vals, label, color) in enumerate(zip(series, labels, colors)):
+        vals = np.asarray(vals, dtype=float)
+        offset = (i - (n_groups - 1) / 2) * w
+        yerr = None
+        lo_err = hi_err = np.zeros_like(vals)
+        if errors is not None and errors[i] is not None:
+            e = errors[i]
+            if isinstance(e, (tuple, list)) and len(e) == 2 and np.ndim(e[0]) > 0:
+                lo_err, hi_err = np.asarray(e[0]), np.asarray(e[1])
+                yerr = [lo_err, hi_err]
+            else:
+                lo_err = hi_err = np.asarray(e)
+                yerr = e
+        hatch = hatches[i] if hatches is not None else None
+        bars = ax.bar(x + offset, vals, width=w, label=label,
+                      color=color, edgecolor='black', linewidth=1.0,
+                      yerr=yerr, error_kw=error_kw, hatch=hatch)
+        tops.append((vals + hi_err).max())
+        bots.append((vals - lo_err).min())
+        if annotate:
+            for bar, val, he in zip(bars, vals, np.broadcast_to(hi_err, vals.shape)):
+                text_color = 'white' if _luminance(color) < 128 else 'black'
+                ax.text(bar.get_x() + bar.get_width() / 2,
+                        val + he + 0.5,
+                        f'{val:.1f}', ha='center', va='bottom',
+                        fontsize=fontsize, color=text_color)
+
+    if dynamic_ylim:
+        top, bot = max(tops), min(bots)
+        span = max(top - bot, 1e-6)
+        ax.set_ylim(max(0, bot - span * 0.15), top + span * 0.25)
+
+    ax.set_xticks(x)
+    ax.set_xticklabels(categories)
+    ax.set_ylabel(ylabel)
+    ax.legend(frameon=False)
+```
+
+---
+
+## Pattern: trend_lines(ax, x, y_series, labels, colors=None, ...)
+
+```python
+def trend_lines(ax, x, y_series, labels, colors=None,
+                ylabel='', xlabel='', lw=2.0, markersize=6,
+                show_fill=False, fill_alpha=0.15, markers=None):
+    """
+    Multi-line trend plot — publication style.
+
+    Parameters
+    ----------
+    ax : matplotlib Axes
+    x : array-like               — shared x values
+    y_series : list[array]       — one 1D array per line
+    labels : list[str]
+    colors : list[str] | None
+    ylabel, xlabel : str
+    lw : float                   — line width
+    markersize : int             — marker size
+    show_fill : bool             — if y is 2D (rows=runs), fill_between ± std
+    fill_alpha : float
+    """
+    if colors is None:
+        colors = list(PEER_PALETTE[:len(y_series)])
+    # Redundant channel: a distinct marker per series so identity survives
+    # crossings, grayscale print, and color-vision deficiency.
+    if markers is None:
+        markers = list(PEER_MARKERS[:len(y_series)])
+
+    for y, label, color, mk in zip(y_series, labels, colors, markers):
+        y = np.asarray(y)
+        if y.ndim == 2:
+            mean, std = y.mean(0), y.std(0)
+        else:
+            mean, std = y, None
+        ax.plot(x, mean, color=color, lw=lw, marker=mk,
+                markersize=markersize, label=label)
+        if show_fill and std is not None:
+            ax.fill_between(x, mean - std, mean + std,
+                            color=color, alpha=fill_alpha)
+
+    if ylabel:
+        ax.set_ylabel(ylabel)
+    if xlabel:
+        ax.set_xlabel(xlabel)
+    ax.legend(frameon=False)
+```
+
+---
+
+## Pattern: heatmap(ax, matrix, x_labels=None, y_labels=None,
+            cmap='Blues', cbar_label=None, annotate=True,
+            fmt='{:.0f}', fontsize=10, vmin=0, vmax=100):
+    """
+    Publication heatmap with clean white gridlines. Uses pcolormesh
+    (nature-journal standard) for professional cell separation.
+
+    Parameters
+    ----------
+    ax : matplotlib Axes
+    matrix : 2D array (n_rows × n_cols)
+    x_labels, y_labels : list[str] | None
+    cmap : str                    — 'Blues' (default), 'Reds' for danger/error metrics, 'RdBu_r' for diverging
+    cbar_label : str | None       — colorbar label with unit
+    annotate : bool
+    fmt : str                     — format string for cell values
+    fontsize : int                — 10 minimum for readability
+    vmin, vmax : float            — color scale range
+    """
+    import matplotlib as mpl
+    import numpy as np
+
+    n_rows, n_cols = matrix.shape
+
+    # pcolormesh with white gridlines — clean cell separation
+    im = ax.pcolormesh(matrix, cmap=cmap, edgecolors='white',
+                       linewidths=1, vmin=vmin, vmax=vmax)
+    ax.invert_yaxis()
+
+    if x_labels:
+        ax.set_xticks(np.arange(n_cols) + 0.5)
+        ax.set_xticklabels(x_labels, rotation=0, fontsize=fontsize)
+    if y_labels:
+        ax.set_yticks(np.arange(n_rows) + 0.5)
+        ax.set_yticklabels(y_labels, rotation=0, fontsize=fontsize)
+
+    if annotate:
+        norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
+        cm_obj = plt.get_cmap(cmap)
+        for i in range(n_rows):
+            for j in range(n_cols):
+                val = matrix[i, j]
+                r, g, b, _ = cm_obj(norm(val))
+                lum = 0.299*r + 0.587*g + 0.114*b
+                color = 'white' if lum < 0.5 else 'black'
+                ax.text(j + 0.5, i + 0.5, fmt.format(val),
+                        ha='center', va='center',
+                        fontsize=fontsize, color=color, fontweight='bold')
+
+    if cbar_label:
+        cbar = ax.figure.colorbar(im, ax=ax, shrink=0.85, pad=0.02)
+        cbar.set_label(cbar_label, fontsize=fontsize)
+        cbar.ax.tick_params(labelsize=fontsize - 1)
+
+    ax.figure.tight_layout(pad=1.5)
+```
+
+---
+
+## Pattern: radar_chart(ax, categories, values_dict, colors=None, ...)
+
+A radar is only legible with a few traces. **Hard rule: more than 4 methods on one
+radar turns into spaghetti** — split into small multiples (one radar per method, or
+2–3 per panel) instead. This helper drops fills automatically past 4 series and
+warns. It also **normalizes each spoke independently** to a display band so the
+differences spread out instead of clustering near the center (the most common cause
+of an unreadable radar). Without per-spoke normalization, a metric where every
+method scores 20–60% on a 0–100 axis collapses into a tiny central blob.
+
+```python
+def radar_chart(ax, categories, values_dict, colors=None,
+                fill_alpha=0.06, lw=1.8, markersize=5,
+                per_spoke_norm=True, display_lo=20, display_hi=95,
+                value_range=(0, 100), markers=None):
+    """
+    Multi-method radar / polar chart — publication style.
+
+    Parameters
+    ----------
+    ax : matplotlib Axes (with projection='polar')
+    categories : list[str]               — spoke labels
+    values_dict : dict[str, list[float]] — method_name -> values (one per category)
+    colors : list[str] | None
+    fill_alpha : float                   — fill alpha; auto-0 past 4 methods
+    lw : float                           — trace line width
+    markersize : int                     — vertex marker size
+    per_spoke_norm : bool                — normalize each spoke to [display_lo, display_hi]
+                                           so differences are visible (recommended)
+    display_lo, display_hi : float       — radial display band
+    value_range : (lo, hi)               — used only when per_spoke_norm=False
+    """
+    names = list(values_dict.keys())
+    if colors is None:
+        colors = list(PEER_PALETTE[:len(names)])
+    # Distinct marker per series: with many overlapping traces, shape (not just
+    # color) tells methods apart at crossings, in grayscale, and for CVD readers.
+    if markers is None:
+        markers = list(PEER_MARKERS[:len(names)])
+    n_methods, n_spokes = len(names), len(categories)
+    if n_methods > 6:
+        raise ValueError(f"{n_methods} methods on one radar is unreadable; use small multiples.")
+
+    angles = np.linspace(0, 2 * np.pi, n_spokes, endpoint=False)
+    angles_closed = np.append(angles, angles[0])
+    arr = np.array([values_dict[k] for k in names], dtype=float)  # (methods, spokes)
+
+    # Per-spoke normalization spreads differences across the display band.
+    if per_spoke_norm:
+        lo, hi = arr.min(axis=0), arr.max(axis=0)
+        span = np.where(hi > lo, hi - lo, 1.0)
+        disp = display_lo + (display_hi - display_lo) * (arr - lo) / span
+    else:
+        vlo, vhi = value_range
+        disp = display_lo + (display_hi - display_lo) * (arr - vlo) / (vhi - vlo)
+
+    ax.set_theta_zero_location('N')
+    ax.set_theta_direction(-1)
+    ax.grid(False)
+    for s in ax.spines.values():
+        s.set_visible(False)
+    ax.set_yticklabels([])
+    ax.set_xticks([])
+    ax.set_ylim(0, display_hi + 6)
+
+    # Light contour rings + spokes (never a heavy black boundary).
+    for frac in (0.25, 0.5, 0.75, 1.0):
+        r = display_lo + (display_hi - display_lo) * frac
+        ax.plot(angles_closed, np.full_like(angles_closed, r),
+                color='#CFCECE', lw=0.6, zorder=1)
+    for a in angles:
+        ax.plot([a, a], [0, display_hi], color='#CFCECE', lw=0.5, zorder=1)
+
+    fill = fill_alpha if n_methods <= 4 else 0.0
+    if n_methods > 4:
+        print(f"[radar] {n_methods} methods (>4): fills dropped; prefer small multiples.")
+    for i, (name, color, mk) in enumerate(zip(names, colors, markers)):
+        ring = np.append(disp[i], disp[i][0])
+        ax.plot(angles_closed, ring, '-', lw=lw, color=color, label=name, zorder=3)
+        ax.scatter(angles, disp[i], s=markersize**2, color=color, marker=mk,
+                   zorder=4, edgecolors='white', linewidths=0.4)
+        if fill:
+            ax.fill(angles_closed, ring, color=color, alpha=fill)
+
+    # Spoke labels offset beyond the outer ring so they never overlap data or rings.
+    for a, cat in zip(angles, categories):
+        ax.text(a, display_hi + 11, cat, ha='center', va='center', fontsize=9)
+
+    from matplotlib.lines import Line2D
+    handles = [Line2D([0], [0], color=c, marker=m, lw=lw, markersize=markersize,
+                      markeredgecolor='white', markeredgewidth=0.4, label=n)
+               for n, c, m in zip(names, colors, markers)]
+    ax.legend(handles=handles, loc='upper center', bbox_to_anchor=(0.5, -0.08),
+              ncol=min(4, n_methods), fontsize=8, frameon=False)
+```
+
+When `per_spoke_norm=True`, raw value scales are no longer readable from the rings,
+so state the per-spoke ranges in the caption or a small note (e.g. "each spoke
+normalized to its own min–max across methods"). For a true shared 0–100 scale with
+few methods, pass `per_spoke_norm=False`.
+
+---
+
+## Pattern: add_panel_label(ax, label, ...)
+
+```python
+def add_panel_label(ax, label, x=-0.06, y=1.02, fontsize=12,
+                    fontweight='bold', color='black'):
+    """Place a bold lowercase panel label near the top-left edge."""
+    ax.text(x, y, label, transform=ax.transAxes, fontsize=fontsize,
+            fontweight=fontweight, color=color, ha='left', va='bottom')
+```
+
+---
+
+## Pattern: dedicated_legend_panel(fig, position, handles, labels, ...)
+
+```python
+def dedicated_legend_panel(fig, subplot_spec, handles, labels,
+                           fontsize=10, ncol=1):
+    """
+    Turn a subplot into a legend-only panel. Use when the legend is too large
+    to fit inside data axes without covering data.
+
+    Parameters
+    ----------
+    fig : matplotlib Figure
+    subplot_spec : GridSpec cell or (row, col) index
+    handles, labels : from ax.get_legend_handles_labels()
+    fontsize : int
+    ncol : int
+    """
+    ax_leg = fig.add_subplot(subplot_spec)
+    ax_leg.legend(handles, labels, fontsize=fontsize, loc='center',
+                  frameon=False, ncol=ncol)
+    ax_leg.set_axis_off()
+```
+
+---
+
+## Usage in Full Draft
+
+When generating figures for a paper:
+
+1. Import patterns from this file or inline the relevant function.
+2. Map method names to semantic colors using the Writing Policy method list.
+3. Call the pattern function with the correct data, labels, and colors.
+4. Always call `save_figure()` with all three formats (SVG, PDF, PNG).
+5. Do not hardcode results from memory — read from workspace result files.
