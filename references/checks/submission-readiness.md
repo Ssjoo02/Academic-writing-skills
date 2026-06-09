@@ -38,10 +38,25 @@ python3 scripts/audit_draft.py paper --max-content-pages <limit>
 ```
 
 Use the confirmed venue content-page limit (or the generic 6-8 main-text page drafting budget, with
-8 as the upper bound). The audit uses the compiled PDF and counts the page where `References` begins
-as a content page if main text reaches that page. Over the limit is `BLOCKED`; if the venue rule is
-unconfirmed, report `OPEN_DECISION`. Do not rely on the Paper Framework's planned page arithmetic
-alone; compiled PDF page count is authoritative.
+8 as the upper bound). The audit uses the compiled PDF and is venue-aware: it stops counting at the
+first post-matter heading — `References` or a venue-excluded section such as `Limitations`,
+`Acknowledgments`, or `Ethics` — so a correctly placed dedicated Limitations/Ethics section does not
+consume the budget, but main text (or a limitations block left inside a body section) that reaches a
+page makes that page count. Over the limit is `BLOCKED`; if the venue rule is unconfirmed, report
+`OPEN_DECISION`. Do not rely on the Paper Framework's planned page arithmetic alone; compiled PDF
+page count is authoritative.
+
+### Required-section and limitations placement
+
+```bash
+python3 scripts/audit_draft.py paper --max-content-pages <limit>
+```
+
+`audit_draft.py` also flags Limitations placement. Treat as `BLOCKED`: a Limitations-titled
+`\subsection`, `\paragraph`, or `\textbf{Limitations …}` run-in sitting inside a body section
+(e.g. Experiments) instead of the dedicated section, and more than one dedicated `\section{Limitations}`.
+For venues that require a Limitations section (ACL family), a missing `\section{Limitations}` is
+`BLOCKED`; confirm it exists after Conclusion and before References.
 
 ### Duplicate labels (hard block)
 
@@ -84,15 +99,19 @@ nothing crosses a margin, overlaps a column, or has clipped labels. Revise and r
 
 ## Citation And Bibliography Checks
 
-- Run the static citation audit before a submission-ready claim:
+- Run the static citation audit before a submission-ready claim, with a paper-type citation floor:
 
 ```bash
-python3 scripts/audit_citations.py paper
+python3 scripts/audit_citations.py paper --min-citations <floor>
 ```
 
+- Set `<floor>` by paper type (benchmark / survey / method papers cite broadly — ~25–30; otherwise
+  ~12–15). The low-coverage result is a warning, not a `BLOCKED` (references do not count toward the
+  page limit), but a warning here means Related Work / Introduction likely under-cite or a named
+  model/dataset/baseline/framework is uncited — resolve before claiming submission-ready.
 - If drafting in another project, use this skill's script path and pass that project's `paper/`
   directory.
-- Treat any citation audit failure as `BLOCKED`.
+- Treat any citation audit error (not the coverage warning) as `BLOCKED`.
 - A citation added through search is verified only when metadata and claim support were checked and
   recorded in `paper/citation-evidence.md`.
 - When a needed source is not in project materials, run targeted live lookup against stable sources

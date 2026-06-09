@@ -131,10 +131,38 @@ Causes and fixes:
   test to appendix tables too); (b) **anchoring each float with real prose** so the surrounding text
   fills the page; and/or (c) **placing appendix tables non-floating** under their heading so they sit
   where written instead of drifting.
-- **Pin placement deliberately in the appendix.** Prefer `[h]`/`[ht]` (or `[H]` from the `float`
-  package) over `[t]` for appendix tables so they stay next to their explanation, and use
-  `\FloatBarrier` (from `placeins`) or a deliberate `\clearpage` between appendix sections to stop
-  floats from migrating across headings. Do **not** scatter-control with blank `\vspace`.
+- **Pin placement deliberately in the appendix — and never use `[h]` alone.** `[h]` ("here only")
+  is the most fragile specifier: when the float does not fit, it is pushed onto a *deferred* queue.
+  Because LaTeX keeps **separate queues for figures and tables**, a deferred table can be flushed
+  *after* figures that come later in the source, so the floats stop appearing in section order and
+  the appendix looks scrambled (a figure surfacing above an earlier section's table). In an appendix
+  where each section owns one float, **pin every float so its order follows the headings**: use
+  `[H]` (from the `float` package) to lock the float exactly under its heading, or `[ht]`/`[tbp]`
+  plus a `\FloatBarrier` (from `placeins`) — or a deliberate `\clearpage` — after each appendix
+  section so no float migrates across a heading. Do **not** use bare `[h]`, and do **not**
+  scatter-control with blank `\vspace`. (This needs `\usepackage{float}` for `[H]` and/or
+  `\usepackage{placeins}` for `\FloatBarrier` in the generated preamble.)
+- **Respect the venue: some templates forbid `float` / `\clearpage`.** `[H]` needs
+  `\usepackage{float}` and the heading-figure unit uses `\clearpage` — but a few venues ban both
+  (e.g. the AAAI author kit explicitly forbids `\usepackage{float}` and any `\clearpage`). When the
+  selected template forbids them, **do not add them**; fall back to robust *floating* placement —
+  `[!ht]` or `[tbp]` (still **never** bare `[h]`) plus column/section-local `\FloatBarrier` if
+  `placeins` is allowed — and rely on the natural float order. Check the template's preamble comments
+  before reaching for `[H]`/`\clearpage`.
+- **`[H]` and `\clearpage` have sharp edges — size to fit, do not blanket-apply.** `[H]` does not
+  float: if the float does not fit the remaining space it page-breaks *before* itself (stranding the
+  preceding text) or overflows the bottom margin (`Overfull \vbox`). It is safe only when you
+  guarantee room — pair it with a fresh page and **size the float to share the page with its
+  heading + lead paragraph** (shrink the figure or trim a wide table if needed). Do **not**
+  `\clearpage` before every appendix section: a `\clearpage` before a short section leaves a
+  near-empty page — exactly the "太空" defect above. Use `\clearpage`/`[H]` *surgically* on the
+  float-heavy sections that actually reorder, not as a blanket rule. (This is the
+  pin-and-size-to-fit discipline; over-pinning trades scramble for emptiness.)
+- **A wide appendix float must still be `table*`/`figure*`, not a single-column `[h]` float.** A
+  many-column matrix (e.g. model × 9 apps) left in a single-column `table` overflows into the
+  neighbouring column and collides with the next section's floats — which reads as "out of order"
+  on top of the overflow. Apply the overflow ladder (`table*` → rotate/split) *before* pinning
+  placement.
 - **Every appendix (sub)section earns a lead paragraph, not a pointer.** 2–4 sentences that say what
   the material is, how to read it, the one or two patterns worth noticing, and which main-text claim
   it backs. A section whose entire prose is `Table~N gives ...` is the "太空" smell — expand it.

@@ -50,14 +50,23 @@ Check whether readers can understand and reproduce the work:
   with the full list in a table or appendix, not enumerated `V1…Vn` / `H1…Hn` / per-app in the body;
   every prose number supports a claim instead of transcribing a table,
 - no footnotes, file names, code artifacts, or local paths in prose,
+- **conclusion discipline**: the conclusion is a short close (contribution → strongest evidence →
+  scoped implication), not a multi-paragraph recap; it carries no full limitations paragraph (those
+  have their own section) and no future-impact / "we hope …" promotional closer, and introduces no
+  new claims or citations,
+- **limitations have one home**: limitations live in a single dedicated `\section{Limitations}` (for
+  venues that expect it), not as a `\textbf{Limitations …}` run-in or `\subsection`/`\paragraph`
+  inside Experiments or another body section, and are not also re-listed in the Conclusion,
 - **no disclosure leaks**: no internal identifiers (checkpoint / training-run / sweep / wandb / tool
   / unreleased-model names) where a public display name belongs, and no do-not-disclose entity
   anywhere (not even by negation or exclusion phrasing).
 
 Failure signals: a subsection that opens with background or a list instead of its point; an
 itemize/enumerate of taxonomy members or per-category counts living in a body section; sentences that
-restate numbers already in a table; a raw checkpoint/run name (e.g. a `..._step380` tag) or a
-withheld baseline named in the text or in an "excludes X" clause.
+restate numbers already in a table; a four-paragraph conclusion or one that ends on a vision/impact
+statement; a "Limitations of …" run-in sitting inside the Experiments section; a raw checkpoint/run
+name (e.g. a `..._step380` tag) or a withheld baseline named in the text or in an "excludes X"
+clause.
 
 ### Experimental strength
 
@@ -76,7 +85,13 @@ Check whether evaluation covers what reviewers expect:
 - important metrics,
 - ablation studies,
 - controls,
-- hard enough datasets or settings.
+- hard enough datasets or settings,
+- **citation coverage**: Related Work and Introduction actually cite the prior work they discuss, and
+  every named model, dataset, benchmark, environment, baseline, or standard/taxonomy framework
+  carries a citation to its source; an implausibly thin bibliography for the paper type (e.g. ~10
+  entries for a benchmark/survey/method paper, a Related Work group with zero or one citation, or a
+  named model with no `\cite`) is an under-citation defect. References do not count toward the page
+  limit, so there is no budget excuse for under-citing.
 
 ### Method design soundness
 
@@ -235,7 +250,8 @@ read with the same scale and the same fix rules.
 ### Risk scale
 
 Use `blocking` for false claims, unsupported headline claims, broken compilation, misleading
-figures/tables, major format violations, citation failures, venue-readiness claims that cannot be
+figures/tables, major format violations (including content-page-limit overflow and limitations
+placed outside their dedicated section), citation failures, venue-readiness claims that cannot be
 verified, or internal data inconsistencies (a number that disagrees across abstract/text/table, a
 delta that the reported numbers do not support, or a headline number with no backing in the body). Use `high` for likely rejection risks that can be fixed in prose, structure, evidence
 alignment, or layout. Use `medium` for clarity and presentation issues that reduce trust. Use `low`

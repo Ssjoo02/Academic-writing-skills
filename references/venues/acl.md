@@ -34,6 +34,18 @@
 - Optional sections: ethical considerations, appendices, supplementary material.
 - Not verified: target-year checklist submission mechanism and exact disclosure-section placement.
 
+## Required Limitations Section (enforced)
+
+- A dedicated `\section{Limitations}` is **required** for ACL submissions and is the single home for
+  all limitations. Plan it in the Paper Framework, place it after Conclusion and before References.
+- Limitations must NOT appear as a `\textbf{Limitations …}` run-in, `\subsection`, or `\paragraph`
+  inside Experiments or any other body section, and must not be re-listed in the Conclusion. A
+  misplaced or duplicated Limitations unit is a blocking defect (`scripts/audit_draft.py` flags it).
+- Because `Limitations` and ethical considerations sit outside the 8/4-page content budget, moving a
+  stray limitations block into the dedicated section both fixes placement and reclaims page budget.
+  The page audit (`audit_draft.py --max-content-pages 8`/`4`) counts content only up to the first
+  post-matter heading, so a correctly placed Limitations section is excluded automatically.
+
 ## Drafting Implications
 
 - Select long or short paper before page budgeting; use 8 or 4 content pages for review drafts.

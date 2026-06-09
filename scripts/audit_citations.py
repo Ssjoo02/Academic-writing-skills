@@ -132,7 +132,7 @@ def key_years(key: str) -> set[int]:
     return {int(m.group(0)) for m in KEY_YEAR_RE.finditer(key) if 1900 <= int(m.group(0)) <= 2099}
 
 
-def audit(paper_dir: Path) -> tuple[list[str], list[str]]:
+def audit(paper_dir: Path, min_citations: int = 0) -> tuple[list[str], list[str]]:
     errors: list[str] = []
     warnings: list[str] = []
 
@@ -150,6 +150,17 @@ def audit(paper_dir: Path) -> tuple[list[str], list[str]]:
     entries = parse_bib_entries(bib_path)
     used = set(used_keys)
     bib_keys = set(entries)
+
+    # Citation coverage floor. References do not count toward page limits, so an implausibly
+    # small bibliography usually means Related Work / Introduction under-cite prior work or that
+    # named models/datasets/baselines were left uncited. This is a smell, not a hard failure;
+    # the paper-type-aware caller (review / submission-readiness) sets the threshold.
+    if min_citations and len(used) < min_citations:
+        warnings.append(
+            f"low citation coverage: {len(used)} distinct cited works (< {min_citations} expected "
+            f"for this paper type); check that Related Work and Introduction cite prior work and "
+            f"that every named model/dataset/baseline/framework is cited"
+        )
 
     for path, lineno, line in markers:
         errors.append(f"unresolved citation marker: {path}:{lineno}: {line}")
@@ -199,10 +210,17 @@ def audit(paper_dir: Path) -> tuple[list[str], list[str]]:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Audit citation and BibTeX integrity for a LaTeX paper.")
     parser.add_argument("paper_dir", nargs="?", default="paper", help="Paper directory containing references.bib")
+    parser.add_argument(
+        "--min-citations",
+        type=int,
+        default=0,
+        help="Warn if the draft cites fewer than this many distinct works (0 disables; set per "
+        "paper type, e.g. benchmark/survey/method papers expect a fuller bibliography).",
+    )
     args = parser.parse_args()
 
     paper_dir = Path(args.paper_dir).resolve()
-    errors, warnings = audit(paper_dir)
+    errors, warnings = audit(paper_dir, min_citations=args.min_citations)
 
     print(f"Citation audit: {paper_dir}")
     if warnings:

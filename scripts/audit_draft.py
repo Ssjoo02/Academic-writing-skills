@@ -17,6 +17,10 @@ Checks (errors block; warnings inform):
   when no list is present.
 - no leftover missing-support markers (% CITATION_NEEDED / EVIDENCE_NEEDED /
   FIGURE_NEEDED / TABLE_NEEDED)
+- limitations placement: no Limitations-titled subsection/paragraph/\\textbf run-in inside a
+  body section, and at most one dedicated \\section{Limitations}
+- content-page budget is venue-aware: the count ends at the first post-matter heading
+  (References, or a venue-excluded section such as Limitations / Acknowledgments / Ethics)
 - subsection budget: at most 4 \\subsection per main section
 - table hygiene: no \\hline in tables (use booktabs); booktabs loaded when any
   table exists; warn on vertical rules and \\textsc{lowercase} names
@@ -24,12 +28,17 @@ Checks (errors block; warnings inform):
 - appendix substance: warn on a sparse / table-dump appendix ("太空") — a section whose lead-in
   before its first float is under a few sentences, or several stacked full-width table*/figure*
   floats that scatter into half-empty pages
+- appendix float ordering: warn on bare [h] placement on appendix floats — [h] defers and reorders
+  across the separate figure/table queues, so floats stop following the section headings ("图顺序乱")
 - salience: warn on taxonomy/inventory enumeration and per-category count dumps in body prose
   (full lists belong in a table or the appendix)
 - wide tables: warn when a many-column plain tabular sits in a single-column float (body or
   appendix) and will overflow; suggest table*/rotate/split
-- limitations length: warn when a standalone Limitations section is over-long (>~200 words),
-  over-enumerated (5+ points), or wrapped in boilerplate opener/closer
+- prose in a non-wrapping column: warn when a multi-word cell sits in an l/c/r column (cannot
+  line-break, runs off the page); suggest a wrapping column (tabularx Y/X or p{..})
+- limitations length: warn when a standalone Limitations section is over-long (>~190 words),
+  over-enumerated (5+ points incl. bold-lead paragraphs), or wrapped in boilerplate opener/closer.
+  Resolves the body across the main.tex-heading + \\input-body split.
 - no duplicate \\label{...}
 - \\input/\\include consistency between main.tex and section files
 - compile-log signals when main.log exists (undefined refs/citations, multiply
@@ -84,6 +93,21 @@ APPENDIX_RE = re.compile(r"\\appendix\b")
 CLEARPAGE_RE = re.compile(r"\\(?:clearpage|newpage|cleardoublepage)\b")
 BOOKTABS_RE = re.compile(r"\\usepackage(?:\[[^\]]*\])?\{[^}]*\bbooktabs\b[^}]*\}")
 REFERENCE_HEADING_RE = re.compile(r"(?m)^\s*(References|Bibliography)\s*$")
+# Post-matter headings that, in most venues, sit outside the main-content page budget
+# (ACL excludes Limitations and Ethics; most venues exclude Acknowledgments and impact
+# statements). Matched only as a heading-only line so an inline "\textbf{Limitations ...}"
+# run-in inside a body section does NOT falsely truncate the content-page count.
+POSTMATTER_HEADING_RE = re.compile(
+    r"(?m)^\s*(References|Bibliography|Limitations|Acknowledg(?:ments|ements)|"
+    r"Ethics(?:\s+Statement)?|Ethical\s+Considerations|Broader\s+Impact|Impact\s+Statement)\s*$"
+)
+# Limitations declared as a structural unit. A dedicated \section{Limitations} (numbered or
+# starred) is the correct home; a \subsection / \paragraph / \textbf run-in titled
+# "Limitation(s)" inside another section is misplaced and must move to the dedicated section.
+LIMIT_SECTION_RE = re.compile(r"\\section\*?\s*\{[^}]*[Ll]imitation[^}]*\}")
+LIMIT_SUBSECTION_RE = re.compile(r"\\subsection\*?\s*\{[^}]*[Ll]imitation[^}]*\}")
+LIMIT_PARAGRAPH_RE = re.compile(r"\\paragraph\*?\s*\{[^}]*[Ll]imitation[^}]*\}")
+LIMIT_RUNIN_RE = re.compile(r"\\textbf\s*\{\s*[Ll]imitation[^}]*\}")
 LIST_ENV_RE = re.compile(r"\\begin\{(itemize|enumerate)\}(.*?)\\end\{\1\}", re.S)
 ITEM_RE = re.compile(r"\\item\b")
 COUNT_RE = re.compile(
@@ -115,11 +139,24 @@ VERY_WIDE_COLS = 10        # >= this many columns usually needs rotation or spli
 # a standalone Limitations section must stay short and scannable, not exhaustive
 LIMITATIONS_HEADING_RE = re.compile(r"\\section\*?\s*\{\s*Limitations\b[^}]*\}", re.I)
 NEXT_HEADING_RE = re.compile(r"\\section\*?\s*\{")
-LIMITATIONS_MAX_WORDS = 200   # target 120-180; warn beyond 200
+# the Limitations section ends at the next section, the appendix, the bibliography, or end of document
+LIM_NEXT_BOUNDARY_RE = re.compile(
+    r"\\section\*?\s*\{|\\appendix\b|\\bibliography\b|\\begin\{thebibliography\}|\\end\{document\}"
+)
+LIMITATIONS_MAX_WORDS = 190   # target 120-180; warn beyond ~190
 LIMITATIONS_MAX_POINTS = 5    # >= this many enumerated limitations is too many
 LIM_ORDINAL_RE = re.compile(r"(?:^|(?<=[.\n]))\s*(?:First|Second|Third|Fourth|Fifth|Sixth)\b", re.M)
+# bold-lead paragraphs (\textbf{Task coverage.} ...) are an enumeration form too
+LIM_BOLD_LEAD_RE = re.compile(r"\\textbf\s*\{[^}]{0,40}?\}")
 LIM_OPENER_RE = re.compile(r"we acknowledge\s+(?:several|a number of|the following|some)\s+limitation", re.I)
 LIM_CLOSER_RE = re.compile(r"despite\s+(?:these|the above|the aforementioned)\s+limitation", re.I)
+
+# a prose cell parked in a non-wrapping (l/c/r) column cannot line-break and runs off the page
+TABULAR_FULL_RE = re.compile(
+    r"\\begin\{tabular\*?\}\s*(?:\{[^{}]*\}\s*)?\{((?:[^{}]|\{[^{}]*\})*)\}(.*?)\\end\{tabular\*?\}",
+    re.S,
+)
+PROSE_CELL_MIN_WORDS = 4   # a cell with >= this many word tokens is prose, not a label/number
 
 # the appendix should be substantive, not a sparse table dump. Two smells of a half-empty ("太空")
 # appendix: (a) a section whose only content is a one-line pointer + a bare float, and (b) several
@@ -128,6 +165,8 @@ APPENDIX_LEAD_MIN_WORDS = 25      # < this many prose words before a float in an
 APPENDIX_WIDE_FLOAT_SCATTER = 3   # >= this many table*/figure* floats in the appendix can scatter
 SECTION_TITLE_RE = re.compile(r"\\section\b\s*\{[^}]*\}")
 FLOAT_ENV_RE = re.compile(r"\\begin\{(table\*?|figure\*?)\}(.*?)\\end\{\1\}", re.S)
+# a float environment with its placement spec, e.g. \begin{table}[h] or \begin{figure*}[!htbp]
+FLOAT_PLACEMENT_RE = re.compile(r"\\begin\{(table|figure)(\*?)\}\s*\[([^\]]*)\]")
 
 
 def count_columns(colspec: str) -> int:
@@ -456,12 +495,21 @@ def check_appendix_substance(paper_dir: Path, warnings: list[str]) -> None:
         bare pointer + float; nudge to add a real lead paragraph.
     (b) Several full-width table*/figure* floats in the appendix scatter into half-empty pages; nudge
         to anchor with prose, pin placement, or keep one-column tables single-column.
+    (c) An appendix float placed with bare [h] ("here only") defers when it does not fit and, because
+        figures and tables sit in separate float queues, resurfaces out of section order ("图顺序乱");
+        nudge to pin with [H] (float pkg) or [ht]/[tbp] + \\FloatBarrier.
     """
     segments = appendix_segments(paper_dir)
     if not segments:
         return
     wide_locs: list[str] = []
+    hplace_locs: list[str] = []
     for name, text in segments:
+        for pm in FLOAT_PLACEMENT_RE.finditer(text):
+            letters = pm.group(3).replace("!", "").strip()
+            if letters == "h":  # bare [h] / [h!] / [!h] — the fragile, reorder-prone specifier
+                kind = pm.group(1) + ("*" if pm.group(2) else "")
+                hplace_locs.append(f"{name}:{text.count(chr(10), 0, pm.start()) + 1} ({kind})")
         sections = list(SECTION_RE.finditer(text))
         bounds = [m.start() for m in sections] + [len(text)]
         for i, sm in enumerate(sections):
@@ -487,7 +535,17 @@ def check_appendix_substance(paper_dir: Path, warnings: list[str]) -> None:
         warnings.append(
             f"{len(wide_locs)} full-width (table*/figure*) floats in the appendix ({shown}); stacked "
             f"wide floats scatter into half-empty pages — anchor each with a lead paragraph, pin "
-            f"placement ([h]/[H]/\\FloatBarrier), or keep one-column tables single-column"
+            f"placement ([H] or [tbp]+\\FloatBarrier), or keep one-column tables single-column"
+        )
+    if hplace_locs:
+        shown = ", ".join(hplace_locs[:6]) + ("…" if len(hplace_locs) > 6 else "")
+        warnings.append(
+            f"{len(hplace_locs)} appendix float(s) use bare [h] placement ({shown}); [h] defers when "
+            f"it does not fit and reorders across the separate figure/table queues, so floats stop "
+            f"following the section headings (\"图顺序乱\") — pin with [H] (float pkg) under the "
+            f"heading, or use [ht]/[tbp] + \\FloatBarrier (placeins) / \\clearpage per appendix "
+            f"section (if the venue forbids float/\\clearpage, e.g. AAAI, use [!ht]/[tbp] instead — "
+            f"never bare [h])"
         )
 
 
@@ -545,42 +603,157 @@ def check_wide_tables(path: Path, base: Path, warnings: list[str]) -> None:
                 )
 
 
-def check_limitations_length(path: Path, base: Path, warnings: list[str]) -> None:
-    """Heuristic: a standalone Limitations section that is over-long or over-enumerated.
+def _flatten_inputs(paper_dir: Path, text: str, depth: int = 0, seen: set[Path] | None = None) -> str:
+    """Inline \\input/\\include targets (recursively, depth-bounded) so a section whose heading sits
+    in main.tex and whose body is pulled in via \\input is measured as one unit."""
+    if seen is None:
+        seen = set()
+    if depth > 4:
+        return text
 
-    Warns when the section runs past ~200 words, lists 5+ separate limitations, or wraps the
-    content in boilerplate ("We acknowledge several limitations…" / "Despite these limitations…").
+    def repl(m: "re.Match[str]") -> str:
+        target = m.group(1).strip()
+        if not target.endswith(".tex"):
+            target += ".tex"
+        path = (paper_dir / target).resolve()
+        if path in seen or not path.exists():
+            return " "
+        seen.add(path)
+        sub = strip_comments(path.read_text(encoding="utf-8", errors="ignore"))
+        return _flatten_inputs(paper_dir, sub, depth + 1, seen)
+
+    return INPUT_RE.sub(repl, text)
+
+
+def check_limitations(paper_dir: Path, warnings: list[str]) -> None:
+    """Heuristic: a standalone Limitations section that is over-long / over-enumerated / boilerplate.
+
+    Resolves the section body even when the heading lives in main.tex and the prose arrives via
+    \\input (the common split that silently defeats a per-file check). Warns past ~190 words, on 5+
+    separate limitations (\\item, ordinals, or bold-lead paragraphs), or on boilerplate framing.
     Warnings only.
     """
-    text = strip_comments(path.read_text(encoding="utf-8", errors="ignore"))
-    name = rel(path, base)
+    main = paper_dir / "main.tex"
+    if main.exists():
+        text = _flatten_inputs(paper_dir, strip_comments(main.read_text(encoding="utf-8", errors="ignore")))
+        where = "Limitations (via main.tex)"
+    else:
+        text = "\n".join(
+            strip_comments(p.read_text(encoding="utf-8", errors="ignore")) for p in prose_tex_files(paper_dir)
+        )
+        where = "Limitations"
     m = LIMITATIONS_HEADING_RE.search(text)
     if not m:
         return
-    nxt = NEXT_HEADING_RE.search(text, m.end())
+    nxt = LIM_NEXT_BOUNDARY_RE.search(text, m.end())
     section = text[m.end() : nxt.start() if nxt else len(text)]
-    lineno = text.count("\n", 0, m.start()) + 1
 
     plain = re.sub(r"\\[a-zA-Z]+\*?", " ", section)
     plain = re.sub(r"[{}\\$&~^_%#]", " ", plain)
     words = len(plain.split())
-    points = max(len(ITEM_RE.findall(section)), len(LIM_ORDINAL_RE.findall(section)))
+    points = max(
+        len(ITEM_RE.findall(section)),
+        len(LIM_ORDINAL_RE.findall(section)),
+        len(LIM_BOLD_LEAD_RE.findall(section)),
+    )
 
     if words > LIMITATIONS_MAX_WORDS:
         warnings.append(
-            f"Limitations section is long ({words} words): {name}:{lineno}; cap at ~120-180 words, "
-            f"keep the 3-4 most material limitations, 1-2 sentences each"
+            f"{where} section is long ({words} words); cap at ~120-180 words, keep the 3-4 most "
+            f"material limitations, 1-2 sentences each"
         )
     if points >= LIMITATIONS_MAX_POINTS:
         warnings.append(
-            f"Limitations enumerates {points} separate points: {name}:{lineno}; merge or cut to the "
-            f"3-4 a reviewer would actually raise"
+            f"{where} enumerates {points} separate points; merge or cut to the 3-4 a reviewer would "
+            f"actually raise"
         )
     if LIM_OPENER_RE.search(section) or LIM_CLOSER_RE.search(section):
         warnings.append(
-            f"Limitations has boilerplate framing: {name}:{lineno}; drop the "
-            f"\"we acknowledge several limitations\" opener / \"despite these limitations\" closer "
-            f"and lead directly with the first limitation"
+            f"{where} has boilerplate framing; drop the \"we acknowledge several limitations\" opener "
+            f"/ \"despite these limitations\" closer and lead directly with the first limitation"
+        )
+
+
+def column_types(colspec: str) -> list[str]:
+    """Return the ordered column types of a tabular colspec, with p/m/b/X/Y/Z treated as wrapping."""
+    spec = re.sub(r"[><@!]\{(?:[^{}]|\{[^{}]*\})*\}", "", colspec)   # drop >{} <{} @{} !{}
+    spec = re.sub(r"[pmb]\{(?:[^{}]|\{[^{}]*\})*\}", "p", spec)       # p{..}/m{..}/b{..} -> wrapping 'p'
+    return [ch for ch in spec if ch in "lcrpXYZS"]
+
+
+def _split_cells(row: str) -> list[str]:
+    """Split a tabular row into cells on unescaped &."""
+    return re.split(r"(?<!\\)&", row)
+
+
+def check_prose_in_narrow_column(path: Path, base: Path, warnings: list[str]) -> None:
+    """Heuristic: a prose cell sitting in a non-wrapping l/c/r column cannot break and overflows.
+
+    Targets the defect where a 'Description'/'Notes' column is declared r/l/c instead of a wrapping
+    Y/X/p{..} column, so its text runs off the page (a frequent source of margin overflow that the
+    column-count check misses because the table has few columns). Warnings only.
+    """
+    text = strip_comments(path.read_text(encoding="utf-8", errors="ignore"))
+    name = rel(path, base)
+    for tm in TABULAR_FULL_RE.finditer(text):
+        types = column_types(tm.group(1))
+        if not types or not any(t in "lcr" for t in types):
+            continue
+        body = tm.group(2)
+        offending: set[int] = set()
+        for raw_row in re.split(r"\\\\", body):
+            if "\\multicolumn" in raw_row or "\\midrule" in raw_row or "\\toprule" in raw_row \
+                    or "\\bottomrule" in raw_row or "\\cmidrule" in raw_row:
+                continue
+            cells = _split_cells(raw_row)
+            for idx, cell in enumerate(cells):
+                if idx >= len(types) or types[idx] not in "lcr":
+                    continue
+                plain = re.sub(r"\\[a-zA-Z]+\*?", " ", cell)
+                plain = re.sub(r"[{}\\$&~^_%#]", " ", plain)
+                nwords = sum(1 for w in plain.split() if any(c.isalpha() for c in w))
+                if nwords >= PROSE_CELL_MIN_WORDS:
+                    offending.add(idx)
+        if offending:
+            lineno = text.count("\n", 0, tm.start()) + 1
+            cols = ", ".join(f"col {i + 1} ({types[i]})" for i in sorted(offending))
+            warnings.append(
+                f"prose in a non-wrapping column: {name}:{lineno}; {cols} hold multi-word text in an "
+                f"l/c/r column that cannot line-break and will run off the page — use a wrapping "
+                f"column (tabularx Y/X or p{{...}}) for the prose column"
+            )
+
+
+def check_limitations_placement(files: list[Path], base: Path, errors: list[str]) -> None:
+    """Limitations must live in one dedicated \\section{Limitations}, not scattered in body sections.
+
+    Flags two defects: (1) a Limitations-titled \\subsection / \\paragraph / \\textbf run-in inside
+    another section (e.g. an Experiments section), and (2) more than one dedicated Limitations
+    section (a sign limitations are duplicated across, say, Conclusion and a standalone section).
+    """
+    dedicated: list[str] = []
+    for path in files:
+        text = strip_comments(path.read_text(encoding="utf-8", errors="ignore"))
+        name = rel(path, base)
+        for lineno, line in enumerate(text.splitlines(), 1):
+            if LIMIT_SECTION_RE.search(line):
+                dedicated.append(f"{name}:{lineno}")
+            for rx, kind in (
+                (LIMIT_SUBSECTION_RE, "\\subsection"),
+                (LIMIT_PARAGRAPH_RE, "\\paragraph"),
+                (LIMIT_RUNIN_RE, "\\textbf run-in"),
+            ):
+                if rx.search(line):
+                    errors.append(
+                        f"misplaced Limitations unit ({kind}) inside a body section: {name}:{lineno}; "
+                        f"move limitations into a single dedicated \\section{{Limitations}} (kept out "
+                        f"of the main content-page budget for venues that exclude it)"
+                    )
+    if len(dedicated) > 1:
+        errors.append(
+            "more than one dedicated Limitations section: "
+            + ", ".join(dedicated)
+            + "; consolidate limitations into one section, do not repeat them"
         )
 
 
@@ -656,12 +829,15 @@ def check_log(paper_dir: Path, errors: list[str], warnings: list[str]) -> None:
 def content_pages_before_references(text_pages: list[str]) -> int:
     """Return the last page counted as main content.
 
-    If references start midway down a page, that page still counts against a
-    content-page limit because main text reached it.
+    Main content ends at the first post-matter heading (References/Bibliography, or a
+    venue-excluded section such as Limitations / Acknowledgments / Ethics / impact
+    statement). If that heading starts midway down a page, that page still counts because
+    main text reached it. Matching heading-only lines avoids truncating on an inline
+    "\\textbf{Limitations ...}" run-in that wrongly sits inside a body section.
     """
 
     for index, page_text in enumerate(text_pages, 1):
-        if REFERENCE_HEADING_RE.search(page_text):
+        if POSTMATTER_HEADING_RE.search(page_text):
             return index
     return len(text_pages)
 
@@ -759,12 +935,14 @@ def audit(paper_dir: Path, max_content_pages: int | None = None) -> tuple[list[s
         check_tables(path, paper_dir, errors, warnings)
         check_enumeration(path, paper_dir, warnings)
         check_wide_tables(path, paper_dir, warnings)
-        check_limitations_length(path, paper_dir, warnings)
+        check_prose_in_narrow_column(path, paper_dir, warnings)
         check_disclosure(path, paper_dir, naming_map, do_not_disclose, errors)
         check_internal_id_heuristic(path, paper_dir, allow, warnings)
+    check_limitations(paper_dir, warnings)
     check_booktabs_loaded(paper_dir, files, errors)
     check_appendix_page(paper_dir, warnings)
     check_appendix_substance(paper_dir, warnings)
+    check_limitations_placement(files, paper_dir, errors)
     check_labels(files, paper_dir, errors)
     check_input_consistency(paper_dir, errors, warnings)
     check_log(paper_dir, errors, warnings)

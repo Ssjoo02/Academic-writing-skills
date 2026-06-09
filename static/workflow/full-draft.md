@@ -31,7 +31,7 @@ Create each output only when its stage is reached and its upstream gate has been
 |---|---|---|
 | Writing Policy | `writing-policies/<paper-slug>-writing-policy.md` | **STOP HERE and wait for user response.** Do not generate Paper Framework until confirmed. |
 | Paper Framework | `writing-policies/<paper-slug>-paper-framework.md` | **STOP HERE and wait for user response.** Do not create `paper/` until confirmed. |
-| Full Draft | complete `paper/` LaTeX project | Return generated files, unresolved markers, and citation/template/compile risks. |
+| Full Draft | complete `paper/` LaTeX project | **Not complete until the closing gates pass, regardless of entry path (including re-entry from an existing policy+framework):** Draft Completion Review Gate (Round 1+2), Final Static Audits (`audit_citations.py` **and** `audit_draft.py` both `PASS`), Final Submission Readiness Gate, and Compliance Self-Check. Only then return generated files, unresolved markers, and citation/template/compile risks. Returning `paper/` before these gates pass is a workflow violation. |
 
 Mandatory gate behavior:
 
@@ -51,6 +51,42 @@ Mandatory gate behavior:
 - If the user asks for autonomous or one-shot full-draft generation, still stop at both gates. Treat
   the request as permission to complete each stage after confirmation, not as permission to skip
   confirmation.
+
+## Re-entry: Resuming From a Confirmed Writing Policy + Paper Framework
+
+A very common request is **"the Writing Policy and Paper Framework already exist — just generate the
+paper"** (or "regenerate `paper/`"). This enters the workflow at the **Full Draft LaTeX Project**
+stage. Re-entry **skips only the two confirmation gates** (the policy and framework are already
+confirmed) — it does **not** skip the drafting discipline or the closing gates. Treat a re-entry
+request exactly like reaching the Full Draft stage through the linear flow.
+
+When entering at the Full Draft stage:
+
+1. **Load and trust the confirmed artifacts.** Read the existing `writing-policies/<slug>-writing-policy.md`
+   and `writing-policies/<slug>-paper-framework.md`. If either is missing, ambiguous, or was never
+   confirmed, do **not** invent it — fall back to the appropriate earlier stage and its confirmation
+   gate. If the framework conflicts with the current workspace evidence on a decision that changes
+   paper identity/claims, stop and ask.
+2. **Load the paper/ drafting references — they are NOT optional on re-entry.** Creating or
+   regenerating `paper/` requires the same references the linear flow loads while drafting:
+   `templates/index.md` (Template Acquisition — local-first), the per-section guides for every
+   section being written (`references/sections/<section>.md` + `references/sections/paragraph-flow.md`),
+   `references/sections/figures-and-tables.md` whenever any figure/table is produced (this is where
+   the table width/overflow, column-type, and appendix placement/ordering rules live), and
+   `references/figures/figure-planning.md` for every figure. Skipping these is the direct cause of
+   tables overflowing (`r`/`l` prose columns), wide matrices left single-column, and a dropped or
+   sparse/scrambled appendix.
+3. **Run the LaTeX Project Setup, Table Handling, and Section Drafting steps below** exactly as in
+   the linear flow.
+4. **Run the closing gates unconditionally** — the Draft Completion Review Gate (Round 1 + Round 2),
+   the Final Static Audits BLOCKING GATE (`audit_citations.py` and `audit_draft.py` must both report
+   `PASS`), the Final Submission Readiness Gate, and the Compliance Self-Check (Before Returning).
+   **These bind to any `paper/` output regardless of how the stage was entered.** A re-entry that
+   produces `paper/` without these gates is a workflow violation, not a shortcut the user authorized.
+
+The user saying "policy and framework are done, just build the paper" authorizes skipping the two
+*confirmation* checkpoints — it never authorizes skipping the section guides, the table/figure
+rules, or the closing audits/review.
 
 At every stage, keep a brief stage ledger in the user-facing summary: output artifact, decisions
 needing confirmation, unresolved paper blockers, and next required user action. Do not make a
@@ -363,8 +399,11 @@ File format:
 
 1. **Inputs Used**: Writing Policy path, target venue, selected template, venue format summary,
    page/length budget, paper type, optional domain evidence adapter, evidence snapshot.
-2. **Page Budget Summary**: total venue or generic page budget, what counts toward the limit,
-   planned main-text total, overflow or compression decisions.
+2. **Page Budget Summary**: state the numeric content-page limit as a bound value (e.g. ACL long
+   `8`, short `4`; generic fallback `8`) and exactly what is excluded from it (references always;
+   plus Limitations / Acknowledgments / Ethics for venues that exclude them). Record the planned
+   main-text total and any overflow or compression decisions. This bound is the `--max-content-pages`
+   value the final page-budget audit must run with, and it is a blocking gate, not a target.
 3. **Section Framework**: ordered section list with section name, main content, Page budget, key
    evidence or figure/table, and writing cautions. Keep this at section level. List subsections only
    when a section genuinely needs them, and respect the Subsection Granularity budget (0, or at most
@@ -374,7 +413,9 @@ File format:
    `single-column`, `double-column`, `appendix`, or `supplement`.
 5. **Venue Assembly Plan**: post-main order, required statements or checklists, optional appendices,
    and `not verified` venue fields. Record that the appendix begins on a fresh page (`\clearpage`
-   before `\appendix`).
+   before `\appendix`). When the venue requires a Limitations section (ACL family), plan it as a
+   single dedicated `\section{Limitations}` placed after Conclusion and before References — it is the
+   only home for limitations in the paper, and it is excluded from the content-page budget.
 6. **Open Decisions**: only blocking missing evidence, uncertain section choices, terminology,
    figure/table choices, or user decisions.
 
@@ -631,9 +672,22 @@ misspells. Do **not** hand-draw pipeline boxes in matplotlib.
     fit one column stay single-column `table` and pack tight; apply the same single-vs-cross-column
     test as the body. (b) **Anchor every appendix (sub)section with a real lead paragraph** (2–4
     sentences: what it is, how to read it, the pattern worth noticing, which main claim it backs), not
-    a pointer. (c) **Pin float placement** with `[h]`/`[ht]` (or `[H]` via the `float` package) and a
-    `\FloatBarrier` (`placeins`) or deliberate `\clearpage` between appendix sections so floats sit
-    under their heading instead of drifting and leaving white bands; never pad with blank `\vspace`.
+    a pointer.     (c) **Pin float placement and keep order — never use bare `[h]`.** `[h]` ("here only") defers
+    when it does not fit, and because figures and tables sit in **separate float queues**, deferred
+    floats resurface out of section order (a later figure printing above an earlier section's table),
+    which reads as "图顺序乱". In the appendix (one float per section), lock each float under its
+    heading with `[H]` (the `float` package), or use `[ht]`/`[tbp]` plus a `\FloatBarrier`
+    (`placeins`) / deliberate `\clearpage` after each appendix section. Add `\usepackage{float}` /
+    `\usepackage{placeins}` to the generated preamble when needed. Never pad with blank `\vspace`.
+    A wide appendix matrix must first go `table*`/rotate/split (rule 3d) — a single-column `[h]` wide
+    table overflows into the next column and compounds the disorder.
+    **Two balances:** (i) *Venue limits* — some templates forbid `\usepackage{float}` and `\clearpage`
+    (e.g. the AAAI author kit). When forbidden, do not add them; fall back to `[!ht]`/`[tbp]` (still
+    never bare `[h]`) + `\FloatBarrier` if allowed, and rely on natural order. (ii) *Do not over-pin*
+    — `[H]` does not float (it strands preceding text or overflows if it does not fit), and a
+    `\clearpage` before every section leaves near-empty pages (the "太空" defect of rule 11 above).
+    Size each pinned float to share its page with its heading + lead paragraph, and apply
+    `[H]`/`\clearpage` only to the float-heavy sections that actually reorder.
     (d) **Carry the full version, never a stub** — no `see supplementary material` placeholder in
     place of content that exists, and no sketch-only appendix. See `references/sections/figures-and-tables.md`
     ("The appendix has the opposite failure") for the substantive-material menu and float discipline.
@@ -695,11 +749,22 @@ For each section, follow this drafting loop:
      and technical advantage; an overview/section-map opens the section; terms defined before use.
    - **Experiments** (`references/sections/experiments.md`): setup (datasets/metrics/baselines/
      protocol) stated; each contribution claim has a matching experiment; metric direction and scope
-     explicit.
+     explicit. **No Limitations block lives here** — limitations do not belong in a numbered body
+     section; route them to the dedicated Limitations section below.
    - **Introduction / Abstract**: problem → gap → contribution chain present; central claims map to
      available evidence; contributions preview maps to later sections.
    - **Related Work**: organized by topic group with a stated distinction per group, not a citation
-     list.
+     list. **Every named prior method, benchmark, dataset, model, or framework carries a `\cite`**;
+     proactively run the targeted citation search (see Citation Search Trigger) rather than leaving
+     groups thin.
+   - **Conclusion** (`references/sections/conclusion.md`): short close (contribution → strongest
+     evidence → scoped implication); **no full limitations paragraph** (it has its own section) and
+     **no future-impact / "we hope …" promotional closer**; no new claims or citations. Over-long or
+     four-paragraph conclusions with a vision closer are a `missing`/over-length defect — compress.
+   - **Limitations** (when the venue expects one, e.g. ACL family): a single dedicated
+     `\section{Limitations}` after Conclusion holds all limitations, ~120–180 words, 3–4 material
+     points; it is the only home for limitations in the paper (do not also enumerate them in
+     Experiments or Conclusion).
    - **All sections**: one paragraph one message; first sentence states the paragraph role and
      leads with the point (not buried); stable terminology; **no taxonomy/inventory/per-category
      enumeration in the body** — such lists are mentioned in one stroke and the full list lives in a
@@ -739,15 +804,26 @@ a blocking risk must be surfaced.
 
 ### Citation Search Trigger
 
-Do not run a broad literature search by default. Trigger targeted citation search only when the
-draft needs external support that is not already available in workspace evidence or verified `.bib`
-entries:
+Do not run an unbounded survey, but do not under-cite either. Run targeted citation search whenever
+the draft needs external support not already covered by workspace evidence or verified `.bib`
+entries. For a full draft, the following are **proactive** triggers — search for them rather than
+waiting for a `% CITATION_NEEDED` to appear:
 
-- Related Work drafting requires prior methods, benchmarks, datasets, or comparison lines.
-- Introduction background or gap claims depend on external literature.
+- **Related Work and Introduction background are proactive by default.** Drafting either one
+  triggers targeted search for the prior methods, benchmarks, datasets, environments, and comparison
+  lines they discuss; a Related Work group with one or zero citations is under-cited, not done.
+- **Every named entity must be cited.** Each model, dataset, benchmark, environment, baseline, or
+  taxonomy/standard framework named in the text (e.g. each evaluated model, each prior benchmark,
+  any security/standard framework the taxonomy is "grounded in") needs a `\cite` to its source.
+- **Citation coverage is paper-type-scaled.** Benchmark, survey, and method papers are expected to
+  cite broadly; a 10-entry bibliography for such a paper is a smell. The final citation audit is run
+  with a paper-type `--min-citations` floor (see Final Static Audits).
 - A confirmed Paper Framework names prior work that is missing from local sources.
 - A necessary sentence would otherwise require `% CITATION_NEEDED`.
 - The user explicitly asks to find, add, or verify references.
+
+References do not count toward the page limit, so breadth here is cheap; verify every added entry
+through `references/checks/citation-integrity.md` and never fabricate to hit a count.
 
 When triggered, load `references/checks/citation-integrity.md`. Search before writing a final
 citation; run targeted live lookup. If live search adds or changes a citation, record the
@@ -839,11 +915,32 @@ python3 "$SKILL_DIR/scripts/audit_draft.py" paper
 If drafting in another project (paper is not in CWD), pass the absolute path to that
 project's `paper/` directory.
 
-For any venue with a content page limit, also check the compiled-PDF page budget:
+**The content page budget is a blocking gate, not an optional extra.** Whenever the venue has a
+content page limit (every modeled venue does; the conference fallback is a soft 8-page upper bound),
+run the page-budget audit with the limit bound in the confirmed Paper Framework, and run the citation
+audit with the paper-type citation floor:
 
 ```bash
 python3 "$SKILL_DIR/scripts/audit_draft.py" paper --max-content-pages <limit>
+python3 "$SKILL_DIR/scripts/audit_citations.py" paper --min-citations <floor>
 ```
+
+`<limit>` is the confirmed venue content-page limit (ACL long 8 / short 4; generic fallback 8). The
+audit is venue-aware: it stops counting at the first post-matter heading (References, or a
+venue-excluded section such as Limitations / Acknowledgments / Ethics), so a correctly placed
+`\section{Limitations}` is not counted against the limit. `<floor>` is a paper-type expectation
+(benchmark / survey / method papers cite broadly — use ~25–30; otherwise ~12–15); the floor raises a
+warning, not a hard block, because references do not consume page budget.
+
+**If the page budget is exceeded, do not return the draft — compress, then recompile and re-audit.**
+Apply the compression ladder in order, cheapest first: (1) move every limitation into the dedicated
+`\section{Limitations}` (it leaves the counted budget for venues that exclude it); (2) cut the
+Conclusion to a short close (drop any limitations paragraph and any future-impact closer); (3) merge
+over-budget subsections (≤4 per section) and demote single-paragraph steps to `\paragraph{}` run-ins;
+(4) move per-vector / per-harm / per-category enumerations into a table and keep only load-bearing
+numbers in prose; (5) move non-essential detail to the appendix. Overflow is a blocking defect even
+when the Paper Framework's planned arithmetic was within the limit — the compiled PDF is
+authoritative.
 
 **How to handle audit failures:**
 
@@ -851,12 +948,15 @@ python3 "$SKILL_DIR/scripts/audit_draft.py" paper --max-content-pages <limit>
   authors, placeholder `and others`, missing DOI/URL/arXiv, year-key mismatch, malformed
   entries, uncited entries). Then **re-run the audit**. Repeat until `PASS`.
 - `audit_draft.py` reports errors → **fix every error in the LaTeX source** (footnotes,
-  file/code artifacts, leftover `% *_NEEDED` markers, duplicate labels, overfull pages, and
-  disclosure leaks — internal identifiers that should use a display name, or do-not-disclose
-  entities that appear in prose). For a disclosure leak, apply the Naming Map (rename to the public
-  display name) or remove the do-not-disclose mention (including any negation/exclusion phrasing);
-  do not edit `paper/.disclosure.yaml` to silence a true leak. Then **re-run the audit**. Repeat
-  until `PASS`.
+  file/code artifacts, leftover `% *_NEEDED` markers, duplicate labels, overfull pages,
+  misplaced/duplicated Limitations units, content-page overflow, and disclosure leaks — internal
+  identifiers that should use a display name, or do-not-disclose entities that appear in prose). For
+  a misplaced Limitations unit, move it into the single dedicated `\section{Limitations}`; for
+  content-page overflow, apply the compression ladder above (limitations to its own section →
+  conclusion trim → subsection merge → enumerations to tables → appendix). For a disclosure leak,
+  apply the Naming Map (rename to the public display name) or remove the do-not-disclose mention
+  (including any negation/exclusion phrasing); do not edit `paper/.disclosure.yaml` to silence a true
+  leak. Then **re-run the audit**. Repeat until `PASS`.
 - **Do not return the draft while any audit reports errors.** A draft with audit failures
   is incomplete. Fix, re-run, pass, then return.
 - Paste the audit result lines into the internal check log so the user can verify.
@@ -864,12 +964,16 @@ python3 "$SKILL_DIR/scripts/audit_draft.py" paper --max-content-pages <limit>
 **What each script checks:**
 - `audit_citations.py`: bibliography integrity — placeholder authors, missing required
   BibTeX fields, missing DOI/URL/arXiv on modern entries, vague source labels, year-key
-  mismatch, uncited entries, unresolved `% CITATION_NEEDED` markers.
+  mismatch, uncited entries, unresolved `% CITATION_NEEDED` markers, and (with `--min-citations`)
+  a low-citation-coverage warning when the bibliography is thinner than the paper type expects.
 - `audit_draft.py`: mechanical writing rules — footnotes, file/code artifacts, local
   paths, subsection budget, duplicate labels, input consistency, leftover markers,
-  content-page budget, and the disclosure check (internal identifiers and do-not-disclose
-  entities listed in `paper/.disclosure.yaml`, plus a heuristic warning for internal-looking
-  identifier tokens even when no list is present).
+  Limitations placement (no Limitations-titled subsection/paragraph/`\textbf` run-in inside a body
+  section; at most one dedicated `\section{Limitations}`), venue-aware content-page budget (counting
+  stops at the first post-matter heading, so a dedicated Limitations/Ethics section is excluded), and
+  the disclosure check (internal identifiers and do-not-disclose entities listed in
+  `paper/.disclosure.yaml`, plus a heuristic warning for internal-looking identifier tokens even when
+  no list is present).
 
 ### Missing-Support Markers
 
@@ -945,10 +1049,12 @@ This check is MANDATORY and cannot be skipped.
 7. Did I load and apply `references/figures/figure-planning.md` (Display Review Gate) for every
    generated figure?
 8. If the draft has an appendix, did I inspect its compiled pages and confirm it is **substantive,
-   not sparse** — every appendix section has a real lead paragraph (not a `Table~N provides ...`
-   pointer), floats sit under their heading rather than scattering into half-empty pages, and no
-   `see supplementary material` stub stands in for content that exists? (Apply Table Handling rule 11
-   / `figures-and-tables.md` "The appendix has the opposite failure".)
+   not sparse, and in order** — every appendix section has a real lead paragraph (not a `Table~N
+   provides ...` pointer); floats appear **in section order** under their heading (no bare `[h]`
+   placement that defers and reorders across the separate figure/table queues); no wide single-column
+   float overflows into the next column; and no `see supplementary material` stub stands in for
+   content that exists? (Apply Table Handling rule 11 / `figures-and-tables.md` "The appendix has the
+   opposite failure".)
 
 **Load receipt:** list which mandatory references were loaded. A mandatory gate whose reference
 was never loaded counts as a failed check, not a pass.

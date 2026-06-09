@@ -1,14 +1,23 @@
 # Academic Writing
 
-Academic Writing 是一个 agent-readable 的学术论文写作 skill，可用于 Claude Code、Codex 等本地 skill 环境，也可以被任何能读取 `SKILL.md` 和 Markdown 引用文件的 agent 或研究者手动使用。
+**Academic Writing** 是一个专注于学术论文写作的 skill，用于生成符合具体会议或期刊格式要求的完整论文初稿，可在 Claude Code、Codex 等本地 skill 环境中使用。
 
 English: [README.md](README.md)
 
-## 项目定位
+## 适用场景
 
-Academic Writing 关注的是研究流程中的论文建构阶段：把实验结果、研究笔记、图表、证据和 claim 组织成一篇连贯的论文初稿。
+Academic Writing 面向研究流程中的**论文建构阶段**：将实验结果、研究笔记、图表、证据和 claim 组织成一篇结构完整、论证连贯的论文初稿。
 
-它默认只做写作，不静默改变研究本身。它可以改结构、论证链、章节逻辑、claim-evidence 对齐、venue fit、引用卫生、图表表达和 reviewer-facing clarity；但不会默认修改研究 idea、运行实验、编造结果、伪造引用，或把证据不足的 claim 写强。
+它默认只处理写作相关任务，不会改变研究本身。也就是说，它可以帮助你改进论文结构、论证链、章节逻辑、claim-evidence 对齐、venue fit、引用卫生、图表表达和 reviewer-facing clarity，但不会默认修改研究 idea、运行实验、编造结果、伪造引用，或将证据不足的 claim 写得过强。
+
+该 skill 适合以下场景：
+
+- **已有部分实验结果，想写论文初稿**：实验已经完成或部分完成，已有结果与研究笔记，希望将其组织成一篇结构完整、逻辑连贯的论文初稿。
+- **已有初稿，希望润色或重写**：针对 Introduction、Method、Experiments 等章节进行起草、重构，或按照特定 venue 风格进行润色。
+- **指定 venue 的成稿需求**：明确目标会议或期刊，例如 EMNLP、NeurIPS、JMLR，需要根据对应模板、篇幅预算和投稿要求组织论文。
+- **分步推进写作流程**：只想先生成 Writing Policy 或 Paper Framework，在确认论文身份、证据边界和章节结构后，再继续生成正文。
+- **投稿前自检**：在提交前对已有手稿进行 review 和 readiness pass，暴露证据、引用、排版和 venue-limit 等潜在风险。
+- **会议与期刊模式切换**：在 conference 与 journal 两种模式之间组织论文，包括期刊特有的 section overlay 与投稿要素检查。
 
 这个 skill 的核心前提是：
 
@@ -16,28 +25,24 @@ Academic Writing 关注的是研究流程中的论文建构阶段：把实验结
 问题 -> 缺口 -> 挑战 -> 洞察 -> 方法 / 研究 / benchmark -> 证据 -> 主张
 ```
 
-论文不是结果堆砌，而是一条可辩护的论证链。每个主要 claim 都必须有明确的证据边界。
+论文不是结果的堆砌，而是一条可辩护的论证链。每个主要 claim 都必须有清晰的证据边界。
 
 ## 写作理念与参考来源
 
-这套写作方法不是我们闭门造车，而是提炼自被广泛认可的科研写作经验。最直接的参考是彭思达老师整理的
-*learning_research* 中的科研与论文写作经验，同时结合了若干经典的科学写作建议：
+该 skill 的写作方式提炼自被广泛认可的科研写作经验。最直接的参考来源是彭思达老师整理的 *learning_research* 中关于科研与论文写作的方法总结，同时也结合了若干经典科学写作建议：
 
-- *learning_research* — 彭思达的科研经验：
+- *learning_research* — 彭思达的科研经验：  
   <https://github.com/pengsida/learning_research/tree/master>
-- *Ten Tips for Writing CS Papers* — Sebastian Nowozin：
+- *Ten Tips for Writing CS Papers* — Sebastian Nowozin：  
   <https://www.nowozin.net/sebastian/blog/ten-tips-for-writing-cs-papers-part-1.html>
-- *Writing a Good Introduction* — Henning Schulzrinne（源自 Jim Kurose）：
+- *Writing a Good Introduction* — Henning Schulzrinne，源自 Jim Kurose：  
   <https://www.cs.columbia.edu/~hgs/etc/intro-style.html>
 
-从这些来源中，skill 内化了几条贯穿全文的写作习惯：尽早、明确地陈述 contribution，并将其归类为
-*insight*（洞察）/ *performance*（性能）/ *capability*（能力）；把每个 section 都当作这一个
-contribution 的不同切面；用简单直接的语言而非华丽辞藻；引言遵循"动机 → 具体问题 → 贡献 →
-与已有工作的区别 → 结构导引"的弧线。上面那条主线，正是把这些习惯串起来的脊梁。
+我们的目标是让 AI 学习这些真实可用的论文写作经验，使生成的论文更贴近真实研究者的写作习惯与表达风格。
 
 ## 核心流程
 
-完整论文初稿 workflow 是三阶段、两个强制检查点。
+完整论文初稿 workflow 分为三个阶段，并包含两个强制检查点：
 
 ```text
 Workspace Discovery
@@ -48,102 +53,211 @@ Workspace Discovery
   -> 论文初稿
 ```
 
-这两个检查点是刻意设计的。大模型完全可以一次性把整篇论文生成出来，但这种"一键生成"的初稿往往会塌缩成一种泛泛的、平均化的写作风格，很难贴合这项工作真正应该被讲述的方式。两个 gate 就是为了打破这种惯性：agent 必须在 Writing Policy 和 Paper Framework 处分别停下来，把本会被静默决定的东西——论文身份、证据边界、venue、章节结构、图表计划——摊开给作者确认或修正。用户要求"写完整论文"只会启动 workflow，并不会跳过这两道关。最终得到的是一篇按作者思路展开的论文，而不是一份模板化的自动产物。
+为了避免“一键生成”的初稿不符合真实论文写作习惯，Academic Writing 在生成完整初稿之前设置了两个检查点：agent 必须分别在 Writing Policy 和 Paper Framework 阶段停下来，将原本可能被静默决定的内容展示给作者确认或修改，包括论文身份、证据边界、目标 venue、section 结构和图表计划等。
+
+因此，用户提出“写完整论文”的请求只会启动 workflow，而不会跳过这两个检查点。最终生成的应当是一篇围绕作者思路展开的论文初稿，而不是模板化的自动产物。
 
 ### 1. Writing Policy
 
-Writing Policy 是论文契约。它记录 source snapshot、paper identity、core story、claim-evidence map、关键术语、可见资产和 open decisions。
+Writing Policy 是论文写作契约，用于记录 source snapshot、paper identity、core story、claim-evidence map、关键术语、可见资产和 open decisions。
 
-它也负责按固定顺序完成路由：
-
-```text
-venue_kind -> venue -> paper_type
-```
-
-只有当用户明确说目标是 journal article / journal paper，或明确点名期刊 venue 时，才进入 journal 模式。其他情况默认按 conference 论文处理。
+建议在使用 skill 之初先指定目标会议或期刊。若未指定，则默认采用 conference 模式下的通用模板。
 
 ### 2. Paper Framework
 
-Paper Framework 把 policy 转成 section-level 计划。它定义章节列表、每个 section 的角色、paper-type profile 对齐、venue/template 组装方式、正文预算，以及图表的 display-item budget。
+skill 内置了多种 paper-type profile，用于匹配不同类型论文的常见结构和写作思路，主要包括 section 分布、章节目标和内容组织方式，从而避免 AI 写作思路过于发散。
 
-这对真实投稿很重要：双栏图和大表会真实占页，所以在生成初稿前就必须把图表占用纳入预算。
+Paper Framework 会将 Writing Policy 转化为 section-level 计划，明确章节列表、每个 section 的核心内容、venue/template 组装方式、正文预算，以及图表和表格的 display-item budget。用户可以先基于 Paper Framework 进行调整与确认，再进入正文生成阶段。
 
 ### 3. 论文初稿
 
-用户确认 Framework 后，skill 会创建完整 LaTeX 论文项目，包括确认后的结构、模板、引用、章节和图表计划。官方 venue template 只作为格式壳使用：示例文字和说明文字会被移除，再写入论文内容。
+用户确认 Paper Framework 后，skill 会创建完整的 LaTeX 论文项目，包括确认后的论文结构、模板、引用、章节和图表计划。
 
-初稿交付前，skill 会完成内部 review 和 readiness pass。能在 writing-only 范围内修复的 blocking 问题会先修复；不能修复的证据、引用、排版或 venue-limit 风险会作为 unresolved risks 报告，而不是被隐藏。
+官方 venue template 仅作为格式壳使用：示例文字和说明内容会被移除，然后写入论文正文。
+
+初稿交付前，skill 会完成内部 review 和 readiness pass。
 
 ## 会议和期刊支持
 
-Academic Writing **同时内置会议和期刊**的模板与 paper-type profile，并不只服务会议论文。会议模板涵盖
-ICLR、NeurIPS、ICML、CVPR、ACL/EMNLP/NAACL、AAAI、IJCAI 等；期刊方向包含 IEEE Transactions、JMLR，
-以及面向任意未单独建模期刊的通用期刊 profile。期刊模式还会在基础写作规则之上叠加期刊特有的 section
-overlay 与投稿要素检查（必需声明、display item 上限、Methods 位置、篇幅预算等）。
+Academic Writing 同时内置会议和期刊的模板与 paper-type profile，并不只服务于会议论文。
+
+会议模板覆盖 ICLR、NeurIPS、ICML、CVPR、ACL、EMNLP、NAACL、AAAI、IJCAI 等；期刊方向支持 IEEE Transactions、JMLR，以及面向未单独建模期刊的通用 journal profile。
 
 | 情况 | 行为 |
 | --- | --- |
-| 用户明确点名会议 | 可用时加载对应 venue profile。 |
-| 用户没有指定 venue | 默认 conference 模式，使用 generic / venue TBD。 |
+| 用户明确点名会议 | 若对应 venue profile 可用，则加载该 profile。 |
+| 用户未指定 venue | 默认使用 conference 模式，并标记为 generic / venue TBD。 |
 | 用户明确点名期刊 | 使用 journal 模式和 journal paper-type profiles。 |
-| 用户点名未建模期刊 | 使用 generic journal profile，并把期刊特定字段保持为待确认。 |
+| 用户点名未建模期刊 | 使用 generic journal profile，并将期刊特定字段保留为待确认。 |
 
-这种保守路由可以避免用户只是说“写论文”时，被误写成期刊论文。
-
-## 可选图像生成
-
-数据图表由当前 agent 根据项目数据生成。对 teaser、概念图、overview image 等非数据类论文图片，skill 可以可选接入 Gemini 或 GPT-image，也支持普通 API key 和中继/base URL 配置。
-
-未配置图片 API 时，只要任务在能力范围内，当前 agent 仍可直接绘制或组装图。
+这种保守路由可以避免用户只是说“写论文”时，系统误将其组织成期刊论文。
 
 ## 安装
 
-请复制完整 `academic-writing` 目录，不要只复制 `SKILL.md`。这个 skill 依赖 `manifest.yaml`、`static/`、`references/`、`templates/` 和支持脚本。
+请复制完整目录，不要只复制 `SKILL.md`，因为该 skill 依赖 `manifest.yaml`、`static/`、`references/`、`templates/` 和相关支持脚本。
 
-### Claude Code
-
-用户级安装：
+**Clone the repo**
 
 ```bash
-mkdir -p ~/.claude/skills
-cp -R /path/to/academic-writing ~/.claude/skills/
+git clone https://github.com/Ssjoo02/Academic-writing-skills
+cd Academic-writing-skills
+```
+
+### 1. Codex
+
+将 skill 复制到 `$CODEX_HOME/skills/`：
+
+```bash
+mkdir -p "$CODEX_HOME/skills"
+cp -R Academic-writing-skills "$CODEX_HOME/skills/academic-writing"
+```
+
+使用示例：
+
+```text
+Use academic-writing to revise my paper's Introduction.
+```
+
+### 2. CC / Claude Code
+
+支持全局安装或项目级安装。
+
+全局安装：
+
+```bash
+mkdir -p "$HOME/.claude/skills"
+cp -R Academic-writing-skills "$HOME/.claude/skills/academic-writing"
 ```
 
 项目级安装：
 
 ```bash
-mkdir -p your-paper-repo/.claude/skills
-cp -R /path/to/academic-writing your-paper-repo/.claude/skills/
+mkdir -p .claude/skills
+cp -R Academic-writing-skills .claude/skills/academic-writing
 ```
 
-安装或更新后，重启 Claude Code。
+安装后重启 Claude Code，并在 prompt 中明确点名该 skill，例如：
 
-### Codex
+```text
+Please use the academic-writing skill to revise my Introduction.
+```
 
-用户级安装：
+## 绘图
+
+数据图表，如柱状图、折线图、雷达图、热力图、散点图和表格，会由当前 agent 直接根据项目数据生成，不需要额外配置。
+
+对于 teaser、概念图、overview image 等非数据类论文图片，skill 可选接入 Gemini 或 GPT-image 生图模型。
+
+未配置图片 API 时，默认由当前 agent 直接绘制；若配置了生图 API，则使用对应模型进行渲染。
+
+### 生图模型 API 配置
+
+skill 会通过环境变量自动检测可用的生图 API：
+
+- 设置 `GEMINI_API_KEY` 时，使用 Gemini；
+- 设置 `OPENAI_API_KEY` 时，使用 GPT-image；
+- 两者都设置时，优先使用 Gemini。
+
+普通官方 key 即可使用，也支持中继或自建网关的 base URL。
+
+**Gemini**
 
 ```bash
-mkdir -p ~/.codex/skills
-cp -R /path/to/academic-writing ~/.codex/skills/
+export GEMINI_API_KEY="你的_key"
+
+# 可选：使用中继或自建网关时覆盖 base URL
+# 默认：https://generativelanguage.googleapis.com
+export GEMINI_BASE_URL="https://your-relay.example.com"
+
+# 可选：覆盖模型
+# 默认：gemini-2.5-flash-image
+export GEMINI_IMAGE_MODEL="gemini-2.5-flash-image"
 ```
 
-如果你使用自定义 `$CODEX_HOME`，请把目录放到 `$CODEX_HOME/skills/` 下。
+**OpenAI / GPT-image**
 
-### 其他 agent 或手动使用
+```bash
+export OPENAI_API_KEY="你的_key"
 
-保持目录结构不变，先读取 `SKILL.md`。当它指向 `static/`、`references/` 或 `templates/` 时，在同一个 `academic-writing` 目录内解析路径。只加载当前任务真正需要的文件。
+# 可选：使用中继或自建网关时覆盖 base URL
+# 默认：https://api.openai.com
+export OPENAI_BASE_URL="https://your-relay.example.com"
+
+# 可选：覆盖模型
+# 默认：gpt-image-2
+export OPENAI_IMAGE_MODEL="gpt-image-2"
+```
+
+请将这些变量配置到运行 agent 的环境中，例如写入 shell 的 `~/.bashrc` / `~/.zshrc`，或在启动 agent 前执行 `export`。skill 在生成图片时会自动读取这些变量，无需设置任何自定义前缀变量。
+
+也可以在对话中直接告诉 agent 你的 API key 和指定模型，让 agent 调用对应 API 来完成绘图。
+
+## 编译为 PDF
+
+skill 产出的是一个**可编译的完整 LaTeX 项目**，默认位于 `paper/` 目录下，通常包含：
+
+```text
+paper/
+  main.tex
+  sections/*.tex
+  references.bib
+  math_commands.tex
+  venue template files
+```
+
+它不是一段零散的 `.tex` 文本，而是一个完整论文项目。要将其编译为 PDF，并让版面检查真正生效，运行环境中需要安装以下工具：
+
+- `latexmk` 或 `pdflatex`：来自 TeX Live / MacTeX，用于编译 LaTeX；
+- `pdfinfo` / `pdftotext`：来自 poppler-utils，用于读取编译后的 PDF，并进行页数预算等检查。
+
+只要环境中存在 `latexmk` 或 `pdflatex`，agent 在写作流程中会**自动编译论文，并以编译出的 PDF 为准**进行版面检查。检查内容包括但不限于：
+
+- 图表是否出界；
+- 是否存在 `Overfull \hbox`；
+- 表格是否溢出；
+- 附录排版是否异常；
+- 页数是否超过目标 venue 的预算。
+
+其中，图表、表格和排版问题会根据 `main.log` 判断；页数预算检查则需要配合 poppler 工具读取 `paper/main.pdf`。如果发现 blocking 问题，agent 会在 writing-only 范围内进行修复。
+
+如果环境里没有这些工具，agent 仍会生成完整的 LaTeX 源码并进行静态审计，但无法验证最终 PDF 的真实版面。也就是说，页数、出界、浮动体位置等依赖编译结果的问题需要在本地自行确认。
+
+本地编译方式如下：
+
+```bash
+cd paper
+latexmk -pdf main.tex
+```
+
+如果没有 `latexmk`，也可以使用：
+
+```bash
+pdflatex main.tex
+bibtex main
+pdflatex main.tex
+pdflatex main.tex
+```
+
+建议先装好 LaTeX 与 poppler 工具链，再让 agent 生成完整初稿。这样，版面相关的 gate 才能真正生效。
 
 ## 示例请求
 
+推荐在一开始就指定实验目录和目标会议，例如：
+
 ```text
-Use academic-writing to build a first manuscript from this workspace for EMNLP.
+Use academic-writing to build a first manuscript from this workspace for EMNLP, my workspace is xxx/xxx.
+Use academic-writing to revise this Introduction for ACL-style clarity, this is my paper xxx/xxx.
+```
+
+更多示例：
+
+```text
 Use academic-writing to write only the Writing Policy first.
 Use academic-writing to build the Paper Framework after I confirm the policy.
-Use academic-writing to revise this Introduction for ACL-style clarity.
 Use academic-writing to prepare a journal manuscript targeting JMLR.
 Use academic-writing to review this manuscript before submission.
 ```
 
-## 范围边界
+## 维护声明
 
-Academic Writing 能帮助你得到更清晰、更可辩护的论文初稿，但不保证录用。它不会伪造证据，不会隐藏 unsupported claims，也不会把缺失实验包装成自信结论。证据不足时，论文应该写得更克制，而不是更夸张。
+本项目会持续更新。欢迎大家试用，也非常感谢任何形式的反馈、建议或修改意见。
