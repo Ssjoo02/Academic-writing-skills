@@ -91,5 +91,48 @@ class LimitationsPlacementTests(unittest.TestCase):
         self.assertTrue(any("more than one dedicated Limitations section" in e for e in errors), errors)
 
 
+class CompileIntegrityTests(unittest.TestCase):
+    def test_undefined_references_in_log_are_errors(self) -> None:
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp:
+            paper = Path(tmp)
+            (paper / "main.log").write_text(
+                "LaTeX Warning: Reference `tab:missing' on page 3 undefined on input line 42.\n"
+                "LaTeX Warning: There were undefined references.\n",
+                encoding="utf-8",
+            )
+            errors: list[str] = []
+            warnings: list[str] = []
+
+            audit_draft.check_log(paper, errors, warnings)
+
+        self.assertTrue(any("undefined references" in e for e in errors), errors)
+
+    def test_unresolved_question_mark_refs_in_pdf_text_are_errors(self) -> None:
+        errors: list[str] = []
+
+        audit_draft.check_unresolved_pdf_refs(
+            ["Table ?? provides details.", "Figure 2 is fine.", "Section ?? is not fine."],
+            errors,
+        )
+
+        self.assertTrue(any("unresolved rendered reference" in e for e in errors), errors)
+
+    def test_invalid_end_section_environment_is_error(self) -> None:
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            path = base / "sections" / "experiments.tex"
+            path.parent.mkdir()
+            path.write_text("\\section{Experiments}\nText.\n\\end{section}\n", encoding="utf-8")
+            errors: list[str] = []
+
+            audit_draft.check_invalid_latex_environments([path], base, errors)
+
+        self.assertTrue(any("invalid LaTeX section environment" in e for e in errors), errors)
+
+
 if __name__ == "__main__":
     unittest.main()

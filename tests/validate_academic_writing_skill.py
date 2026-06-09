@@ -121,6 +121,52 @@ def validate_post_draft_review_contract(root: Path, manifest: dict) -> None:
     )
 
 
+def validate_final_quality_gates(root: Path) -> None:
+    full_draft = (root / "static/workflow/full-draft.md").read_text()
+    submission_readiness = (root / "references/checks/submission-readiness.md").read_text()
+    figures_tables = (root / "references/sections/figures-and-tables.md").read_text()
+    conclusion = (root / "references/sections/conclusion.md").read_text()
+    audit_script = (root / "scripts/audit_draft.py").read_text()
+
+    require(
+        "Table ??" in full_draft and "undefined references" in full_draft,
+        "Full Draft workflow must block unresolved rendered references such as Table ??",
+    )
+    require(
+        "invalid LaTeX section environment" in audit_script
+        and "check_invalid_latex_environments" in audit_script,
+        "audit_draft.py must block invalid section environments such as \\end{section}",
+    )
+    require(
+        "check_unresolved_pdf_refs" in audit_script
+        and "UNRESOLVED_RENDERED_REF_RE" in audit_script,
+        "audit_draft.py must scan the rendered PDF for Table ?? / Figure ?? references",
+    )
+    require(
+        "undefined references present" in audit_script
+        and "errors.append" in audit_script,
+        "audit_draft.py must treat undefined references as errors",
+    )
+    require(
+        "section is long" in audit_script
+        and "errors.append" in audit_script
+        and "120-180 words" in conclusion
+        and "blocking" in conclusion.lower(),
+        "over-long Limitations must be a blocking defect, not a warning-only style note",
+    )
+    require(
+        "Never let a table overflow" in figures_tables
+        and "hard defect" in figures_tables
+        and "appendix" in figures_tables.lower(),
+        "figure/table guide must make body and appendix overflow a hard defect",
+    )
+    require(
+        "undefined references or citations" in submission_readiness
+        and "BLOCKED" in submission_readiness,
+        "submission-readiness must block undefined references and citations",
+    )
+
+
 def validate_paper_type_families(root: Path, manifest: dict) -> None:
     paper_type_values = manifest["axes"]["paper_type"]["values"]
     conference = [key for key in paper_type_values if not key.startswith("journal-")]
@@ -166,6 +212,7 @@ def main(argv: list[str]) -> int:
     validate_manifest_paths(root, manifest)
     validate_venue_kind_first_contract(root, manifest)
     validate_post_draft_review_contract(root, manifest)
+    validate_final_quality_gates(root)
     validate_paper_type_families(root, manifest)
     validate_venue_cards(root, manifest)
     print(f"academic-writing skill validation passed: {root}")

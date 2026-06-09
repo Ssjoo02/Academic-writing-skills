@@ -664,6 +664,12 @@ misspells. Do **not** hand-draw pipeline boxes in matplotlib.
     overflow ladder in rule 3d (table* → rotate/split → resize), revise, and recompile before
     returning the draft. A compile-log overfull `\hbox` whose source is a `tabular` is this defect —
     do not dismiss it as cosmetic.
+10b. **No unresolved rendered references.** After compiling, inspect the PDF text and compile log for
+    `Table ??`, `Figure ??`, `Section ??`, undefined references, and undefined citations. Any `??`
+    marker or LaTeX undefined-reference/citation warning is a **blocking** defect: fix the missing
+    `\label{...}` / `\ref{...}` / BibTeX entry, remove invalid LaTeX such as `\end{section}`, and
+    recompile until the rendered PDF contains no unresolved reference markers. Never return text like
+    `Table ?? provides ...` to the user.
 11. **Design the appendix against the opposite defect — sparseness, not overflow.** Once the page
     budget is gone, the failure mode flips: short floats scatter across half-empty pages and each
     appendix section becomes a one-line pointer (`Table~N provides ...`) plus a bare float ("太空").
@@ -949,8 +955,10 @@ authoritative.
   entries, uncited entries). Then **re-run the audit**. Repeat until `PASS`.
 - `audit_draft.py` reports errors → **fix every error in the LaTeX source** (footnotes,
   file/code artifacts, leftover `% *_NEEDED` markers, duplicate labels, overfull pages,
-  misplaced/duplicated Limitations units, content-page overflow, and disclosure leaks — internal
-  identifiers that should use a display name, or do-not-disclose entities that appear in prose). For
+  unresolved rendered references such as `Table ??` / `Figure ??`, invalid LaTeX section
+  environments such as `\end{section}`, misplaced/duplicated or over-long Limitations units,
+  content-page overflow, and disclosure leaks — internal identifiers that should use a display name,
+  or do-not-disclose entities that appear in prose). For
   a misplaced Limitations unit, move it into the single dedicated `\section{Limitations}`; for
   content-page overflow, apply the compression ladder above (limitations to its own section →
   conclusion trim → subsection merge → enumerations to tables → appendix). For a disclosure leak,
@@ -967,10 +975,12 @@ authoritative.
   mismatch, uncited entries, unresolved `% CITATION_NEEDED` markers, and (with `--min-citations`)
   a low-citation-coverage warning when the bibliography is thinner than the paper type expects.
 - `audit_draft.py`: mechanical writing rules — footnotes, file/code artifacts, local
-  paths, subsection budget, duplicate labels, input consistency, leftover markers,
+  paths, subsection budget, duplicate labels, input consistency, unresolved rendered references,
+  undefined references/citations, invalid LaTeX section environments, leftover markers,
   Limitations placement (no Limitations-titled subsection/paragraph/`\textbf` run-in inside a body
-  section; at most one dedicated `\section{Limitations}`), venue-aware content-page budget (counting
-  stops at the first post-matter heading, so a dedicated Limitations/Ethics section is excluded), and
+  section; at most one dedicated `\section{Limitations}`), Limitations length, venue-aware
+  content-page budget (counting stops at the first post-matter heading, so a dedicated
+  Limitations/Ethics section is excluded), and
   the disclosure check (internal identifiers and do-not-disclose entities listed in
   `paper/.disclosure.yaml`, plus a heuristic warning for internal-looking identifier tokens even when
   no list is present).

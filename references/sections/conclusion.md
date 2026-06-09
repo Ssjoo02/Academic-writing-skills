@@ -43,8 +43,8 @@ attack surfaces — neither helps.
   limitations of this work…") and the promotional closer ("Despite these limitations, we
   believe our work provides…"). Lead directly with the first limitation and stop after the last.
 - **Lead with the limitation itself** (a short bold lead-in or topic phrase), not with a wind-up.
-- **Target ≈ 120–180 words total** — well under half a column. If it is longer, you are
-  over-explaining; compress.
+- **Target ≈ 120-180 words total** — well under half a column. If it is longer, it is a
+  **blocking** writing defect for a first manuscript: compress before returning.
 
 ## Principles
 

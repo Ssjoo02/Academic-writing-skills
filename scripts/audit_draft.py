@@ -39,11 +39,13 @@ Checks (errors block; warnings inform):
 - limitations length: warn when a standalone Limitations section is over-long (>~190 words),
   over-enumerated (5+ points incl. bold-lead paragraphs), or wrapped in boilerplate opener/closer.
   Resolves the body across the main.tex-heading + \\input-body split.
+- no invalid section environments such as \\end{section}; LaTeX sectioning commands are commands,
+  not begin/end environments.
 - no duplicate \\label{...}
 - \\input/\\include consistency between main.tex and section files
 - compile-log signals when main.log exists (undefined refs/citations, multiply
-  defined labels; a large overfull hbox — content past the margin / "出界" — is a
-  blocking error, minor overfulls are warnings)
+  defined labels, rendered Table ?? / Figure ?? / Section ?? references; a large overfull hbox —
+  content past the margin / "出界" — is a blocking error, minor overfulls are warnings)
 """
 
 from __future__ import annotations
@@ -86,6 +88,7 @@ SUBSECTION_RE = re.compile(r"\\subsection\b\s*\{")
 SECTION_RE = re.compile(r"\\section\b\s*\{")
 LABEL_RE = re.compile(r"\\label\s*\{([^}]*)\}")
 INPUT_RE = re.compile(r"\\(?:input|include)\s*\{([^}]*)\}")
+INVALID_SECTION_ENV_RE = re.compile(r"\\(?:begin|end)\s*\{(?:section|subsection|subsubsection|paragraph)\}")
 HLINE_RE = re.compile(r"\\hline\b")
 TABULAR_BEGIN_RE = re.compile(r"\\begin\{(tabular\*?|tabularx)\}")
 TEXTSC_LOWER_RE = re.compile(r"\\textsc\s*\{\s*[a-z]")
@@ -100,6 +103,9 @@ REFERENCE_HEADING_RE = re.compile(r"(?m)^\s*(References|Bibliography)\s*$")
 POSTMATTER_HEADING_RE = re.compile(
     r"(?m)^\s*(References|Bibliography|Limitations|Acknowledg(?:ments|ements)|"
     r"Ethics(?:\s+Statement)?|Ethical\s+Considerations|Broader\s+Impact|Impact\s+Statement)\s*$"
+)
+UNRESOLVED_RENDERED_REF_RE = re.compile(
+    r"\b(?:Table|Figure|Fig\.|Section|Sec\.|Appendix|Eq\.|Equation)\s+\?\?"
 )
 # Limitations declared as a structural unit. A dedicated \section{Limitations} (numbered or
 # starred) is the correct home; a \subsection / \paragraph / \textbf run-in titled
@@ -625,13 +631,14 @@ def _flatten_inputs(paper_dir: Path, text: str, depth: int = 0, seen: set[Path] 
     return INPUT_RE.sub(repl, text)
 
 
-def check_limitations(paper_dir: Path, warnings: list[str]) -> None:
+def check_limitations(paper_dir: Path, errors: list[str], warnings: list[str]) -> None:
     """Heuristic: a standalone Limitations section that is over-long / over-enumerated / boilerplate.
 
     Resolves the section body even when the heading lives in main.tex and the prose arrives via
     \\input (the common split that silently defeats a per-file check). Warns past ~190 words, on 5+
     separate limitations (\\item, ordinals, or bold-lead paragraphs), or on boilerplate framing.
-    Warnings only.
+    Over-long or over-enumerated limitations are blocking for first-draft delivery because they are
+    easy to fix in writing and otherwise hand reviewers avoidable objections.
     """
     main = paper_dir / "main.tex"
     if main.exists():
@@ -658,12 +665,12 @@ def check_limitations(paper_dir: Path, warnings: list[str]) -> None:
     )
 
     if words > LIMITATIONS_MAX_WORDS:
-        warnings.append(
+        errors.append(
             f"{where} section is long ({words} words); cap at ~120-180 words, keep the 3-4 most "
             f"material limitations, 1-2 sentences each"
         )
     if points >= LIMITATIONS_MAX_POINTS:
-        warnings.append(
+        errors.append(
             f"{where} enumerates {points} separate points; merge or cut to the 3-4 a reviewer would "
             f"actually raise"
         )
@@ -757,6 +764,23 @@ def check_limitations_placement(files: list[Path], base: Path, errors: list[str]
         )
 
 
+def check_invalid_latex_environments(files: list[Path], base: Path, errors: list[str]) -> None:
+    """Flag sectioning commands written as environments.
+
+    LaTeX has `\\section{...}` commands, not `\\begin{section}` / `\\end{section}` environments.
+    An erroneous `\\end{section}` can leave labels unresolved and surface as `Table ??` in the PDF.
+    """
+    for path in files:
+        text = strip_comments(path.read_text(encoding="utf-8", errors="ignore"))
+        name = rel(path, base)
+        for lineno, line in enumerate(text.splitlines(), 1):
+            if INVALID_SECTION_ENV_RE.search(line):
+                errors.append(
+                    f"invalid LaTeX section environment: {name}:{lineno}: "
+                    f"use \\section{{...}} commands only; remove \\begin/\\end{{section}}"
+                )
+
+
 def check_labels(files: list[Path], base: Path, errors: list[str]) -> None:
     seen: dict[str, str] = {}
     for path in files:
@@ -799,9 +823,9 @@ def check_log(paper_dir: Path, errors: list[str], warnings: list[str]) -> None:
         return
     text = log.read_text(encoding="utf-8", errors="ignore")
     if "There were undefined references" in text or re.search(r"Reference `[^']+' on page", text):
-        warnings.append("compile log: undefined references present")
+        errors.append("compile log: undefined references present; rerun LaTeX or fix missing labels before returning")
     if re.search(r"Citation `[^']+' (?:on page .*?)?undefined", text):
-        warnings.append("compile log: undefined citations present")
+        errors.append("compile log: undefined citations present; fix missing BibTeX entries before returning")
     if "multiply defined" in text:
         warnings.append("compile log: multiply-defined labels present")
     # Overfull \hbox = content pushed past the text/column edge into the margin
@@ -824,6 +848,26 @@ def check_log(paper_dir: Path, errors: list[str], warnings: list[str]) -> None:
         )
     if small:
         warnings.append(f"compile log: {small} minor overfull hbox warning(s) (< {OVERFULL_ERROR_PT:.0f}pt)")
+
+
+def check_unresolved_pdf_refs(text_pages: list[str], errors: list[str]) -> None:
+    for index, page_text in enumerate(text_pages, 1):
+        for m in UNRESOLVED_RENDERED_REF_RE.finditer(page_text):
+            snippet = " ".join(page_text[max(0, m.start() - 50): m.end() + 80].split())
+            errors.append(f"unresolved rendered reference on PDF page {index}: ...{snippet}...")
+
+
+def check_rendered_pdf_refs(paper_dir: Path, errors: list[str]) -> None:
+    pdf_path = paper_dir / "main.pdf"
+    if not pdf_path.exists():
+        return
+    page_count = pdf_page_count(pdf_path)
+    if page_count is None:
+        return
+    pages = pdf_text_pages(pdf_path, page_count)
+    if pages is None:
+        return
+    check_unresolved_pdf_refs(pages, errors)
 
 
 def content_pages_before_references(text_pages: list[str]) -> int:
@@ -938,14 +982,16 @@ def audit(paper_dir: Path, max_content_pages: int | None = None) -> tuple[list[s
         check_prose_in_narrow_column(path, paper_dir, warnings)
         check_disclosure(path, paper_dir, naming_map, do_not_disclose, errors)
         check_internal_id_heuristic(path, paper_dir, allow, warnings)
-    check_limitations(paper_dir, warnings)
+    check_limitations(paper_dir, errors, warnings)
     check_booktabs_loaded(paper_dir, files, errors)
     check_appendix_page(paper_dir, warnings)
     check_appendix_substance(paper_dir, warnings)
     check_limitations_placement(files, paper_dir, errors)
+    check_invalid_latex_environments(files, paper_dir, errors)
     check_labels(files, paper_dir, errors)
     check_input_consistency(paper_dir, errors, warnings)
     check_log(paper_dir, errors, warnings)
+    check_rendered_pdf_refs(paper_dir, errors)
     check_page_budget(paper_dir, max_content_pages, errors, warnings)
     return errors, warnings
 

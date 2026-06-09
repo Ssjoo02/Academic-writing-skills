@@ -8,11 +8,11 @@ English: [README.md](README.md)
 
 Academic Writing 面向研究流程中的**论文建构阶段**：将实验结果、研究笔记、图表、证据和 claim 组织成一篇结构完整、论证连贯的论文初稿。
 
-它默认只处理写作相关任务，不会改变研究本身。也就是说，它可以帮助你改进论文结构、论证链、章节逻辑、claim-evidence 对齐、venue fit、引用卫生、图表表达和 reviewer-facing clarity，但不会默认修改研究 idea、运行实验、编造结果、伪造引用，或将证据不足的 claim 写得过强。
+它默认只处理写作相关任务，不会改变研究本身。也就是说，它可以帮助你改进论文结构、论证链、章节逻辑、claim-evidence 对齐、venue fit、引用卫生、图表表达和 reviewer-facing clarity；但不会默认修改研究 idea、运行实验、编造结果、伪造引用，或将证据不足的 claim 写得过强。
 
 该 skill 适合以下场景：
 
-- **已有部分实验结果，想写论文初稿**：实验已经完成或部分完成，已有结果与研究笔记，希望将其组织成一篇结构完整、逻辑连贯的论文初稿。
+- **已有部分实验结果，想写论文初稿**：实验已经完成或部分完成，手中已有结果与研究笔记，希望将其组织成一篇结构完整、逻辑连贯的论文初稿。
 - **已有初稿，希望润色或重写**：针对 Introduction、Method、Experiments 等章节进行起草、重构，或按照特定 venue 风格进行润色。
 - **指定 venue 的成稿需求**：明确目标会议或期刊，例如 EMNLP、NeurIPS、JMLR，需要根据对应模板、篇幅预算和投稿要求组织论文。
 - **分步推进写作流程**：只想先生成 Writing Policy 或 Paper Framework，在确认论文身份、证据边界和章节结构后，再继续生成正文。
@@ -190,7 +190,7 @@ export OPENAI_IMAGE_MODEL="gpt-image-2"
 
 请将这些变量配置到运行 agent 的环境中，例如写入 shell 的 `~/.bashrc` / `~/.zshrc`，或在启动 agent 前执行 `export`。skill 在生成图片时会自动读取这些变量，无需设置任何自定义前缀变量。
 
-也可以在对话中直接告诉 agent 你的 API key 和指定模型，让 agent 调用对应 API 来完成绘图。
+你也可以在对话中直接告诉 agent API key 和指定模型，让 agent 调用对应 API 完成绘图。
 
 ## 编译为 PDF
 
@@ -205,7 +205,7 @@ paper/
   venue template files
 ```
 
-它不是一段零散的 `.tex` 文本，而是一个完整论文项目。要将其编译为 PDF，并让版面检查真正生效，运行环境中需要安装以下工具：
+它不是一段零散的 `.tex` 文本，而是一个完整论文项目。为了将其编译为 PDF，并让版面检查真正生效，建议在运行环境中安装以下工具：
 
 - `latexmk` 或 `pdflatex`：来自 TeX Live / MacTeX，用于编译 LaTeX；
 - `pdfinfo` / `pdftotext`：来自 poppler-utils，用于读取编译后的 PDF，并进行页数预算等检查。
@@ -218,24 +218,13 @@ paper/
 - 附录排版是否异常；
 - 页数是否超过目标 venue 的预算。
 
-其中，图表、表格和排版问题会根据 `main.log` 判断；页数预算检查则需要配合 poppler 工具读取 `paper/main.pdf`。如果发现 blocking 问题，agent 会在 writing-only 范围内进行修复。
-
-如果环境里没有这些工具，agent 仍会生成完整的 LaTeX 源码并进行静态审计，但无法验证最终 PDF 的真实版面。也就是说，页数、出界、浮动体位置等依赖编译结果的问题需要在本地自行确认。
+如果环境中没有这些工具，agent 仍会生成完整的 LaTeX 源码并进行静态审计，但无法验证最终 PDF 的真实版面。
 
 本地编译方式如下：
 
 ```bash
 cd paper
 latexmk -pdf main.tex
-```
-
-如果没有 `latexmk`，也可以使用：
-
-```bash
-pdflatex main.tex
-bibtex main
-pdflatex main.tex
-pdflatex main.tex
 ```
 
 建议先装好 LaTeX 与 poppler 工具链，再让 agent 生成完整初稿。这样，版面相关的 gate 才能真正生效。
@@ -247,15 +236,6 @@ pdflatex main.tex
 ```text
 Use academic-writing to build a first manuscript from this workspace for EMNLP, my workspace is xxx/xxx.
 Use academic-writing to revise this Introduction for ACL-style clarity, this is my paper xxx/xxx.
-```
-
-更多示例：
-
-```text
-Use academic-writing to write only the Writing Policy first.
-Use academic-writing to build the Paper Framework after I confirm the policy.
-Use academic-writing to prepare a journal manuscript targeting JMLR.
-Use academic-writing to review this manuscript before submission.
 ```
 
 ## 维护声明
