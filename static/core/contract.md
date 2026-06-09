@@ -6,13 +6,13 @@ those claims, and what must stay bounded.
 
 ## ⚠️ Critical Decision Rule
 
-**The agent MUST NOT guess any of the six contract points below.** If any point cannot be
+**The agent MUST NOT guess any of the seven contract points below.** If any point cannot be
 determined from the workspace evidence, the agent MUST stop and ask the user. Guessing paper
-identity, core story, claims, key terminology, or venue produces false contracts that cascade
-into wrong drafts. When in doubt: **stop, ask, wait for explicit user response, then proceed.**
-The full rule is in `static/core/gates.md`.
+identity, core story, claims, key terminology, disclosure boundary, or venue produces false
+contracts that cascade into wrong drafts. When in doubt: **stop, ask, wait for explicit user
+response, then proceed.** The full rule is in `static/core/gates.md`.
 
-## The Six-Point Contract
+## The Seven-Point Contract
 
 Before writing any paper artifact, establish:
 
@@ -46,11 +46,37 @@ Before writing any paper artifact, establish:
    a use policy, and a status. Terminology must stay stable across the paper.
 
 6. **Venue and format contract**: venue kind, target template, page/length budget, what counts
-   toward the limit, required statements, post-main section order, and citation style. If the venue
+   toward the limit, required statements, post-main section order, and citation style. **Templates
+   are local-first:** the official template for each major venue is preloaded in `templates/`; when
+   the target venue maps to a bundled template (`templates/index.md`), use that local file — do not
+   web-search, download, or reconstruct venue formatting from memory. If the venue
    is unconfirmed and venue kind is conference, use generic_article.tex with a soft 6-8
    main-text-page drafting budget and record that the official template is unresolved. If venue kind
    is journal but the target journal is not modeled, use `journal-generic` and keep journal-specific
    fields unresolved until the target journal guidelines are verified.
+
+7. **Disclosure and naming boundary**: which entities may appear in the paper, under what name.
+   This is distinct from the claims-and-evidence boundary (point 4): point 4 governs *what the paper
+   may assert*, this point governs *what may appear at all*. The workspace artifacts the writing job
+   reads (`NARRATIVE_REPORT.md`, `EXPERIMENT_LOG.md`, `findings.md`, `results/*.json`, run trackers)
+   routinely carry internal scaffolding — checkpoint names, training-run / sweep identifiers, wandb
+   run names, internal tool names, unreleased model names, and competing methods the authors do not
+   intend to compare against — and none of these belong in the manuscript verbatim. Establish two
+   registries before drafting:
+   - **Naming Map**: internal identifier → the single public display name used in the paper. The
+     internal identifier (e.g. a `..._step380` checkpoint tag) MUST NOT appear anywhere in prose,
+     captions, tables, or figures; only the display name (e.g. the released model name) is written.
+   - **Do-Not-Disclose list**: entities that must not appear at all — neither asserted, nor named in
+     passing, nor referenced by negation or exclusion (do not write "the protocol that excludes X").
+     Typical members: a baseline / competing method the authors deliberately withhold, an internal
+     tool, an unreleased dataset, a partner or product name, or any not-for-publication result.
+
+   **Integrity guard (overrides the disclosure default):** withholding a competing method is
+   legitimate only when it is internal scaffolding, not when it hides a stronger comparison. If
+   removing a Do-Not-Disclose entity would make a comparison claim misleading — e.g. a "state of the
+   art" / "best" / "outperforms all" claim becomes true only because a stronger method was hidden —
+   this is an `idea-level risk`: **stop and ask the user**; do not silently produce the flattering
+   claim. Disclosure control suppresses names; it never manufactures a false comparison result.
 
 ## Evidence Classification
 
@@ -64,6 +90,11 @@ Classify important sources as:
 
 For claims and evidence: `unknown`, `supported`, `partially supported`, `needs evidence`,
 `not verified`, `should avoid`.
+
+For disclosure status of an entity (model, method, baseline, dataset, tool, identifier):
+`public` (may appear as written), `display-as:<name>` (must be renamed to the public display name;
+the internal identifier is forbidden), `restricted` (only a bounded, agreed description may appear),
+`do-not-disclose` (must not appear at all, including by negation or exclusion).
 
 ## Source Conflict Rule
 

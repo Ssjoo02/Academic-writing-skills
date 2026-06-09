@@ -16,38 +16,43 @@ source files.
 This route now covers **both** conceptual teasers **and** pipeline / architecture
 / workflow concept figures, because the goal is a polished *illustrative* figure
 (devices, UI panels, icons, actors, a scene), not a flowchart of rounded
-rectangles. Use AI generation for the **visual**; do not use it for the **text**
-(see the next section). Reserve a deterministic node-edge diagram (FigureSpec /
-TikZ) only when the user explicitly asks for an editable schematic, or when the
-figure is genuinely a formal graph/state machine where a clean schematic reads
-better than an illustration.
+rectangles. The image model may render the labels directly in the image (see the
+next section); the labels must then be verified. Reserve a deterministic node-edge
+diagram (FigureSpec / TikZ) only when the user explicitly asks for an editable
+schematic, or when the figure is genuinely a formal graph/state machine where a
+clean schematic reads better than an illustration.
 
-## Text Is Never Rendered By The Image Model (critical)
+## Text In The Image Is Allowed, But Must Be Verified (critical)
 
-Raster image models **cannot spell**. They reliably corrupt exact labels — real
-generations from this skill produced `Indulator` (Emulator), `Doicker`
-(Docker), `Missformation` (Misinformation), and `pipeine` (pipeline). Garbled
-text in a paper figure is fatal. Therefore:
+This skill's focus is the paper, not figure tooling, so the image model is allowed
+to render the figure's labels directly in the image. The price is that raster
+image models **sometimes misspell** — real generations from this skill produced
+`Indulator` (Emulator), `Doicker` (Docker), `Missformation` (Misinformation), and
+`pipeine` (pipeline). Garbled or wrong text in a paper figure is still fatal, so
+the policy is *generate-then-verify*, not *forbid*:
 
-- **The image model renders only the illustration, with no text.** State this in
-  the prompt explicitly: *"Do not render any text, letters, words, numbers, or
-  labels anywhere in the image."* Any text the model adds is treated as noise to
-  be cropped or covered, never trusted.
-- **All exact labels are added deterministically after generation**, as a LaTeX /
-  TikZ overlay on top of `\includegraphics`, so every word is spelled from the
-  Writing Policy and stays editable. This is the **hybrid pattern** and it is the
-  default for every picture figure.
+- **Tell the model exactly which labels to render, spelled correctly.** List the
+  exact label strings (from the Writing Policy / Paper Framework) in the prompt and
+  ask for clean, legible, correctly spelled sans-serif text. Do not invent labels,
+  numbers, claims, modules, or datasets the paper does not support.
+- **Verify every visible word after generation (mandatory).** Open the rendered
+  PNG and read each label. If any word is misspelled, garbled, duplicated, or does
+  not match the paper's exact terminology, the figure fails — **regenerate** (re-emphasizing the exact label spelling), or fix that label with the overlay
+  fallback below. A figure with a misspelled label must never ship.
 - **Never paste the prompt scaffolding into the image.** The lines `Message:`,
   `Show exactly these components:`, and `Use exactly these labels:` are
   instructions to *you*, not text to be drawn. A clean Direct Image Prompt is a
-  single visual description with no rubric headers (a past run drew the literal
-  `Message:` sentence into the figure).
+  single visual description with the label strings woven in naturally, not a rubric
+  dump (a past run drew the literal `Message:` sentence into the figure).
 
-### Hybrid Overlay Pattern (LaTeX/TikZ)
+### Overlay Fallback Pattern (LaTeX/TikZ) — when the model cannot spell a label
 
-Generate the text-free illustration, then place labels over it with TikZ in a
-normalized 0–1 coordinate space, tuning anchor positions by **looking at the
-rendered PNG** and adjusting:
+The hybrid overlay is no longer mandatory; use it as a **fallback** when the model
+keeps misspelling a specific label, when a label must stay editable, or when you
+deliberately generate a text-free illustration and add all labels yourself. In that
+case generate the illustration (text-free for that region), then place labels over
+it with TikZ in a normalized 0–1 coordinate space, tuning anchor positions by
+**looking at the rendered PNG** and adjusting:
 
 ```tex
 \begin{figure*}[t]
@@ -56,11 +61,17 @@ rendered PNG** and adjusting:
   % background illustration drawn by the image model (text-free)
   \node[anchor=south west,inner sep=0] (img) at (0,0)
     {\includegraphics[width=\textwidth]{figures/fig1_teaser.png}};
+  % CLAMP the picture's bounding box to the image so no overlay node can push the
+  % figure past \textwidth into the margin (prevents the Overfull \hbox / "出界").
+  \useasboundingbox (img.south west) rectangle (img.north east);
   % overlay exact labels in normalized (x,y) ∈ [0,1] over the image
   \begin{scope}[x={(img.south east)},y={(img.north west)}]
     \node[font=\sffamily\small\bfseries] at (0.10,0.52) {User};
     \node[font=\sffamily\small\bfseries] at (0.46,0.55) {GUI Agent};
     \node[font=\sffamily\footnotesize]   at (0.86,0.74) {HARM};
+    % edge labels: inset and anchored INWARD so the label box stays on the image
+    \node[anchor=west,font=\sffamily\scriptsize] at (0.04,0.90) {Email};   % left column
+    \node[anchor=east,font=\sffamily\scriptsize] at (0.96,0.90) {Phishing}; % right column
     % ... place each label, then recompile and re-inspect alignment
   \end{scope}
 \end{tikzpicture}
@@ -74,6 +85,47 @@ Requires `\usepackage{tikz}` in the preamble. Iterate: compile → look at the P
 impractical for a dense figure, fall back to a clean deterministic figure (TikZ
 schematic or a compact labeled illustration) rather than shipping garbled
 in-image text.
+
+#### Overlay Bounding-Box Rule (prevents 出界 / overfull \hbox)
+
+A `figure*` image at `width=\textwidth` already fills the full text width, so a
+TikZ overlay node whose box extends past the image edge enlarges the
+`tikzpicture` bounding box and pushes the figure **into the margin** — LaTeX
+reports it as `Overfull \hbox (... too wide)` and `audit_draft.py` blocks on it.
+Two mandatory guards:
+
+1. **Clamp the picture box to the image.** Immediately after the image node, add
+   `\useasboundingbox (img.south west) rectangle (img.north east);`. This fixes
+   the figure's size to the image regardless of overlay placement.
+2. **Inset edge labels and anchor them inward.** Never place an outward-anchored
+   label at the extreme edge (e.g. `anchor=east` at `x≈0.0`, or `anchor=west` at
+   `x≈1.0`) — its box spills off the image. Keep every label's *box* inside
+   `(x,y) ∈ [0,1]`: put left-edge labels around `x≈0.03–0.06` and right-edge
+   labels around `x≈0.94–0.97`, anchoring **toward the image center**. Labels
+   live on the image, not in the surrounding whitespace.
+
+### Aspect, Height, And Whitespace (prevents tall figures / "上下边距太长")
+
+The image model emits a fixed canvas (often 16:9, e.g. 1376×768). Forcing
+`width=\textwidth` on a 16:9 image makes it ~9–10 cm tall — too tall for a teaser
+or pipeline banner — and if the scene only occupies a central strip, the baked-in
+empty top/bottom bands read as excessive vertical margin. Control this:
+
+- **Prompt for the right shape.** For a double-column teaser/pipeline **banner**,
+  ask for a **wide, short composition that fills the whole canvas edge to edge**
+  (target aspect roughly `3:1` to `4:1`, so at `\textwidth` the height is ~4.5–6
+  cm). For a single-column figure target roughly `1.6:1` to `2:1`. State "fill the
+  full frame, no empty margins or blank bands" in the Direct Image Prompt.
+- **Cap the rendered height.** When in doubt, bound the height explicitly so a
+  mis-shaped render cannot eat a third of the page:
+  `\includegraphics[width=\textwidth,height=5.5cm,keepaspectratio]{...}` (use a
+  larger cap only if the content genuinely needs it).
+- **Trim baked-in whitespace instead of shipping it.** If the rendered PNG still
+  has empty top/bottom (or side) bands, crop them — either re-export the PNG
+  cropped to content, or trim at include time:
+  `\includegraphics[trim=0 120 0 120,clip,width=\textwidth]{...}` (`trim` is
+  `left bottom right top` in **bigpoints**; read the values off the PNG). Do not
+  leave a thin content strip floating in a tall empty box.
 
 ## Required Dual Output
 
@@ -117,8 +169,8 @@ Use this file shape:
 ## Evidence Boundary
 - Source files:
 - Confirmed concepts:
-- Labels allowed in the image:
-- Labels or claims forbidden in the image:
+- Exact labels to render in the image (correct spelling, from the Writing Policy):
+- Labels, numbers, or claims forbidden in the image:
 
 ## Visual Plan
 - Canvas:
@@ -129,11 +181,17 @@ Use this file shape:
 - Accessibility:
 
 ## Direct Image Prompt
-<A single clean paragraph describing the illustration only. No rubric headers, no
-label lists, no spelled-out words to draw. End with the no-text instruction.>
+<A single clean paragraph describing the scene, with the exact label strings woven
+in naturally and a request for clean, legible, correctly spelled sans-serif text.
+No rubric headers.>
 
-## Text Overlay Plan
-- Labels to overlay (exact spelling from Writing Policy): ...
+## Label Verification Plan
+- Exact labels that must appear, spelled correctly: ...
+- After rendering, confirm each label reads correctly; list any that needed a
+  regenerate or an overlay fix.
+
+## Overlay Fallback Plan (only if the model misspells a label)
+- Labels to overlay instead (exact spelling from Writing Policy): ...
 - Approximate normalized positions (x,y in 0–1): ...
 
 ## Renderer Route
@@ -147,8 +205,8 @@ label lists, no spelled-out words to draw. End with the no-text instruction.>
 ## Writing the Direct Image Prompt
 
 The Direct Image Prompt is **one clean visual paragraph**, not a filled-in rubric.
-Describe the scene the way you would commission an illustrator, then end with the
-no-text instruction. Quality guardrails:
+Describe the scene the way you would commission an illustrator, and name the exact
+labels that should appear, spelled correctly. Quality guardrails:
 
 - **Illustrative, not a flowchart.** Aim for a scene with concrete objects —
   smartphone / device frames, app UI panels, channel icons (envelope, chat
@@ -159,29 +217,33 @@ no-text instruction. Quality guardrails:
   generous but balanced whitespace (no large empty bands; fill the canvas evenly).
 - **Restrained color**: soft professional tones, a small consistent palette; no
   oversaturated colors.
-- **No text in the image**: finish every prompt with *"Do not render any text,
-  letters, words, numbers, or labels anywhere — leave clean space where labels
-  will be added later."* Labels come from the Text Overlay Plan, not the model.
+- **Text in the image**: name the exact labels to render and ask for *"clean,
+  legible, correctly spelled sans-serif labels"*. Keep labels few and short (a word
+  or two each) — short strings are far less likely to be misspelled than sentences.
+  After rendering, verify every word (see the Review Gate). If a label keeps coming
+  out garbled, generate that region text-free and add the label with the overlay
+  fallback.
 - **Avoid**: photorealism, messy sketch lines, heavy drop shadows, rainbow
-  gradients, 3D bevels, glow effects, and any embedded words.
+  gradients, 3D bevels, glow effects, and long sentences baked into the image.
 
 The rest — palette, exact layout, icon choice — is decided per figure from the
 Evidence Boundary and Visual Plan. Do not copy a fixed style string into every
 prompt.
 
-### Example Direct Image Prompt (pipeline, illustrative, text-free)
+### Example Direct Image Prompt (pipeline, illustrative, with labels)
 
 > A clean flat vector academic illustration of a left-to-right process for
 > building a mobile-app safety benchmark. Six evenly spaced circular icon
 > medallions in a single horizontal row, equal spacing, connected by thin clean
 > right-pointing arrows: a checklist clipboard, a smartphone showing an app
 > screen, a hand typing a chat message, a magnifier over a warning shield, a
-> stack of Android emulator phone frames, and a padlocked archive box. Below the
-> row, a slim horizontal band suggesting a worked example with small app icons
-> (envelope, calendar) and an arrow flow. Soft professional palette of blue,
-> teal, amber, and slate on a white background, minimalist, balanced, filling the
-> full width evenly. Do not render any text, letters, words, numbers, or labels
-> anywhere — leave clean space where labels will be added later.
+> stack of Android emulator phone frames, and a padlocked archive box. Below each
+> medallion place one short, correctly spelled sans-serif caption, in order:
+> "MobileWorld", "Injection", "Taxonomy", "Evaluation", "ASR / TCR". Soft
+> professional palette of blue, teal, amber, and slate on a white background,
+> minimalist. Compose as a wide, short banner (roughly 3:1) that fills the entire
+> frame edge to edge, with no empty top or bottom bands and no wide blank margins.
+> Render only these five short labels — clean and legible — and no other text.
 
 ## Image Renderer Preference
 
@@ -263,20 +325,34 @@ accurate paper-safe picture is better than an empty figure slot.
 Open the rendered PNG and inspect it (do not infer from the prompt). Reject and
 regenerate or redraw if **any** of these fail:
 
-- **No raw text rendered by the model.** If the illustration contains any words,
-  the model has spelled them — assume they are garbled. Either crop/cover them
-  and overlay correct labels, or regenerate with a stronger no-text instruction.
-- **No misspellings / no leaked scaffolding.** Specifically check for corrupted
-  words (e.g. `Indulator`, `Missformation`) and for prompt headers like
-  `Message:` drawn into the image. Either means reject.
+- **Every label is spelled correctly and matches the paper's terminology.** Read
+  each word in the image against the exact label strings from the Writing Policy.
+  Any misspelling (e.g. `Indulator`, `Missformation`), wrong term, or duplicated
+  label means reject — regenerate emphasizing the correct spelling, or fix that
+  label with the overlay fallback. A misspelled label must never ship.
+- **No leaked scaffolding and no invented text.** Check that no prompt header like
+  `Message:` was drawn into the image, and that the model did not add labels,
+  numbers, claims, or modules the paper does not support. Either means reject.
 - **Illustrative, not a box-and-arrow flowchart.** If it is just rounded
   rectangles in a row, the prompt was wrong — rewrite it toward a scene.
-- **No large empty bands**; the composition fills the canvas evenly.
+- **No large empty bands**; the composition fills the canvas evenly. A banner with
+  empty top/bottom strips reads as "too much vertical margin" — re-prompt for a
+  wide, edge-to-edge composition or trim the bands (see Aspect, Height, And
+  Whitespace).
+- **The figure does not run into the margin.** After compiling, confirm there is
+  **no `Overfull \hbox` for the figure** in `main.log` (`audit_draft.py` blocks on
+  any overflow ≥10pt). If it overflows, the overlay box exceeds the image — add
+  `\useasboundingbox` clamped to the image and inset the edge labels (Overlay
+  Bounding-Box Rule).
+- **The figure is not too tall.** At `\textwidth` a 16:9 image is ~9–10 cm; a
+  teaser/pipeline banner should be ~4.5–6 cm. If it is too tall, fix the aspect,
+  cap the height, or trim whitespace — do not let one figure eat a third of the
+  page.
 - All required components appear; no extra claim, dataset, metric, or module was
   invented; arrows and relationships are directionally correct.
-- After the TikZ text overlay, **every label sits on its element** and is legible
-  at paper scale.
+- Every label — whether rendered by the model or added via the overlay fallback —
+  **sits on its element**, stays inside the image, and is legible at paper scale.
 - The generated file is non-empty and stored at the recorded output path.
 
-If any check fails, revise the prompt or the overlay coordinates and regenerate.
-Keep rejected versions only when useful for audit.
+If any check fails, revise the prompt (or the overlay coordinates, if used) and
+regenerate. Keep rejected versions only when useful for audit.

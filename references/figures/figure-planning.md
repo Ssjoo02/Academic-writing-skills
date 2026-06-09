@@ -46,8 +46,9 @@ Before assigning a generation route or writing code, establish:
 4. **Backend**: for data-driven plots, confirm the plotting backend. Python (matplotlib/seaborn) is
    the default. If R (ggplot2/patchwork) is preferred, the user must explicitly request it. For
    non-data pictures **and pipeline / architecture / teaser concept figures**, the backend is the
-   configured picture API for the illustration plus a deterministic LaTeX/TikZ text overlay for all
-   labels (the hybrid pattern in `picture-generation.md`) — the image model never renders text.
+   configured picture API; the image model may render the labels directly, and every label must then
+   be verified for correct spelling and terminology (the generate-then-verify policy in
+   `picture-generation.md`). Use the TikZ overlay only as a fallback when the model misspells a label.
    Use a pure TikZ/FigureSpec schematic only when the user explicitly asks for an editable diagram.
    Do not hand-draw pipeline boxes in matplotlib; that route produced faint boxes, broken arrows,
    and overflowing text.
@@ -72,6 +73,20 @@ Long-text tables must use wrapping columns (`tabularx` or `p{...}` widths tied t
 `\textwidth`). Pure `l/c/r` columns are allowed only when every cell is short enough to fit the
 declared layout. Scaling a table down with `\resizebox` is a last resort for numeric tables, not a
 default for prose-heavy tables.
+
+**Height also has a budget, not just width.** A picture set to `width=\textwidth` is as tall as its
+aspect ratio dictates: a 16:9 render at double-column width is ~9–10 cm tall, which for a teaser or
+pipeline banner is too tall and leaves empty bands. Plan concept figures as **wide, short banners**
+(target aspect ~3:1 to 4:1 double-column, ~1.6:1 to 2:1 single-column) so they occupy ~4.5–6 cm of
+height, and the rendered image must **fill its frame** (no baked-in empty top/bottom bands). When a
+render is mis-shaped, cap the height (`height=...,keepaspectratio`) or trim whitespace
+(`trim=... ,clip`) rather than shipping a tall box with a thin content strip. See
+`picture-generation.md` for the height/trim mechanics.
+
+**Overlays must not exceed the image.** For the AI-illustration + TikZ-overlay pattern, the figure
+must not be wider than its `width=\textwidth` image. Clamp the `tikzpicture` bounding box to the
+image (`\useasboundingbox`) and inset edge labels so no overlay node pushes the figure into the
+margin. An `Overfull \hbox` for a figure is a hard defect, not a cosmetic warning.
 
 ### Display Review Gate (executable — render, look, regenerate)
 
@@ -98,17 +113,21 @@ to one), run this loop:
 
 | Signature | What to look for in the PNG | Fix |
 |---|---|---|
-| **Garbled in-image text** | Any word rendered by the image model; misspellings like `Indulator`, `Missformation`; a prompt header such as `Message:` drawn into the figure. | The image model must render **no text**. Regenerate with the no-text instruction; add every label via the TikZ overlay (`picture-generation.md`). |
+| **Garbled / wrong in-image text** | A label the model rendered is misspelled (`Indulator`, `Missformation`), uses the wrong term, is duplicated, or a prompt header such as `Message:` leaked into the figure. | Model-rendered labels are allowed but must be **verified**: read each word against the Writing Policy terms; regenerate emphasizing the correct spelling, or fix that label via the TikZ overlay fallback (`picture-generation.md`). A misspelled label must not ship. |
 | **Boxy flowchart** | Just rounded rectangles in a row with arrows — a slide diagram, not an illustration. | Rewrite the Direct Image Prompt toward a scene (devices, UI, icons, actors); drop "rounded rectangles / boxes in a row". |
-| **Empty bands / off-center** | A large blank strip (e.g. top or right ~40%) while content crowds one side. | Re-prompt for an evenly filled, balanced composition; set the canvas/aspect to the target column width. |
-| **Overlay misalignment** | After TikZ overlay, a label floats off its element or runs off the image. | Open the PDF, nudge the normalized `(x,y)` coordinates, recompile, re-inspect. |
+| **Empty bands / off-center / too tall** | A large blank strip (e.g. top/bottom or right ~30–40%) while content crowds a strip; or a banner that is ~9–10 cm tall and eats a third of the page ("上下边距太长"). | Re-prompt for a wide, short, edge-to-edge banner (aspect ~3:1 double-column); cap the height (`height=...,keepaspectratio`) or trim the bands (`trim=...,clip`). |
+| **Out of bounds / overflow ("出界")** | The figure runs past the column/text edge into the margin; `main.log` shows `Overfull \hbox (... too wide)` for the figure. | Clamp the `tikzpicture` box to the image (`\useasboundingbox (img.south west) rectangle (img.north east);`) and inset edge labels (anchor inward, `x≈0.04`/`0.96`); for a plain image, cap the width. |
+| **Overlay misalignment** | After TikZ overlay, a label floats off its element or runs off the image. | Open the PDF, nudge the normalized `(x,y)` coordinates, keep label boxes inside `[0,1]`, recompile, re-inspect. |
 
 Then confirm the contract checks:
 
 - All planned panels appear and serve the core conclusion,
 - No extra claim, dataset, metric, or module was invented by the renderer,
 - Visible text is readable at paper scale and matches the allowed labels from the Writing Policy,
-- The item fits its declared single-column or double-column width,
+- The item fits its declared single-column or double-column width **and does not overflow into the
+  margin** (no `Overfull \hbox` for the figure in `main.log`),
+- The item's height is reasonable for its role (a teaser/pipeline banner is ~4.5–6 cm, not ~10 cm)
+  and the image fills its frame without empty bands,
 - Arrows, relationships, and data direction are correct,
 - The item is paper-ready rather than slide-deck decorative,
 - The generated file is non-empty and stored at the recorded output path.
@@ -184,7 +203,7 @@ Use the lightest reliable route:
 | existing asset | screenshots, qualitative examples, already-drawn diagrams | copied asset under `paper/figures/` |
 | reproducible plot script | numeric results, ablations, scaling, heatmaps | Python script following `plot-style.md` rules and `chart-patterns.md` patterns + SVG/PDF/PNG |
 | LaTeX table | result tables, feature comparison, benchmark statistics | `.tex` table or inline table |
-| AI illustration + TikZ overlay (default for concept figures) | teasers, conceptual method illustrations, **pipeline / architecture / workflow** overview figures | text-free PNG from the picture API + TikZ overlay supplying every label |
+| AI illustration (default for concept figures) | teasers, conceptual method illustrations, **pipeline / architecture / workflow** overview figures | labeled PNG from the picture API (labels verified for spelling/terminology); TikZ overlay only as a fallback for a label the model misspells |
 | TikZ / FigureSpec schematic | only when the user explicitly wants an editable node-edge diagram or a formal graph/state machine | `.tex`/JSON spec + SVG/PDF |
 | current-agent drawing | fallback when no image API exists | agent-created illustration plus Picture Brief; still overlay text deterministically |
 

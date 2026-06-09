@@ -10,20 +10,31 @@ Checks (errors block; warnings inform):
 - no \\footnote{...} anywhere in prose
 - no file/code artifacts in prose (\\texttt{...ext}, \\verb, \\path)
 - no local filesystem paths in prose (/mnt/, /home/, /Users/, /root/, ~/)
+- disclosure: no internal identifiers or do-not-disclose entities in prose. Driven by an optional
+  paper/.disclosure.yaml exported from the Writing Policy (see parse_disclosure_config for the
+  format). Listed internal identifiers and do-not-disclose entities are errors; a heuristic also
+  warns on internal-looking identifier tokens (e.g. ..._step380, long snake_case with digits) even
+  when no list is present.
 - no leftover missing-support markers (% CITATION_NEEDED / EVIDENCE_NEEDED /
   FIGURE_NEEDED / TABLE_NEEDED)
 - subsection budget: at most 4 \\subsection per main section
 - table hygiene: no \\hline in tables (use booktabs); booktabs loaded when any
   table exists; warn on vertical rules and \\textsc{lowercase} names
 - appendix starts on a fresh page (\\clearpage before \\appendix)
+- appendix substance: warn on a sparse / table-dump appendix ("太空") — a section whose lead-in
+  before its first float is under a few sentences, or several stacked full-width table*/figure*
+  floats that scatter into half-empty pages
 - salience: warn on taxonomy/inventory enumeration and per-category count dumps in body prose
   (full lists belong in a table or the appendix)
 - wide tables: warn when a many-column plain tabular sits in a single-column float (body or
   appendix) and will overflow; suggest table*/rotate/split
+- limitations length: warn when a standalone Limitations section is over-long (>~200 words),
+  over-enumerated (5+ points), or wrapped in boilerplate opener/closer
 - no duplicate \\label{...}
 - \\input/\\include consistency between main.tex and section files
 - compile-log signals when main.log exists (undefined refs/citations, multiply
-  defined labels, overfull boxes)
+  defined labels; a large overfull hbox — content past the margin / "出界" — is a
+  blocking error, minor overfulls are warnings)
 """
 
 from __future__ import annotations
@@ -38,6 +49,12 @@ from pathlib import Path
 
 SUBSECTION_BUDGET = 4
 
+# An overfull hbox at or above this width (in points) is treated as a hard
+# out-of-margin defect ("出界"), not a cosmetic warning. ~10pt ≈ 3.5mm past the
+# edge: well beyond microtype tolerance and visible in the PDF. Smaller overfulls
+# (long words, URLs) stay warnings.
+OVERFULL_ERROR_PT = 10.0
+
 FOOTNOTE_RE = re.compile(r"\\footnote\b")
 ARTIFACT_RE = re.compile(
     r"\\(?:texttt|verb|path|lstinline)\b[^\n]*?"
@@ -45,6 +62,16 @@ ARTIFACT_RE = re.compile(
     re.I,
 )
 PATH_RE = re.compile(r"(?:/mnt/|/home/|/Users/|/root/|/tmp/|(?<![\w.])~/)")
+# Heuristic for internal run/checkpoint identifiers that leaked into prose without being listed in
+# .disclosure.yaml. Two signals: an explicit step/epoch/iter/ckpt + number suffix, or a long
+# snake_case token (>= 2 underscores) that contains a digit (e.g. qwen3vl_rsmllm_top2_step380).
+INTERNAL_STEP_RE = re.compile(
+    r"\b\w*[_-](?:step|steps|epoch|epochs|ep|iter|iters|iteration|ckpt|checkpoint)[_-]?\d+\w*\b",
+    re.I,
+)
+INTERNAL_SNAKE_RE = re.compile(r"\b[A-Za-z0-9]+(?:_[A-Za-z0-9]+){2,}\b")
+# disclosure config filenames, checked in order
+DISCLOSURE_FILES = (".disclosure.yaml", ".disclosure.yml")
 MARKER_RE = re.compile(r"%\s*(CITATION_NEEDED|EVIDENCE_NEEDED|FIGURE_NEEDED|TABLE_NEEDED)\b")
 SUBSECTION_RE = re.compile(r"\\subsection\b\s*\{")
 SECTION_RE = re.compile(r"\\section\b\s*\{")
@@ -85,6 +112,23 @@ PLAIN_TABULAR_RE = re.compile(
 WIDE_SINGLE_COL_COLS = 6   # >= this many columns in a single-column float likely overflows
 VERY_WIDE_COLS = 10        # >= this many columns usually needs rotation or splitting
 
+# a standalone Limitations section must stay short and scannable, not exhaustive
+LIMITATIONS_HEADING_RE = re.compile(r"\\section\*?\s*\{\s*Limitations\b[^}]*\}", re.I)
+NEXT_HEADING_RE = re.compile(r"\\section\*?\s*\{")
+LIMITATIONS_MAX_WORDS = 200   # target 120-180; warn beyond 200
+LIMITATIONS_MAX_POINTS = 5    # >= this many enumerated limitations is too many
+LIM_ORDINAL_RE = re.compile(r"(?:^|(?<=[.\n]))\s*(?:First|Second|Third|Fourth|Fifth|Sixth)\b", re.M)
+LIM_OPENER_RE = re.compile(r"we acknowledge\s+(?:several|a number of|the following|some)\s+limitation", re.I)
+LIM_CLOSER_RE = re.compile(r"despite\s+(?:these|the above|the aforementioned)\s+limitation", re.I)
+
+# the appendix should be substantive, not a sparse table dump. Two smells of a half-empty ("太空")
+# appendix: (a) a section whose only content is a one-line pointer + a bare float, and (b) several
+# stacked full-width floats that scatter across pages and leave empty bands. Warnings only.
+APPENDIX_LEAD_MIN_WORDS = 25      # < this many prose words before a float in an appendix section = thin
+APPENDIX_WIDE_FLOAT_SCATTER = 3   # >= this many table*/figure* floats in the appendix can scatter
+SECTION_TITLE_RE = re.compile(r"\\section\b\s*\{[^}]*\}")
+FLOAT_ENV_RE = re.compile(r"\\begin\{(table\*?|figure\*?)\}(.*?)\\end\{\1\}", re.S)
+
 
 def count_columns(colspec: str) -> int:
     """Count column slots in a tabular colspec, tolerant of p{..}/>{..}/@{..} groups."""
@@ -124,6 +168,154 @@ def rel(path: Path, base: Path) -> str:
         return str(path.relative_to(base))
     except ValueError:
         return str(path)
+
+
+def parse_disclosure_config(paper_dir: Path) -> tuple[list[tuple[str, str]], list[str], Path | None]:
+    """Parse paper/.disclosure.yaml into (naming_map, do_not_disclose, source_path).
+
+    Expected shape (a small YAML subset; no external dependency required):
+
+        naming_map:
+          - internal: qwen3vl_rsmllm_top2_step380
+            display: RsEvi-8B
+        do_not_disclose:
+          - RSThinker
+          - SomeInternalTool
+
+    `naming_map` entries pair an internal identifier with the public display name that must replace
+    it. `do_not_disclose` is a flat list of entities that must not appear at all. Returns empty lists
+    and a None path when no config file exists. The parser is intentionally forgiving: it reads the
+    two top-level keys and ignores anything it does not recognize.
+    """
+    config_path = None
+    for name in DISCLOSURE_FILES:
+        candidate = paper_dir / name
+        if candidate.exists():
+            config_path = candidate
+            break
+    if config_path is None:
+        return [], [], None
+
+    naming_map: list[tuple[str, str]] = []
+    do_not_disclose: list[str] = []
+    section: str | None = None
+    pending_internal: str | None = None
+
+    def strip_value(raw: str) -> str:
+        raw = raw.strip()
+        if raw and raw[0] in "'\"" and raw[-1:] == raw[0]:
+            raw = raw[1:-1]
+        return raw.strip()
+
+    for line in config_path.read_text(encoding="utf-8", errors="ignore").splitlines():
+        # drop comments
+        hash_pos = line.find("#")
+        if hash_pos != -1:
+            line = line[:hash_pos]
+        if not line.strip():
+            continue
+        stripped = line.strip()
+        if stripped in ("naming_map:", "naming_map :"):
+            section = "naming"
+            continue
+        if stripped in ("do_not_disclose:", "do_not_disclose :"):
+            section = "exclude"
+            continue
+        if section == "naming":
+            m = re.match(r"-\s*internal\s*:\s*(.+)$", stripped)
+            if m:
+                pending_internal = strip_value(m.group(1))
+                continue
+            m = re.match(r"display\s*:\s*(.+)$", stripped)
+            if m and pending_internal is not None:
+                naming_map.append((pending_internal, strip_value(m.group(1))))
+                pending_internal = None
+                continue
+            # tolerate "- internal: x, display: y" or "- x: y" one-liners
+            m = re.match(r"-\s*(.+?)\s*:\s*(.+)$", stripped)
+            if m and m.group(1) not in ("internal", "display"):
+                naming_map.append((strip_value(m.group(1)), strip_value(m.group(2))))
+                continue
+        elif section == "exclude":
+            m = re.match(r"-\s*(.+)$", stripped)
+            if m:
+                value = strip_value(m.group(1))
+                if value:
+                    do_not_disclose.append(value)
+                continue
+
+    return naming_map, do_not_disclose, config_path
+
+
+def _entity_re(entity: str) -> re.Pattern[str]:
+    """Whole-token match for an entity name, tolerant of LaTeX wrappers around it."""
+    return re.compile(r"(?<![A-Za-z0-9_])" + re.escape(entity) + r"(?![A-Za-z0-9_])")
+
+
+def check_disclosure(
+    path: Path,
+    base: Path,
+    naming_map: list[tuple[str, str]],
+    do_not_disclose: list[str],
+    errors: list[str],
+) -> None:
+    """Listed internal identifiers / do-not-disclose entities in prose are blocking errors."""
+    text = strip_comments(path.read_text(encoding="utf-8", errors="ignore"))
+    name = rel(path, base)
+    for lineno, line in enumerate(text.splitlines(), 1):
+        for internal, display in naming_map:
+            if internal and _entity_re(internal).search(line):
+                errors.append(
+                    f"internal identifier in prose: {name}:{lineno}: '{internal}' — use the public "
+                    f"display name '{display}' (Naming Map)"
+                )
+        for entity in do_not_disclose:
+            if entity and _entity_re(entity).search(line):
+                errors.append(
+                    f"do-not-disclose entity in prose: {name}:{lineno}: '{entity}' — remove it, "
+                    f"including any negation/exclusion phrasing"
+                )
+
+
+# commands whose {...} arguments are keys/paths, not prose — their tokens must not trip the
+# internal-identifier heuristic (e.g. \cite{smith_etal_2024}, \label{fig:abc_1})
+REF_LIKE_RE = re.compile(
+    r"\\(?:cite[a-zA-Z]*|[Cc]ref|autoref|nameref|ref|eqref|pageref|label|input|include|"
+    r"includegraphics|bibliography|bibliographystyle|usepackage|url|href|texttt|verb|path|"
+    r"lstinline)\b\s*(?:\[[^\]]*\])?\s*\{[^{}]*\}",
+)
+
+
+def strip_ref_like(text: str) -> str:
+    return REF_LIKE_RE.sub(" ", text)
+
+
+def check_internal_id_heuristic(
+    path: Path,
+    base: Path,
+    allow: set[str],
+    warnings: list[str],
+) -> None:
+    """Warn on internal-looking identifier tokens not covered by an explicit list."""
+    text = strip_ref_like(strip_comments(path.read_text(encoding="utf-8", errors="ignore")))
+    name = rel(path, base)
+    seen: set[str] = set()
+    for lineno, line in enumerate(text.splitlines(), 1):
+        candidates = set()
+        for m in INTERNAL_STEP_RE.finditer(line):
+            candidates.add(m.group(0))
+        for m in INTERNAL_SNAKE_RE.finditer(line):
+            tok = m.group(0)
+            if any(ch.isdigit() for ch in tok):
+                candidates.add(tok)
+        for tok in candidates:
+            if tok in allow or tok in seen:
+                continue
+            seen.add(tok)
+            warnings.append(
+                f"internal-looking identifier in prose: {name}:{lineno}: '{tok}'; if this is a "
+                f"checkpoint/run/sweep name, map it to a public display name (Naming Map)"
+            )
 
 
 def check_prose(path: Path, base: Path, errors: list[str], warnings: list[str]) -> None:
@@ -213,6 +405,92 @@ def check_appendix_page(paper_dir: Path, warnings: list[str]) -> None:
         warnings.append("\\appendix is not preceded by \\clearpage; appendix may not start on a fresh page")
 
 
+def _prose_word_count(segment: str) -> int:
+    """Count real prose words in a LaTeX fragment, ignoring commands, refs, and math punctuation."""
+    s = strip_ref_like(segment)
+    s = re.sub(r"\\[a-zA-Z@]+\*?", " ", s)   # drop control sequences
+    s = re.sub(r"[{}\\$&~^_%#]", " ", s)
+    return sum(1 for w in s.split() if any(c.isalpha() for c in w))
+
+
+def appendix_segments(paper_dir: Path) -> list[tuple[str, str]]:
+    """Return (name, stripped-text) for appendix content.
+
+    Covers both inline appendices (text after `\\appendix` in main.tex) and file-based appendices
+    (files \\input after `\\appendix`, or any *.tex whose name contains 'appendix'). De-duplicated by
+    display name so an inputted appendix file is not counted twice.
+    """
+    segments: list[tuple[str, str]] = []
+    appendix_files: set[Path] = set()
+    main = paper_dir / "main.tex"
+    if main.exists():
+        mtext = strip_comments(main.read_text(encoding="utf-8", errors="ignore"))
+        am = APPENDIX_RE.search(mtext)
+        if am:
+            after = mtext[am.end():]
+            segments.append(("main.tex", after))
+            for im in INPUT_RE.finditer(after):
+                target = im.group(1).strip()
+                if not target.endswith(".tex"):
+                    target += ".tex"
+                appendix_files.add((paper_dir / target).resolve())
+    for path in sorted(paper_dir.rglob("*.tex")):
+        if path.name in SKIP_PROSE:
+            continue
+        if "appendix" in path.name.lower() or path.resolve() in appendix_files:
+            segments.append((rel(path, paper_dir), strip_comments(path.read_text(encoding="utf-8", errors="ignore"))))
+    seen: set[str] = set()
+    out: list[tuple[str, str]] = []
+    for name, text in segments:
+        if name in seen:
+            continue
+        seen.add(name)
+        out.append((name, text))
+    return out
+
+
+def check_appendix_substance(paper_dir: Path, warnings: list[str]) -> None:
+    """Heuristic: flag a sparse / table-dump appendix ("太空"). Warnings only.
+
+    (a) An appendix \\section whose lead-in before its first float is under a few sentences reads as a
+        bare pointer + float; nudge to add a real lead paragraph.
+    (b) Several full-width table*/figure* floats in the appendix scatter into half-empty pages; nudge
+        to anchor with prose, pin placement, or keep one-column tables single-column.
+    """
+    segments = appendix_segments(paper_dir)
+    if not segments:
+        return
+    wide_locs: list[str] = []
+    for name, text in segments:
+        sections = list(SECTION_RE.finditer(text))
+        bounds = [m.start() for m in sections] + [len(text)]
+        for i, sm in enumerate(sections):
+            span = text[sm.start(): bounds[i + 1]]
+            span_wo_head = SECTION_TITLE_RE.sub(" ", span, count=1)
+            fm = FLOAT_ENV_RE.search(span_wo_head)
+            if not fm:
+                continue  # prose-only section, or no float here — not the table-dump smell
+            words = _prose_word_count(span_wo_head[: fm.start()])
+            if words < APPENDIX_LEAD_MIN_WORDS:
+                lineno = text.count("\n", 0, sm.start()) + 1
+                kind = "figure" if fm.group(1).startswith("figure") else "table"
+                warnings.append(
+                    f"thin appendix section ({words} words of prose before a {kind}): {name}:{lineno}; "
+                    f"add a lead paragraph (what it is, how to read it, which claim it backs) instead "
+                    f"of a one-line pointer + bare float"
+                )
+        for fm in FLOAT_ENV_RE.finditer(text):
+            if fm.group(1).endswith("*"):
+                wide_locs.append(f"{name}:{text.count(chr(10), 0, fm.start()) + 1}")
+    if len(wide_locs) >= APPENDIX_WIDE_FLOAT_SCATTER:
+        shown = ", ".join(wide_locs[:5]) + ("…" if len(wide_locs) > 5 else "")
+        warnings.append(
+            f"{len(wide_locs)} full-width (table*/figure*) floats in the appendix ({shown}); stacked "
+            f"wide floats scatter into half-empty pages — anchor each with a lead paragraph, pin "
+            f"placement ([h]/[H]/\\FloatBarrier), or keep one-column tables single-column"
+        )
+
+
 def check_enumeration(path: Path, base: Path, warnings: list[str]) -> None:
     """Heuristic: flag taxonomy/inventory enumeration and per-category count dumps in body prose.
 
@@ -267,6 +545,45 @@ def check_wide_tables(path: Path, base: Path, warnings: list[str]) -> None:
                 )
 
 
+def check_limitations_length(path: Path, base: Path, warnings: list[str]) -> None:
+    """Heuristic: a standalone Limitations section that is over-long or over-enumerated.
+
+    Warns when the section runs past ~200 words, lists 5+ separate limitations, or wraps the
+    content in boilerplate ("We acknowledge several limitations…" / "Despite these limitations…").
+    Warnings only.
+    """
+    text = strip_comments(path.read_text(encoding="utf-8", errors="ignore"))
+    name = rel(path, base)
+    m = LIMITATIONS_HEADING_RE.search(text)
+    if not m:
+        return
+    nxt = NEXT_HEADING_RE.search(text, m.end())
+    section = text[m.end() : nxt.start() if nxt else len(text)]
+    lineno = text.count("\n", 0, m.start()) + 1
+
+    plain = re.sub(r"\\[a-zA-Z]+\*?", " ", section)
+    plain = re.sub(r"[{}\\$&~^_%#]", " ", plain)
+    words = len(plain.split())
+    points = max(len(ITEM_RE.findall(section)), len(LIM_ORDINAL_RE.findall(section)))
+
+    if words > LIMITATIONS_MAX_WORDS:
+        warnings.append(
+            f"Limitations section is long ({words} words): {name}:{lineno}; cap at ~120-180 words, "
+            f"keep the 3-4 most material limitations, 1-2 sentences each"
+        )
+    if points >= LIMITATIONS_MAX_POINTS:
+        warnings.append(
+            f"Limitations enumerates {points} separate points: {name}:{lineno}; merge or cut to the "
+            f"3-4 a reviewer would actually raise"
+        )
+    if LIM_OPENER_RE.search(section) or LIM_CLOSER_RE.search(section):
+        warnings.append(
+            f"Limitations has boilerplate framing: {name}:{lineno}; drop the "
+            f"\"we acknowledge several limitations\" opener / \"despite these limitations\" closer "
+            f"and lead directly with the first limitation"
+        )
+
+
 def check_labels(files: list[Path], base: Path, errors: list[str]) -> None:
     seen: dict[str, str] = {}
     for path in files:
@@ -303,7 +620,7 @@ def check_input_consistency(paper_dir: Path, errors: list[str], warnings: list[s
                 warnings.append(f"orphan section file not \\input by main.tex: {rel(path, paper_dir)}")
 
 
-def check_log(paper_dir: Path, warnings: list[str]) -> None:
+def check_log(paper_dir: Path, errors: list[str], warnings: list[str]) -> None:
     log = paper_dir / "main.log"
     if not log.exists():
         return
@@ -314,9 +631,26 @@ def check_log(paper_dir: Path, warnings: list[str]) -> None:
         warnings.append("compile log: undefined citations present")
     if "multiply defined" in text:
         warnings.append("compile log: multiply-defined labels present")
-    overfull = len(re.findall(r"Overfull \\hbox", text))
-    if overfull:
-        warnings.append(f"compile log: {overfull} overfull hbox warning(s)")
+    # Overfull \hbox = content pushed past the text/column edge into the margin
+    # ("出界"). A large overfull is almost always a figure/table/overlay exceeding
+    # \textwidth or \columnwidth and is a hard defect; tiny ones (long words, URLs)
+    # are cosmetic. Block on the large ones, warn on the rest.
+    small = 0
+    for m in re.finditer(
+        r"Overfull \\hbox \(([\d.]+)pt too wide\)(?: in paragraph at lines ([\d-]+))?", text
+    ):
+        pt = float(m.group(1))
+        if pt < OVERFULL_ERROR_PT:
+            small += 1
+            continue
+        where = f" at lines {m.group(2)}" if m.group(2) else ""
+        errors.append(
+            f"compile log: content overflows the margin by {pt:.0f}pt{where} "
+            f"(figure/table/overlay wider than \\textwidth/\\columnwidth; cap width, trim "
+            f"baked-in whitespace, or clamp the overlay bounding box)"
+        )
+    if small:
+        warnings.append(f"compile log: {small} minor overfull hbox warning(s) (< {OVERFULL_ERROR_PT:.0f}pt)")
 
 
 def content_pages_before_references(text_pages: list[str]) -> int:
@@ -410,17 +744,30 @@ def audit(paper_dir: Path, max_content_pages: int | None = None) -> tuple[list[s
         errors.append(f"no .tex files found under {paper_dir}")
         return errors, warnings
 
+    naming_map, do_not_disclose, disclosure_path = parse_disclosure_config(paper_dir)
+    if disclosure_path is None:
+        warnings.append(
+            "no paper/.disclosure.yaml found; disclosure check runs in heuristic-only mode "
+            "(export the Writing Policy Naming Map / Do-Not-Disclose tables to enable exact matching)"
+        )
+    # display names are legitimate; never warn on them via the heuristic
+    allow = {display for _, display in naming_map if display}
+
     for path in files:
         check_prose(path, paper_dir, errors, warnings)
         check_subsection_budget(path, paper_dir, errors)
         check_tables(path, paper_dir, errors, warnings)
         check_enumeration(path, paper_dir, warnings)
         check_wide_tables(path, paper_dir, warnings)
+        check_limitations_length(path, paper_dir, warnings)
+        check_disclosure(path, paper_dir, naming_map, do_not_disclose, errors)
+        check_internal_id_heuristic(path, paper_dir, allow, warnings)
     check_booktabs_loaded(paper_dir, files, errors)
     check_appendix_page(paper_dir, warnings)
+    check_appendix_substance(paper_dir, warnings)
     check_labels(files, paper_dir, errors)
     check_input_consistency(paper_dir, errors, warnings)
-    check_log(paper_dir, warnings)
+    check_log(paper_dir, errors, warnings)
     check_page_budget(paper_dir, max_content_pages, errors, warnings)
     return errors, warnings
 

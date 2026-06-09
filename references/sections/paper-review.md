@@ -19,7 +19,7 @@ The paper should have:
 4. clear writing and reproducible details,
 5. reasonable method or benchmark design.
 
-## Seven Review Dimensions (Five Core Plus Visual and Format Checks)
+## Eight Review Dimensions (Six Core Plus Visual and Format Checks)
 
 ### Contribution
 
@@ -49,11 +49,15 @@ Check whether readers can understand and reproduce the work:
 - **no body enumeration**: taxonomies/inventories/per-category counts are mentioned in one stroke
   with the full list in a table or appendix, not enumerated `V1…Vn` / `H1…Hn` / per-app in the body;
   every prose number supports a claim instead of transcribing a table,
-- no footnotes, file names, code artifacts, or local paths in prose.
+- no footnotes, file names, code artifacts, or local paths in prose,
+- **no disclosure leaks**: no internal identifiers (checkpoint / training-run / sweep / wandb / tool
+  / unreleased-model names) where a public display name belongs, and no do-not-disclose entity
+  anywhere (not even by negation or exclusion phrasing).
 
 Failure signals: a subsection that opens with background or a list instead of its point; an
 itemize/enumerate of taxonomy members or per-category counts living in a body section; sentences that
-restate numbers already in a table.
+restate numbers already in a table; a raw checkpoint/run name (e.g. a `..._step380` tag) or a
+withheld baseline named in the text or in an "excludes X" clause.
 
 ### Experimental strength
 
@@ -84,6 +88,42 @@ Check whether the design is reasonable:
 - benefits outweigh added limitations,
 - no negative net value.
 
+### Internal consistency (front-to-back data and claim consistency)
+
+Check that the paper agrees with itself end to end. This is a paper-vs-paper audit: the same fact
+must read the same way wherever it appears, and every derived number must follow from the numbers
+the paper itself reports. (The standalone paper-vs-raw-evidence audit lives at the Writing Policy
+stage in `references/checks/workspace-logic-audit.md`; this dimension re-checks the assembled draft
+for self-consistency.)
+
+- **Cross-location number agreement**: a metric or result stated in the abstract, introduction, body
+  text, a table, or a caption must carry the same value in every place it appears. Only standard
+  rounding to the displayed precision is allowed; an abstract number that disagrees with its table
+  is a defect.
+- **Delta / improvement arithmetic**: every "+X%", "improves by", "Y× faster/smaller", or absolute
+  gain must be arithmetically consistent with the underlying numbers reported elsewhere in the paper
+  (e.g. a claimed 15% gain must match `(new - old) / old` computed from the table it draws on).
+- **Aggregation and count consistency**: "average over N seeds/runs", "N datasets/tasks", sample
+  sizes, denominators, and totals must match what the tables and figures actually contain; a claimed
+  N must equal the reported N, and per-group counts must sum to the stated total.
+- **Table/figure vs text agreement**: prose must not contradict its own table or figure (which row
+  is best, the ranking of methods, which setting wins); the caption must describe what the table or
+  figure actually shows, not a different result.
+- **Claim-to-body support**: every headline claim in the abstract and introduction must be backed by
+  a number or finding that actually appears later in the paper. A headline figure with no table or
+  experiment behind it is a defect, not a rounding issue.
+- **Terminology, notation, and units**: method/model/dataset/metric names, symbols, abbreviations,
+  units, and metric direction (↑/↓) stay identical throughout. The same quantity must not be
+  reported in different units or under two names in different sections.
+
+When raw result files are available and cited by the draft, spot-check the load-bearing numbers
+against them, but stay within writing-only scope: flag a mismatch as a finding; do not re-run or
+modify experiments to "fix" it.
+
+Failure signals: an abstract number no table backs; "15% improvement" that the table makes 12.8%;
+"average of 5 seeds" beside a 3-row table; a caption that names the wrong method as best; a metric
+defined as a percentage in one place and a raw count in another; a symbol used with two meanings.
+
 ### Visual and layout quality
 
 Check the compiled PDF when it exists:
@@ -106,7 +146,10 @@ Check format risks before any submission-ready claim:
   resolved or reported,
 - every intended section file is referenced by `main.tex`,
 - footnotes are removed or converted to inline text; file names and code artifacts
-  (`\texttt{*.json}`, `\texttt{*.py}`) are replaced with descriptive natural language.
+  (`\texttt{*.json}`, `\texttt{*.py}`) are replaced with descriptive natural language,
+- disclosure is clean: `scripts/audit_draft.py` reports no internal-identifier or do-not-disclose
+  errors against `paper/.disclosure.yaml`, and heuristic internal-token warnings are resolved or
+  justified.
 
 ## Claim Support Rule
 
@@ -127,7 +170,7 @@ the user is the reviewed-and-revised draft, not the pre-review draft.
 ### Round 1 — Self-review
 
 1. Read both the LaTeX source and the compiled PDF when the PDF exists.
-2. Review the seven dimensions above as a defect-finding pass, not a confirmation pass.
+2. Review the eight dimensions above as a defect-finding pass, not a confirmation pass.
 3. Grade findings as `blocking / high / medium / low`.
 4. Fix every `blocking` finding and every `high` finding that can be fixed without inventing
    evidence, citations, results, or venue rules.
@@ -143,7 +186,7 @@ skeptical reviewer; it does not see how the draft was written or what Round 1 ch
 
 1. Spawn the reviewer subagent with the Reviewer Independence inputs below. Give it the reviewer
    role, the venue/format constraints, the paths to the LaTeX source directory and the compiled PDF,
-   and the seven review dimensions plus the `blocking / high / medium / low` scale. Also give it the
+   and the eight review dimensions plus the `blocking / high / medium / low` scale. Also give it the
    **Section-Method Adherence** task: pass the relevant section guides
    (`references/sections/<section>.md`) as a neutral rubric and ask it to verify per section whether
    the required moves are present (e.g., Method: motivation/design/advantage per module; Experiments:
@@ -164,7 +207,7 @@ skeptical reviewer; it does not see how the draft was written or what Round 1 ch
 
 The reviewer must form its own assessment from the primary artifacts, so its context stays clean.
 
-- **Pass to the subagent:** the reviewer role/persona, the review objective and the seven
+- **Pass to the subagent:** the reviewer role/persona, the review objective and the eight
   dimensions, the `blocking / high / medium / low` scale, venue/format constraints (venue, page
   limit, anonymity, required statements), file paths (the `paper/` LaTeX source directory and the
   compiled PDF), and the relevant section guides (`references/sections/<section>.md`) as a neutral
@@ -192,8 +235,9 @@ read with the same scale and the same fix rules.
 ### Risk scale
 
 Use `blocking` for false claims, unsupported headline claims, broken compilation, misleading
-figures/tables, major format violations, citation failures, or venue-readiness claims that cannot be
-verified. Use `high` for likely rejection risks that can be fixed in prose, structure, evidence
+figures/tables, major format violations, citation failures, venue-readiness claims that cannot be
+verified, or internal data inconsistencies (a number that disagrees across abstract/text/table, a
+delta that the reported numbers do not support, or a headline number with no backing in the body). Use `high` for likely rejection risks that can be fixed in prose, structure, evidence
 alignment, or layout. Use `medium` for clarity and presentation issues that reduce trust. Use `low`
 for cosmetic issues.
 
@@ -214,15 +258,16 @@ When showing full-paper review, produce:
 | Dimension | Reviewer question | Current answer | Risk level | Required revision |
 |---|---|---|---|---|
 
-Use these seven dimensions:
+Use these eight dimensions:
 
 1. Contribution,
 2. Writing clarity,
 3. Experimental strength,
 4. Evaluation completeness,
 5. Method design soundness,
-6. Visual and layout quality,
-7. Format and submission hygiene.
+6. Internal consistency,
+7. Visual and layout quality,
+8. Format and submission hygiene.
 
 Risk level vocabulary: `blocking`, `high`, `medium`, `low`.
 

@@ -19,6 +19,9 @@ FIELD_RE = re.compile(r"(?m)^\s*([A-Za-z][A-Za-z0-9_-]*)\s*=\s*[{'\"]")
 MARKER_RE = re.compile(r"%\s*(CITATION_NEEDED|EVIDENCE_NEEDED)\b")
 PLACEHOLDER_AUTHOR_RE = re.compile(r"\band\s+others\b|\bet\s+al\.?\b", re.I)
 ARXIV_RE = re.compile(r"\b\d{4}\.\d{4,5}(?:v\d+)?\b|[a-z-]+/\d{7}(?:v\d+)?", re.I)
+DOI_RE = re.compile(r"10\.\d{4,9}/\S+")
+URL_RE = re.compile(r"https?://|www\.", re.I)
+KEY_YEAR_RE = re.compile(r"(?:19|20)\d{2}")
 
 
 def strip_comments(text: str) -> str:
@@ -101,7 +104,17 @@ def extract_cites(tex_files: list[Path]) -> tuple[list[str], list[tuple[Path, in
 
 
 def has_stable_identifier(fields: dict[str, str]) -> bool:
-    if fields.get("doi") or fields.get("url") or fields.get("eprint"):
+    # A non-empty identifier field is not enough; it must look like a real DOI,
+    # URL, or arXiv id. This rejects malformed placeholders such as
+    # ``eprint = {2025}`` or ``arXiv preprint arXiv:2025`` (year used as the id).
+    doi = fields.get("doi", "")
+    if doi and (DOI_RE.search(doi) or "doi.org/" in doi.lower()):
+        return True
+    url = fields.get("url", "")
+    if url and URL_RE.search(url):
+        return True
+    eprint = fields.get("eprint", "")
+    if eprint and ARXIV_RE.search(eprint):
         return True
     joined = " ".join(fields.values())
     return bool(ARXIV_RE.search(joined) or "doi.org/" in joined.lower())
@@ -110,6 +123,13 @@ def has_stable_identifier(fields: dict[str, str]) -> bool:
 def year_value(fields: dict[str, str]) -> int | None:
     match = re.search(r"\d{4}", fields.get("year", ""))
     return int(match.group(0)) if match else None
+
+
+def key_years(key: str) -> set[int]:
+    # Year-like tokens embedded in the citation key, restricted to a plausible
+    # publication range so identifiers such as ``imagenet1000`` or ``iso27001``
+    # are not misread as years.
+    return {int(m.group(0)) for m in KEY_YEAR_RE.finditer(key) if 1900 <= int(m.group(0)) <= 2099}
 
 
 def audit(paper_dir: Path) -> tuple[list[str], list[str]]:
@@ -154,6 +174,14 @@ def audit(paper_dir: Path) -> tuple[list[str], list[str]]:
             errors.append(f"placeholder author in BibTeX: {key}: use full verified author list, no `and others`")
 
         year = year_value(fields)
+        key_year_set = key_years(key)
+        if year is not None and key_year_set and year not in key_year_set:
+            shown = "/".join(str(y) for y in sorted(key_year_set))
+            errors.append(
+                f"year-key mismatch: {key}: key year {shown} != year field {year} "
+                f"(fix or replace; mismatched keys indicate a fabricated or botched entry)"
+            )
+
         if year and year >= 2000 and not has_stable_identifier(fields):
             errors.append(f"modern entry lacks DOI/URL/arXiv: {key}")
         elif not has_stable_identifier(fields):

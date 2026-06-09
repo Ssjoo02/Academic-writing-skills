@@ -38,9 +38,9 @@ summaries the agent itself wrote):
 State the **assessment boundary** explicitly: if the workspace is partial, audit only what the
 material supports and mark the rest `not assessable`. Do not invent evidence to close a gap.
 
-## Step B — Audit checklist (six checks)
+## Step B — Audit checklist (seven checks)
 
-Run all six. Record each as `pass` / `risk` / `blocking`, with the source trace.
+Run all seven. Record each as `pass` / `risk` / `blocking`, with the source trace.
 
 1. **Trace-to-artifact (phantom check).** Every number, comparison, or scope claim the paper plans
    to make must point to a concrete artifact in the workspace (a result file, table, or log). A
@@ -75,6 +75,23 @@ Run all six. Record each as `pass` / `risk` / `blocking`, with the source trace.
 6. **Terminology stability.** Terms that will appear in the title, abstract, contribution, method
    name, dataset/task, benchmark, or metric must be consistent across the source material. A term
    that drifts between files is a key-terminology decision — resolve it or stop-and-ask.
+
+7. **Disclosure / publication-name check.** Separate from terminology stability (which asks "is the
+   term consistent?"), this asks "should this entity appear in the paper, and under what name?".
+   Scan the planned claims, key terms, and the artifacts feeding them for two leak classes:
+   - **Internal identifiers** that are not publication names: checkpoint tags, training-run / sweep
+     identifiers, wandb run names, internal tool names, unreleased model names (e.g. a `..._step380`
+     tag). Each maps to a single public display name in the Naming Map; the internal identifier is
+     `display-as:<name>` and must never be written. If no public name exists yet, that is a
+     key-terminology / paper-identity decision → stop-and-ask.
+   - **Do-not-disclose entities**: baselines or competing methods the authors withhold, internal
+     tools, unreleased datasets, partner/product names, not-for-publication results. Mark each
+     `do-not-disclose` and ensure it never appears — including by negation or exclusion phrasing.
+   **Integrity guard:** if removing a withheld competing method would make a comparison claim
+   misleading (a "best"/"state of the art"/"outperforms all" claim that holds only because a stronger
+   method was hidden), record it as an `idea-level risk` and **stop-and-ask**. Suppressing a name is
+   a writing-only action; manufacturing a false comparison is not — never do the latter to make the
+   audit pass.
 
 ## Step C — Evidence type to claim ceiling
 

@@ -70,8 +70,12 @@ Other paper-types can adapt the package, but every central claim still needs ali
 
 ## Pre-Draft Risk Check
 
-Before confirming a Writing Policy, inspect it internally for claim and evidence risks across five
-drafting dimensions:
+Before confirming a Writing Policy, run the Workspace Logic And Evidence Audit in
+`references/checks/workspace-logic-audit.md` (trace-to-artifact, cross-file consistency,
+result-to-conclusion logic, scope/integrity smells, evidence-type labeling, terminology stability,
+plus the default-on independent recheck). That audit is the mechanism; this section names the
+drafting dimensions it should cover. Inspect the policy internally for claim and evidence risks
+across five drafting dimensions:
 
 1. contribution,
 2. writing clarity,
@@ -80,8 +84,10 @@ drafting dimensions:
 5. method design soundness.
 
 Each serious weakness should become either a claim drafting action, a missing-evidence note, or an
-Open Decision. Do not produce a formal review, scorecard, or long risk map during Writing Policy
-generation unless the user explicitly asks for one.
+Open Decision. The audit is writing-side only: a weakness can downgrade or scope the wording, mark
+a claim, defer it, or trigger stop-and-ask — it never re-runs or redesigns the research. Do not
+produce a formal review, scorecard, or long risk map during Writing Policy generation unless the
+user explicitly asks for one.
 
 ## Key Terms
 

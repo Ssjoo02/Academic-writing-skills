@@ -27,14 +27,25 @@ writing references unless editing the LaTeX project itself.
 
 ## Selection Rules
 
-1. Select the template from the confirmed target venue in the Writing Policy or Paper Framework.
+These templates are **preloaded and authoritative**. Acquire a template in this strict priority
+order and stop at the first that applies; **do not search the web or download a template when a
+preloaded mapping exists**.
+
+1. **Preloaded `templates/` first.** Select the template for the confirmed target venue from the
+   Template Mapping above and copy the local file. This is the first and authoritative source. When
+   a venue maps to a bundled template, **do not web-search, download, or fetch from an official URL**
+   to obtain it — the file is already here.
 2. If the target venue is not selected, use `generic_article.tex` only as a non-submission
    single-column draft template. Record the page/length budget as a soft 6-8 main-text-page drafting
    budget, excluding references and appendix, and record that the official venue template remains
    unresolved. The template's default section inputs are placeholders; replace them with the
    confirmed Paper Framework section list before drafting.
-3. If no matching preloaded template exists, use a user-provided official template or the official
-   template source recorded in the venue profile or maintenance records.
+3. **External fetch is a last resort, gated.** Only when there is **no** matching preloaded template
+   in the mapping **and** the user provided no official template, fall back to a user-provided file
+   or a targeted fetch from the official source recorded in the venue profile / maintenance records,
+   and record it as a template risk. The official-source URLs in venue cards and in
+   `maintenance/venue-template-sources.md` are **provenance records, not draft-time fetch
+   instructions** — they explain how the bundled assets were obtained.
 4. Do not invent venue formatting from memory.
 5. Official venue templates are format shells, not prose sources. After copying a template, remove
    official sample or instruction body text and keep only the format setup, required commands,

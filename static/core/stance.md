@@ -80,6 +80,15 @@ are repeated in the workflow fragments, but they hold even if a fragment is not 
 - **No file names or code artifacts in prose.** Do not write `\texttt{*.json}`, `\texttt{*.py}`,
   `\texttt{*.csv}`, or raw code identifiers; use descriptive natural language.
 - **No local filesystem paths or directory names in prose.**
+- **No internal identifiers in prose, captions, tables, or figures.** Checkpoint tags,
+  training-run / sweep / wandb names, internal tool names, and unreleased model names (e.g. a
+  `..._step380` tag) are scaffolding, not publication names. Write the public display name from the
+  Naming Map instead; the internal identifier must never appear.
+- **No do-not-disclose entities anywhere.** Entities the user withholds (a withheld baseline or
+  competing method, an internal tool, an unreleased dataset, a partner/product name, a
+  not-for-publication result) must not appear — not positively, not in passing, and **not by
+  negation or exclusion** (never "the protocol that excludes X" or "unlike X"). Suppressing a name
+  must not turn a comparison claim into a misleading one; if it would, stop and ask (contract point 7).
 - **No leftover missing-support markers** (`% CITATION_NEEDED`, `% EVIDENCE_NEEDED`,
   `% FIGURE_NEEDED`, `% TABLE_NEEDED`) in a draft called clean; list any that remain in the summary.
 - **Paper-type profile is the default structure** (Full Draft): match its section list and count;

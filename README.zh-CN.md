@@ -1,192 +1,149 @@
 # Academic Writing
 
-Academic Writing 是一个用于学术论文写作的 Codex skill。它把已有研究材料转化为有约束的论文草稿，默认只做写作工作：改结构、论证链、claim-evidence 对齐、venue fit、引用卫生、图表表达和投稿前 review，不默认修改研究 idea，不跑实验，不编造结果，也不伪造引用。
+Academic Writing 是一个 agent-readable 的学术论文写作 skill，可用于 Claude Code、Codex 等本地 skill 环境，也可以被任何能读取 `SKILL.md` 和 Markdown 引用文件的 agent 或研究者手动使用。
 
-English version: [README.md](README.md)
+English: [README.md](README.md)
 
-## 这个 Skill 用来做什么
+## 项目定位
 
-适合在这些场景使用：
+Academic Writing 关注的是研究流程中的论文建构阶段：把实验结果、研究笔记、图表、证据和 claim 组织成一篇连贯的论文初稿。
 
-- 从项目 workspace 创建完整论文初稿；
-- 在写正文前生成 Writing Policy；
-- 把 Writing Policy 转成 section-level Paper Framework；
-- 基于确认后的 Framework 生成 LaTeX `paper/` 项目；
-- 修改、润色、压缩或 review 已有论文草稿；
-- 在不越过证据边界的前提下适配会议或期刊 venue。
+它默认只做写作，不静默改变研究本身。它可以改结构、论证链、章节逻辑、claim-evidence 对齐、venue fit、引用卫生、图表表达和 reviewer-facing clarity；但不会默认修改研究 idea、运行实验、编造结果、伪造引用，或把证据不足的 claim 写强。
 
-这个 skill 把论文看成一个结构化论证：
+这个 skill 的核心前提是：
 
 ```text
 问题 -> 缺口 -> 挑战 -> 洞察 -> 方法 / 研究 / benchmark -> 证据 -> 主张
 ```
 
-每个主要 claim 都必须能追到可见证据；否则就要弱化、延后、标记未解决，不能写强。
+论文不是结果堆砌，而是一条可辩护的论证链。每个主要 claim 都必须有明确的证据边界。
+
+## 写作理念与参考来源
+
+这套写作方法不是我们闭门造车，而是提炼自被广泛认可的科研写作经验。最直接的参考是彭思达老师整理的
+*learning_research* 中的科研与论文写作经验，同时结合了若干经典的科学写作建议：
+
+- *learning_research* — 彭思达的科研经验：
+  <https://github.com/pengsida/learning_research/tree/master>
+- *Ten Tips for Writing CS Papers* — Sebastian Nowozin：
+  <https://www.nowozin.net/sebastian/blog/ten-tips-for-writing-cs-papers-part-1.html>
+- *Writing a Good Introduction* — Henning Schulzrinne（源自 Jim Kurose）：
+  <https://www.cs.columbia.edu/~hgs/etc/intro-style.html>
+
+从这些来源中，skill 内化了几条贯穿全文的写作习惯：尽早、明确地陈述 contribution，并将其归类为
+*insight*（洞察）/ *performance*（性能）/ *capability*（能力）；把每个 section 都当作这一个
+contribution 的不同切面；用简单直接的语言而非华丽辞藻；引言遵循"动机 → 具体问题 → 贡献 →
+与已有工作的区别 → 结构导引"的弧线。上面那条主线，正是把这些习惯串起来的脊梁。
 
 ## 核心流程
 
-完整初稿 workflow 是三阶段、两个强制检查点。
+完整论文初稿 workflow 是三阶段、两个强制检查点。
 
 ```text
 Workspace Discovery
   -> Writing Policy
-  -> Checkpoint 1：用户确认或修改 policy
+  -> Checkpoint 1：确认或修改 policy
   -> Paper Framework
-  -> Checkpoint 2：用户确认或修改 framework
-  -> Full Draft LaTeX Project
-  -> 自动 Post-Draft Review
-  -> Final Audits / Submission Readiness Summary
+  -> Checkpoint 2：确认或修改 framework
+  -> 论文初稿
 ```
 
-这两个检查点是硬门控。用户要求“写完整初稿”只表示允许进入这个 workflow，不表示可以跳过 Writing Policy 或 Paper Framework。
+这两个检查点是刻意设计的。大模型完全可以一次性把整篇论文生成出来，但这种"一键生成"的初稿往往会塌缩成一种泛泛的、平均化的写作风格，很难贴合这项工作真正应该被讲述的方式。两个 gate 就是为了打破这种惯性：agent 必须在 Writing Policy 和 Paper Framework 处分别停下来，把本会被静默决定的东西——论文身份、证据边界、venue、章节结构、图表计划——摊开给作者确认或修正。用户要求"写完整论文"只会启动 workflow，并不会跳过这两道关。最终得到的是一篇按作者思路展开的论文，而不是一份模板化的自动产物。
 
-### 阶段 1：Writing Policy
+### 1. Writing Policy
 
-Writing Policy 是论文的紧凑写作契约，保存到：
+Writing Policy 是论文契约。它记录 source snapshot、paper identity、core story、claim-evidence map、关键术语、可见资产和 open decisions。
 
-```text
-writing-policies/<paper-slug>-writing-policy.md
-```
-
-它记录：
-
-- source snapshot 和已检查文件；
-- paper identity：venue kind、venue、paper type、目标读者、核心研究问题；
-- core story 和一句话 contribution；
-- claims 与 evidence boundary；
-- 关键术语和命名决策；
-- 可见资产与约束；
-- 会影响论文方向的 open decisions。
-
-路由顺序必须是先判断 `venue_kind`，再判断 `venue`，最后判断 `paper_type`。
+它也负责按固定顺序完成路由：
 
 ```text
 venue_kind -> venue -> paper_type
 ```
 
-只有当用户明确说这是 journal article / journal paper，或明确点名期刊 venue 时，才进入 journal 模式。只要用户没有明确指定 journal，默认就是 conference。
+只有当用户明确说目标是 journal article / journal paper，或明确点名期刊 venue 时，才进入 journal 模式。其他情况默认按 conference 论文处理。
 
-### 阶段 2：Paper Framework
+### 2. Paper Framework
 
-Paper Framework 是 section-level 规划，不是正文，也不是逐段大纲。保存到：
+Paper Framework 把 policy 转成 section-level 计划。它定义章节列表、每个 section 的角色、paper-type profile 对齐、venue/template 组装方式、正文预算，以及图表的 display-item budget。
 
-```text
-writing-policies/<paper-slug>-paper-framework.md
-```
+这对真实投稿很重要：双栏图和大表会真实占页，所以在生成初稿前就必须把图表占用纳入预算。
 
-它定义：
+### 3. 论文初稿
 
-- 标题方向和章节列表；
-- 每个 section 的 main content；
-- 是否遵守 paper-type profile，以及任何必要偏离；
-- 正文 page budget；
-- 图表的 display-item page budget；
-- template 和 venue assembly plan；
-- 进入 draft 前仍未解决的 blocker。
+用户确认 Framework 后，skill 会创建完整 LaTeX 论文项目，包括确认后的结构、模板、引用、章节和图表计划。官方 venue template 只作为格式壳使用：示例文字和说明文字会被移除，再写入论文内容。
 
-对严格 page limit 的会议，图和表必须单独计入预算。双栏图、大表会真实占页；不能只按 prose 估算页数。
+初稿交付前，skill 会完成内部 review 和 readiness pass。能在 writing-only 范围内修复的 blocking 问题会先修复；不能修复的证据、引用、排版或 venue-limit 风险会作为 unresolved risks 报告，而不是被隐藏。
 
-### 阶段 3：Full Draft
+## 会议和期刊支持
 
-用户确认 Paper Framework 后，skill 创建完整 LaTeX 项目：
+Academic Writing **同时内置会议和期刊**的模板与 paper-type profile，并不只服务会议论文。会议模板涵盖
+ICLR、NeurIPS、ICML、CVPR、ACL/EMNLP/NAACL、AAAI、IJCAI 等；期刊方向包含 IEEE Transactions、JMLR，
+以及面向任意未单独建模期刊的通用期刊 profile。期刊模式还会在基础写作规则之上叠加期刊特有的 section
+overlay 与投稿要素检查（必需声明、display item 上限、Methods 位置、篇幅预算等）。
 
-```text
-paper/
-  main.tex
-  math_commands.tex
-  references.bib
-  sections/
-  figures/
-```
+| 情况 | 行为 |
+| --- | --- |
+| 用户明确点名会议 | 可用时加载对应 venue profile。 |
+| 用户没有指定 venue | 默认 conference 模式，使用 generic / venue TBD。 |
+| 用户明确点名期刊 | 使用 journal 模式和 journal paper-type profiles。 |
+| 用户点名未建模期刊 | 使用 generic journal profile，并把期刊特定字段保持为待确认。 |
 
-初稿使用确认过的 template 和 section plan。官方 venue template 只作为格式壳使用：示例正文和说明文字必须删除后再写入论文内容。
+这种保守路由可以避免用户只是说“写论文”时，被误写成期刊论文。
 
-## 自动 Review 和 Audits
+## 可选图像生成
 
-最终交给用户的第一版 draft 不是未经 review 的 raw draft。只要完整 `paper/` 初稿存在，skill 就自动加载 `references/sections/paper-review.md` 并运行 post-draft review gate。
+数据图表由当前 agent 根据项目数据生成。对 teaser、概念图、overview image 等非数据类论文图片，skill 可以可选接入 Gemini 或 GPT-image，也支持普通 API key 和中继/base URL 配置。
 
-review 分两轮：
-
-1. 自审：检查 contribution、clarity、evidence、evaluation completeness、method soundness、visual/layout 和 format hygiene。
-2. 独立 reviewer：有 subagent 能力时启动独立 reviewer；没有时使用 fresh second self-pass fallback。
-
-所有 blocking 问题和所有能在 writing-only 范围内修复的 high-priority 问题，都必须在最终交付前修完。
-
-最终 audits 是硬门控：
-
-```bash
-python3 scripts/audit_citations.py paper
-python3 scripts/audit_draft.py paper
-python3 scripts/audit_draft.py paper --max-content-pages <limit>
-```
-
-page-limit audit 以编译后的 PDF 为准。EMNLP/ACL-style long paper 使用 8 个 content pages；short paper 使用 4 个。只要超过确认的 venue page limit，这个 draft 就不完整，即使 Paper Framework 里的计划页数看起来没有超。
-
-## 会议和期刊路由
-
-skill 同时支持 conference 和 journal，但默认保守：
-
-- 用户明确点名期刊或说 journal paper，才使用 `venue_kind=journal`。
-- 其他情况使用 `venue_kind=conference`。
-- conference paper type 使用 `references/paper-types/*.md`。
-- journal paper type 使用 `references/paper-types/journal/*.md`。
-- journal-only section overlays 和 submission-element checks 只在 journal 模式加载。
-
-这样可以避免一个 generic 或未指定 venue 的请求被误写成期刊论文。
-
-## 可选图片 API
-
-对 teaser、概念图、overview image 等非数据类论文图片，skill 可以可选接入图像生成 API。数据图表仍由当前 agent 直接用 Python 生成。
-
-Gemini：
-
-```bash
-export GEMINI_API_KEY="..."
-export GEMINI_IMAGE_MODEL="gemini-2.5-flash-image"   # 可选
-export GEMINI_BASE_URL="..."                          # 可选，中继地址
-```
-
-GPT-image：
-
-```bash
-export OPENAI_API_KEY="..."
-export OPENAI_IMAGE_MODEL="gpt-image-2"              # 可选
-export OPENAI_BASE_URL="..."                          # 可选，中继地址
-```
-
-未配置图片 API 时，当前 agent 会直接绘制或组装图片。
+未配置图片 API 时，只要任务在能力范围内，当前 agent 仍可直接绘制或组装图。
 
 ## 安装
 
-请复制完整 `academic-writing` 目录，而不是只复制 `SKILL.md`。这个 skill 依赖 `manifest.yaml`、`static/`、`references/`、`templates/`、`scripts/` 和 `tests/`。
+请复制完整 `academic-writing` 目录，不要只复制 `SKILL.md`。这个 skill 依赖 `manifest.yaml`、`static/`、`references/`、`templates/` 和支持脚本。
 
-Codex 安装示例：
+### Claude Code
+
+用户级安装：
+
+```bash
+mkdir -p ~/.claude/skills
+cp -R /path/to/academic-writing ~/.claude/skills/
+```
+
+项目级安装：
+
+```bash
+mkdir -p your-paper-repo/.claude/skills
+cp -R /path/to/academic-writing your-paper-repo/.claude/skills/
+```
+
+安装或更新后，重启 Claude Code。
+
+### Codex
+
+用户级安装：
 
 ```bash
 mkdir -p ~/.codex/skills
 cp -R /path/to/academic-writing ~/.codex/skills/
 ```
 
-安装或更新后，建议开启新会话。
+如果你使用自定义 `$CODEX_HOME`，请把目录放到 `$CODEX_HOME/skills/` 下。
+
+### 其他 agent 或手动使用
+
+保持目录结构不变，先读取 `SKILL.md`。当它指向 `static/`、`references/` 或 `templates/` 时，在同一个 `academic-writing` 目录内解析路径。只加载当前任务真正需要的文件。
 
 ## 示例请求
 
 ```text
-Use academic-writing to create a full draft from this workspace for EMNLP.
-Use academic-writing to write the Writing Policy first; do not draft yet.
-Use academic-writing to build the Paper Framework from the confirmed policy.
-Use academic-writing to revise this introduction for ACL-style clarity.
-Use academic-writing to review this full paper before submission.
-Use academic-writing for a journal paper targeting JMLR.
+Use academic-writing to build a first manuscript from this workspace for EMNLP.
+Use academic-writing to write only the Writing Policy first.
+Use academic-writing to build the Paper Framework after I confirm the policy.
+Use academic-writing to revise this Introduction for ACL-style clarity.
+Use academic-writing to prepare a journal manuscript targeting JMLR.
+Use academic-writing to review this manuscript before submission.
 ```
 
 ## 范围边界
 
-这个 skill 不会：
-
-- 默认运行新实验或修改实验 pipeline；
-- 编造数字、引用、baseline、dataset 或 claim；
-- 静默改变研究 idea、方法机制或证据边界；
-- 在 compilation、citation、page-limit 或 review gate 失败时宣称 draft submission-ready。
-
-当写作需要缺失证据时，skill 会弱化 claim、标记 gap、询问用户，或把问题报告为 unresolved。
+Academic Writing 能帮助你得到更清晰、更可辩护的论文初稿，但不保证录用。它不会伪造证据，不会隐藏 unsupported claims，也不会把缺失实验包装成自信结论。证据不足时，论文应该写得更克制，而不是更夸张。

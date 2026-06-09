@@ -1,7 +1,12 @@
 # Venue Template Sources
 
-Use this file to track official templates and author guidelines. Do not download or redistribute
-template assets unless license and access allow it.
+**This is a maintenance-time provenance ledger, not a draft-time fetch list.** It records how the
+templates already preloaded in `templates/` were obtained (official URL, download date, source
+status). The drafting agent should **not** load this file or fetch these URLs while writing a paper:
+the assets are already bundled in `templates/` and are the authoritative source (see
+`templates/index.md`). Use this file only when *maintaining* the skill — refreshing a bundled
+template against a new official release. Do not download or redistribute template assets unless
+license and access allow it.
 
 | Venue | Official template/guideline URL | Local asset path | Source status | Notes |
 |---|---|---|---|---|

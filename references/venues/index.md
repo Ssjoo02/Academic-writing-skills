@@ -10,6 +10,15 @@ anonymity, citation command style, required statements, figure/table planning, c
 calibration, and final checklist risks. They must not invent claims, results, citations, or paper
 identity.
 
+**Template note:** the official LaTeX template for each modeled venue is **preloaded in
+`templates/`** and is the authoritative source for formatting (see `templates/index.md`). The
+`Official sources:` URLs in each venue card — and the URL table in
+`maintenance/venue-template-sources.md` — are **provenance records and pre-submission verification
+links, not draft-time fetch instructions**. When a venue maps to a bundled template, use the local
+file directly; do not web-search or download a template to start the LaTeX project. A venue card's
+`Final Gate` instruction to "confirm the current official style file" is a *pre-submission* check
+against the official page, not a license to re-download during drafting.
+
 The schema is strict; the facts are allowed to be incomplete. Prefer `not verified` or `verify
 current official page` over filling a field from memory, old calls, search snippets, or another
 venue's pattern. If a target venue is unavailable, choose the closest profile only for approximate

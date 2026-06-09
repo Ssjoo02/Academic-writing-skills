@@ -27,6 +27,25 @@ Decision rule:
 - A limitation statement should be precise enough to avoid overclaiming but not so broad that it
   supplies an avoidable rejection argument.
 
+## Limitations Section Length And Shape
+
+A standalone `Limitations` section (ACL-style) must be **short and scannable, not exhaustive**.
+A long, padded Limitations section reads as either anxiety or as handing reviewers a list of
+attack surfaces — neither helps.
+
+- **Cap at the 3–4 most material limitations.** Pick the ones a competent reviewer would
+  actually raise; do not enumerate every conceivable caveat. Five or more numbered points is a
+  signal to merge or cut.
+- **1–2 sentences each.** State the limitation, then at most one clause of scope or mitigation.
+  Do **not** append a "future work should…" sentence to every point — that doubles the length
+  for no information.
+- **No boilerplate frame.** Drop the throat-clearing opener ("We acknowledge several
+  limitations of this work…") and the promotional closer ("Despite these limitations, we
+  believe our work provides…"). Lead directly with the first limitation and stop after the last.
+- **Lead with the limitation itself** (a short bold lead-in or topic phrase), not with a wind-up.
+- **Target ≈ 120–180 words total** — well under half a column. If it is longer, you are
+  over-explaining; compress.
+
 ## Principles
 
 - Close the story opened by the Introduction.

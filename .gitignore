@@ -1,0 +1,7 @@
+# Unbundled reference adapters: kept locally, not shipped in the skill repo
+references/domains/
+references/style/user-style-profile.md
+references/style/reference-paper-learning.md
+
+# Orphan maintenance note: kept locally, not tracked
+maintenance/venue-template-sources.md

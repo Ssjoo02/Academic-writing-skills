@@ -71,6 +71,12 @@ when the content needs it.
 - When you do use `table*`, it **must fill `\textwidth`** (see Width Contract) — a `table*` that
   floats narrow in the middle of the page span is a defect. If a table is too narrow to fill
   `\textwidth` cleanly, that is a signal it should have stayed single-column.
+- **Decide per table — never blanket-promote.** Do not convert every table in the paper to `table*`
+  just because one of them (the main results) needs it. A definition table with a single prose
+  column (e.g. `ID | Name | Description`) belongs in one column even if Description wraps; only when a
+  cell genuinely cannot fit — confirmed by a compile-time overfull `\hbox` *and* failure to recover
+  by abbreviating headers/cells — do you escalate. **Measure, don't guess:** after sizing a table,
+  render the page and look (the `≳5–6 columns` heuristic is a prompt to check, not an order to widen).
 
 #### Column widths
 
@@ -107,6 +113,43 @@ Rule of thumb: a numeric table with **≳6 columns**, or with long header text, 
 column — default it to `table*`. A table with **≳10 columns** usually needs rotation or splitting
 even at full width. Treat any compile-time overfull `\hbox` originating in a `tabular` as this defect.
 
+#### The appendix has the opposite failure: sparse, scattered floats ("太空")
+
+In the **body** the risk is *overflow* (content too wide for its budget). In the **appendix** the
+page budget is gone, so the dominant defect flips to *under-density*: short floats scatter across the
+page with large empty vertical bands, and each appendix "section" is a one-line pointer (`Table~N
+provides ...`) followed by a bare float. The result reads as half-empty pages and a table dump, not
+supporting material. Treat a sparse, float-only appendix as a defect to fix, the same way you treat
+an overflowing body table.
+
+Causes and fixes:
+
+- **Stacked full-width `table*[t]` floats scatter.** Three `table*` with `[t]` placement and nothing
+  between them get pushed to page tops and spread with `\textfloatsep`/`\floatsep` fill, leaving big
+  white gaps. Fix by (a) **not reflexively widening** — most appendix definition / config / boundary
+  tables fit one column and pack tight as plain `table` (apply the body's single-vs-cross-column
+  test to appendix tables too); (b) **anchoring each float with real prose** so the surrounding text
+  fills the page; and/or (c) **placing appendix tables non-floating** under their heading so they sit
+  where written instead of drifting.
+- **Pin placement deliberately in the appendix.** Prefer `[h]`/`[ht]` (or `[H]` from the `float`
+  package) over `[t]` for appendix tables so they stay next to their explanation, and use
+  `\FloatBarrier` (from `placeins`) or a deliberate `\clearpage` between appendix sections to stop
+  floats from migrating across headings. Do **not** scatter-control with blank `\vspace`.
+- **Every appendix (sub)section earns a lead paragraph, not a pointer.** 2–4 sentences that say what
+  the material is, how to read it, the one or two patterns worth noticing, and which main-text claim
+  it backs. A section whose entire prose is `Table~N gives ...` is the "太空" smell — expand it.
+- **The appendix carries the *full* version, never a stub.** Do not relegate sketch-only content or
+  leave `see supplementary material` pointers in place of content that exists. If the body summarizes
+  a taxonomy, protocol, proof, or result matrix, the appendix holds the complete, self-contained
+  version (this is also what makes the pages substantive rather than empty).
+
+Substantive material that belongs in a well-filled appendix: full definitions / taxonomies that the
+body mentions in one stroke, complete per-item / per-model / per-category result matrices, full
+proofs or derivations (body keeps the sketch), dataset and annotation protocol details, exact
+prompts and agent / hyperparameter configurations, extra ablations and robustness checks, and
+additional qualitative examples. Group these under labeled appendix sections (A, B, C…) ordered to
+mirror the main paper, each reachable by a main-text forward reference.
+
 #### Highlighting and emphasis (general)
 
 - For **"baselines vs. ours"** comparisons, place your method in the **last row**, separated by a
@@ -131,7 +174,10 @@ Every table must declare its target layout before it is written:
   gaps is preferred over leaving a cramped table floating in white space.
 - `appendix`: apply the **same width contract and the same overflow ladder as the body** — a wide
   appendix table must be `table*` (or rotated/split), never a single-column `table` left to spill.
-  Appendix placement is not a license to exceed the printable area.
+  Appendix placement is not a license to exceed the printable area. **Also guard the opposite defect**
+  (see "The appendix has the opposite failure"): do not scatter narrow `table*[t]` floats across
+  half-empty pages — keep tables that fit one column single-column, anchor each with real prose, and
+  pin placement so floats sit under their heading.
 - `supplement`: move very wide, dense, or complete result matrices out of the paper body when even a
   rotated or split in-paper table would be unreadable.
 
@@ -202,4 +248,6 @@ captions for long discussion that duplicates the main text.
 - Can the table be read without guessing metric direction or protocol?
 - Does each figure/table fit the declared single-column or double-column width?
 - Do all long table cells wrap instead of crossing into margins or neighboring columns?
+- Does the appendix read as substantive (every section has a real lead paragraph, floats sit under
+  their heading, no half-empty pages or bare table dumps), not just structurally correct?
 - Is visual polish consistent with target venue expectations?

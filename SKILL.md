@@ -57,6 +57,18 @@ without English technical terms), the agent MUST respond in Chinese. File paths,
 LaTeX commands, BibTeX keys, and code remain in their original language. Paper prose
 remains English by default. This rule is not overridden by any other policy.
 
+## ⚠️ Bundled Venue Templates — Local First, Do Not Web-Fetch
+
+**This skill ships the official LaTeX templates for the major venues, preloaded in `templates/`**
+(ICLR, NeurIPS, ICML, ACL/EMNLP/NAACL, CVPR, AAAI, IJCAI, ACM/KDD/WWW/SIGIR/CHI/UIST, IEEE
+conference/journal, JMLR, plus a generic draft template). When a target venue maps to a preloaded
+template (see `templates/index.md`), the agent **MUST use the local file directly and MUST NOT
+search the web or download a template** to obtain venue formatting. Web/official-source fetch is a
+**last resort only** for a venue with no preloaded mapping and no user-provided template. The
+official-source URLs in venue cards and in `maintenance/venue-template-sources.md` are
+**provenance records for maintenance, not draft-time fetch instructions**. Do not infer venue
+formatting from memory either — use the bundled template.
+
 ## Routing Protocol
 
 Follow these steps every time the skill is invoked.
@@ -142,11 +154,15 @@ The files under `references/` are deep references, not defaults. Open them on de
   Load it immediately after the first complete `paper/` draft exists; do not wait for
   the user to explicitly ask for review. The draft returned to the user is the
   reviewed-and-revised draft.
+- Writing Policy workspace logic/evidence audit (run before the Claims table; trace-to-artifact,
+  cross-file consistency, result-to-conclusion logic, scope/integrity smells, default-on independent
+  recheck) → `references/checks/workspace-logic-audit.md`
 - Claim-evidence audit → `references/checks/claim-evidence.md`
 - Citation integrity → `references/checks/citation-integrity.md`
 - Final submission-readiness check → `references/checks/submission-readiness.md`
 - Domain-specific evidence pressure → `references/domains/<domain>.md`
-- Template selection → `templates/index.md`
+- Template selection → `templates/index.md` (preloaded official templates are the **first and
+  authoritative** source; do not web-search/download when the venue maps to a bundled template)
 - Reference paper style learning → `references/style/reference-paper-learning.md`
 
 ## Why This Split

@@ -119,17 +119,42 @@ figure canvas.** Check these before saving:
 
 ### Colors
 
-Color is an **encoding**, not decoration. Two mistakes make generated figures look
-amateur, and both are explicitly banned by journal figure practice (no rainbow/jet
-colormaps; hue must not be the *only* encoding; grayscale print must stay readable):
+Color is an **encoding**, not decoration. Three mistakes make generated figures look
+amateur (all banned by journal figure practice — no rainbow/jet colormaps; hue must not be
+the *only* encoding; grayscale print must stay readable):
 
-1. a **rainbow of maximally-distinct, saturated hues** with no hierarchy (the "Excel"
+1. **Shipping the library default cycle.** matplotlib's `tab10` / seaborn's default
+   (saturated mid orange `#ff7f0e` + mid blue `#1f77b4`, etc.) is the single most common
+   "this looks like a generated/Excel chart" tell. **Never rely on the default color cycle —
+   set an explicit palette before plotting every figure.** A two-series chart in raw
+   `tab:orange`/`tab:blue` is a defect even though it is "only two colors."
+2. a **rainbow of maximally-distinct, saturated hues** with no hierarchy (the "Excel"
    look) — caused by hand-mixing colors of unequal luminance, and
-2. using **hue as the only channel**, which collapses in grayscale print and for
+3. using **hue as the only channel**, which collapses in grayscale print and for
    colorblind readers.
+
+Publication palettes are **deep and slightly muted, not neon**. When a color looks
+vivid/saturated on screen, desaturate or deepen it — saturated primaries are what make a
+figure read as amateur. **Reduce saturation before adding categories.**
 
 Pick color in three steps: choose the palette family **from the data structure**, add a
 **redundant channel**, then **verify**.
+
+#### Step 0 — one palette for the whole paper (define once, reuse everywhere)
+
+Every figure in the paper should read as **one visual system**, not a set of unrelated
+charts. Before generating the first plot, fix a single palette and reuse it across the bar
+chart, line plot, radar, and heatmap accents. **Family consistency beats maximal hue
+separation:** keep baselines in one cool family and the proposed method in one hero family.
+
+- **One entity → one (color, marker) pair across *every* figure.** If "Gemini3-Pro" is the
+  deep-blue series in Figure 3, it is deep blue everywhere it appears — never remapped.
+- Group related entities into **families** and color by family (e.g. all "Frontier LLM"
+  baselines in cool blues, all "Specialist agent" baselines in warm neutrals), rather than
+  giving N equal entities N unrelated hues.
+- Reserve green/red for *direction* (gain/drop/threshold), never for entity identity.
+- If two figures legitimately need different palettes (different entity sets), still keep
+  the same saturation level and neutral family so they look related.
 
 #### Step 1 — choose the palette family from the DATA (not the paper, not the chart)
 
@@ -169,9 +194,14 @@ PEER_MARKERS = ['o', 's', '^', 'D', 'v', 'P', 'X', '*']  # pair 1:1 with colors
 - Balanced luminance → equal visual weight (the point of a peer comparison).
 - Cap at **6–8 categories**. Beyond that, group/aggregate or use small multiples; do not
   keep adding hues. **Reduce saturation before adding categories.**
-- For a **2–3 series** comparison where every series matters, take the first 2–3
-  qualitative colors (e.g. `#0072B2` blue + `#D55E00` vermillion). Do not paint one of
-  them grey.
+- For a **2–3 series** comparison where every series matters (e.g. two metrics like
+  ASR vs. TCR across models), pick from the **nature-figure palette** so the colors stay
+  consistent across the paper — `#0F4D92` deep blue paired with `#B64342` brick red
+  (default), or `#42949E` teal, or `#8BCF8B` soft green. Do **not** ship the matplotlib
+  default orange/blue (`#1f77b4`/`#ff7f0e`) and do **not** hand-mix off-palette hues like a
+  brown/clay — those read muddy. When the two series have opposite valence (e.g. ASR =
+  risk/bad, TCR = capability), put the warmer/red hue on the "risk" series. Do not paint one
+  series grey; keep the legend frameless (`frameon=False`).
 
 #### Ordered → Single-hue sequential ramp
 
@@ -197,12 +227,14 @@ zero/center.
 
 #### Emphasis → Hero-baseline (one focus entity)
 
-When the paper proposes a method, make the hero the only saturated color; baselines are
-muted and recede. Misapplying this to a peer comparison invents a hierarchy that is not
-there.
+When the paper proposes a method, make the hero the **only saturated color**; baselines are
+**pale and recede**. This is the pattern published Nature/NMI comparison bars use: a row of
+soft, low-saturation baselines and one deep hero, with the **hero placed last** so the eye
+lands on it. Misapplying this to a peer comparison of equal methods invents a hierarchy that
+is not there.
 
 ```python
-HERO_BLUE = "#3775BA"   # proposed method — the one advancing color
+HERO_BLUE = "#3775BA"   # proposed method — the one advancing color (deepen to #0F4D92 for more pop)
 BASELINE_PALETTE = [     # all baselines — low-saturation receding colors
     "#CFCECE",   # grey
     "#DDF3DE",   # pale green
@@ -211,7 +243,11 @@ BASELINE_PALETTE = [     # all baselines — low-saturation receding colors
     "#DAA87C",   # warm tan
     "#B4C0E4",   # soft blue-purple
 ]
+# usage: colors = BASELINE_PALETTE[:n_baselines] + [HERO_BLUE]  # hero last
 ```
+
+This is the right fix whenever a "many methods, one metric" bar chart would otherwise become
+a row of equally-saturated hues: keep the baselines pale and let one color carry the message.
 
 #### Step 2 — add a redundant channel (mandatory when ≥4 overlapping series, or whenever grayscale/CVD matters)
 

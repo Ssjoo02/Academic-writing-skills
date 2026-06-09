@@ -1,211 +1,185 @@
 # Academic Writing
 
-Academic Writing is a Codex skill for turning research materials into a disciplined paper draft. It
-is writing-only by default: it improves paper structure, argument flow, claim-evidence alignment,
-venue fit, citation hygiene, figures/tables presentation, and final review readiness, but it does
-not change the research idea, run experiments, invent results, or fabricate citations.
+Academic Writing is an agent-readable skill for building research papers from real project
+materials. It works in local skill environments such as Claude Code and Codex, and can also be used
+manually by any agent or researcher that can read `SKILL.md` and the referenced Markdown files.
 
-Chinese version: [README.zh-CN.md](README.zh-CN.md)
+简体中文：[README.zh-CN.md](README.zh-CN.md)
 
-## What This Skill Is For
+## Project Orientation
 
-Use this skill when you want to:
+Academic Writing focuses on the manuscript-building part of research: turning experiments, notes,
+figures, tables, and claims into a coherent first manuscript.
 
-- create a complete first paper draft from a project workspace;
-- build a paper-level writing policy before drafting;
-- turn the policy into a section-level paper framework;
-- generate a LaTeX `paper/` project from the confirmed framework;
-- revise, polish, compress, or review an existing paper draft;
-- adapt a draft to a conference or journal venue while preserving evidence boundaries.
+It is deliberately writing-only by default. It can improve structure, argument flow, section logic,
+claim-evidence alignment, venue fit, citation hygiene, figure/table presentation, and reviewer-facing
+clarity. It does not silently change the research idea, run experiments, invent results, fabricate
+citations, or strengthen claims beyond the available evidence.
 
-The skill treats a research paper as a structured argument:
+The skill is built around one principle:
 
 ```text
 problem -> gap -> challenge -> insight -> method / study / benchmark -> evidence -> claim
 ```
 
-Every major claim must map to visible evidence or be weakened, deferred, or marked unresolved.
+A paper is not a collection of results. It is a defensible argument, and every major claim needs a
+visible evidence boundary.
 
-## Core Workflow
+## Writing Philosophy And Influences
 
-The full-draft workflow has three stages and two mandatory user checkpoints.
+The writing methodology is not an in-house invention. It distills widely shared research-writing
+experience, most directly the research and paper-writing guidance compiled by Sida Peng (彭思达) in
+*learning_research*, together with established community advice on clear scientific writing:
+
+- *learning_research* — Sida Peng's research notes:
+  <https://github.com/pengsida/learning_research/tree/master>
+- *Ten Tips for Writing CS Papers* — Sebastian Nowozin:
+  <https://www.nowozin.net/sebastian/blog/ten-tips-for-writing-cs-papers-part-1.html>
+- *Writing a Good Introduction* — Henning Schulzrinne (after Jim Kurose):
+  <https://www.cs.columbia.edu/~hgs/etc/intro-style.html>
+
+From these sources the skill internalizes a few load-bearing habits: state the contribution early
+and classify it as *insight*, *performance*, or *capability*; treat every section as a facet of that
+single contribution; prefer simple, direct language over ornate prose; and give the introduction a
+clear motivation → specific problem → contribution → distinction-from-prior-work → roadmap arc. The
+principle above is the spine that holds these habits together.
+
+## Workflow
+
+The full-manuscript workflow has three stages and two required checkpoints.
 
 ```text
 Workspace Discovery
   -> Writing Policy
-  -> Checkpoint 1: user confirms or corrects the policy
+  -> Checkpoint 1: confirm or correct the policy
   -> Paper Framework
-  -> Checkpoint 2: user confirms or corrects the framework
-  -> Full Draft LaTeX Project
-  -> Automatic Post-Draft Review
-  -> Final Audits / Submission Readiness Summary
+  -> Checkpoint 2: confirm or correct the framework
+  -> First Manuscript
 ```
 
-The two checkpoints are deliberate. A request for a complete draft authorizes the workflow, but it
-does not allow the agent to skip the Writing Policy or Paper Framework gates.
+The two checkpoints are deliberate. A language model can emit a full paper in a single pass, but a
+one-click draft tends to collapse toward a generic, averaged writing style that rarely matches how
+the work should actually be told. The gates break that pattern: the agent must pause at the Writing
+Policy and again at the Paper Framework, surface the decisions it would otherwise make silently —
+paper identity, evidence boundary, venue, section structure, figure plan — and let the author confirm
+or redirect them. Asking for a complete paper starts the workflow; it does not skip the gates. The
+result is a manuscript that follows the author's intent rather than a templated auto-generation.
 
-### Stage 1: Writing Policy
+### 1. Writing Policy
 
-The Writing Policy is the compact contract for the paper. It is saved as:
+The Writing Policy is the paper contract. It records the source snapshot, paper identity, core story,
+claim-evidence map, key terminology, visible assets, and open decisions.
 
-```text
-writing-policies/<paper-slug>-writing-policy.md
-```
-
-It records:
-
-- source snapshot and files inspected;
-- paper identity: venue kind, venue, paper type, intended reader, core research question;
-- core story and one-sentence contribution;
-- claims and evidence boundaries;
-- key terminology and naming decisions;
-- visible assets and constraints;
-- open decisions that could change the paper.
-
-The skill must decide `venue_kind` before `venue`, and `venue` before `paper_type`.
+It also resolves routing in this order:
 
 ```text
 venue_kind -> venue -> paper_type
 ```
 
-Journal mode is selected only when the user explicitly says this is a journal article or names a
-journal venue. If the user does not explicitly specify journal, the default is conference.
+Journal mode is used only when the user explicitly says the target is a journal article or names a
+journal venue. Otherwise the skill defaults to conference mode.
 
-### Stage 2: Paper Framework
+### 2. Paper Framework
 
-The Paper Framework is a section-level plan, not prose and not a paragraph-by-paragraph outline. It
-is saved as:
+The Paper Framework turns the policy into a section-level plan. It defines the section list, each
+section's role, paper-type profile alignment, venue/template assembly, prose budget, and display-item
+budget for figures and tables.
 
-```text
-writing-policies/<paper-slug>-paper-framework.md
-```
+This matters for real submissions: a double-column figure or large table consumes page space, so the
+framework budgets display items before manuscript generation begins.
 
-It defines:
+### 3. First Manuscript
 
-- title direction and section list;
-- each section's main content;
-- paper-type profile adherence and any justified deviations;
-- prose page budget;
-- display-item page budget for figures and tables;
-- template and venue assembly plan;
-- unresolved blockers before drafting.
+After the framework is confirmed, the skill creates a complete LaTeX manuscript project with the
+confirmed structure, template, bibliography, sections, and figure/table plan. Official venue
+templates are treated as format shells: sample text and instructions are removed before manuscript
+content is written.
 
-For strict conference venues, figures and tables are budgeted explicitly. A wide figure or double-
-column table consumes real page space; planned prose pages alone are not enough.
+Before the first manuscript is delivered, the skill performs its internal review and readiness pass.
+Blocking writing, evidence, citation, layout, or venue-limit problems are fixed when they are within
+writing scope; otherwise they are reported as unresolved risks instead of being hidden.
 
-### Stage 3: Full Draft
+## Conference And Journal Support
 
-After the Paper Framework is confirmed, the skill creates a complete LaTeX project:
+Academic Writing ships templates and paper-type profiles for **both conference and journal**
+manuscripts — it is not limited to conference papers. Conference templates include ICLR, NeurIPS,
+ICML, CVPR, ACL/EMNLP/NAACL, AAAI, and IJCAI; journal targets include IEEE Transactions and JMLR,
+with a generic journal profile for any journal not modeled individually. Journal mode also layers
+journal-specific section overlays and submission-element checks (mandatory statements, display-item
+caps, methods placement, length budgets) on top of the base writing rules.
 
-```text
-paper/
-  main.tex
-  math_commands.tex
-  references.bib
-  sections/
-  figures/
-```
+| Case | Behavior |
+| --- | --- |
+| User names a conference | Load the matching venue profile when available. |
+| User gives no venue | Use conference mode with a generic venue-TBD manuscript. |
+| User explicitly names a journal | Use journal mode and journal paper-type profiles. |
+| User gives an unmodeled journal | Use a generic journal profile and keep journal-specific fields open until verified. |
 
-The draft uses the confirmed template and section plan. Official venue templates are treated as
-format shells: their sample prose and instruction text are removed before drafting.
+This conservative routing avoids accidentally writing a journal article when the user only asked for
+a paper.
 
-## Automatic Review And Audits
+## Optional Figure Generation
 
-The first draft returned to the user is not the raw first pass. As soon as a complete `paper/` draft
-exists, the skill automatically loads `references/sections/paper-review.md` and runs the post-draft
-review gate.
+Data charts are generated from project data by the current agent. For non-data paper pictures such
+as teasers, conceptual illustrations, and overview images, the skill can optionally use Gemini or
+GPT-image through normal API keys or relay/base-URL configuration.
 
-The review has two rounds:
-
-1. Self-review over contribution, clarity, evidence, evaluation completeness, method soundness,
-   visuals/layout, and format hygiene.
-2. Independent reviewer pass when subagent capability is available; otherwise a fresh second self-
-   pass fallback.
-
-The agent fixes every blocking issue and every feasible high-priority issue within writing-only
-scope before final delivery.
-
-Final audits are blocking gates:
-
-```bash
-python3 scripts/audit_citations.py paper
-python3 scripts/audit_draft.py paper
-python3 scripts/audit_draft.py paper --max-content-pages <limit>
-```
-
-The page-limit audit uses the compiled PDF. For EMNLP/ACL-style long papers, use 8 content pages;
-for short papers, use 4. A draft that exceeds the confirmed venue limit is incomplete even if the
-framework's planned budget looked valid.
-
-## Conference And Journal Routing
-
-The skill supports both conferences and journals, but the default is conservative:
-
-- If the user explicitly names a journal or says "journal paper", use `venue_kind=journal`.
-- Otherwise use `venue_kind=conference`.
-- Conference paper types use `references/paper-types/*.md`.
-- Journal paper types use `references/paper-types/journal/*.md`.
-- Journal-only section overlays and submission-element checks are loaded only in journal mode.
-
-This prevents a generic or unspecified request from accidentally becoming a journal article.
-
-## Optional Picture API
-
-For non-data paper pictures such as teasers, conceptual illustrations, or overview images, the skill
-can optionally use an image-generation API. Data charts are generated directly by the current agent
-with Python.
-
-Gemini:
-
-```bash
-export GEMINI_API_KEY="..."
-export GEMINI_IMAGE_MODEL="gemini-2.5-flash-image"   # optional
-export GEMINI_BASE_URL="..."                          # optional, for relay
-```
-
-GPT-image:
-
-```bash
-export OPENAI_API_KEY="..."
-export OPENAI_IMAGE_MODEL="gpt-image-2"              # optional
-export OPENAI_BASE_URL="..."                          # optional, for relay
-```
-
-If no picture API is configured, the current agent draws or assembles the figure directly.
+If no image API is configured, the current agent can still create or assemble figures directly when
+the requested figure is within scope.
 
 ## Installation
 
-Copy the complete `academic-writing` directory, not only `SKILL.md`. The skill depends on its
-`manifest.yaml`, `static/`, `references/`, `templates/`, `scripts/`, and `tests/` paths.
+Copy the complete `academic-writing` directory. Do not copy only `SKILL.md`; the skill depends on
+`manifest.yaml`, `static/`, `references/`, `templates/`, and supporting scripts.
 
-For Codex:
+### Claude Code
+
+User-level install:
+
+```bash
+mkdir -p ~/.claude/skills
+cp -R /path/to/academic-writing ~/.claude/skills/
+```
+
+Project-local install:
+
+```bash
+mkdir -p your-paper-repo/.claude/skills
+cp -R /path/to/academic-writing your-paper-repo/.claude/skills/
+```
+
+Restart Claude Code after installing or updating the skill.
+
+### Codex
+
+User-level install:
 
 ```bash
 mkdir -p ~/.codex/skills
 cp -R /path/to/academic-writing ~/.codex/skills/
 ```
 
-Start a new session after installing or updating the skill.
+If you use a custom `$CODEX_HOME`, place the directory under `$CODEX_HOME/skills/` instead.
+
+### Other Agents Or Manual Use
+
+Keep the directory structure intact and read `SKILL.md` first. When it points to `static/`,
+`references/`, or `templates/`, resolve those paths inside the same `academic-writing` directory.
+Load only the files needed for the current task.
 
 ## Example Requests
 
 ```text
-Use academic-writing to create a full draft from this workspace for EMNLP.
-Use academic-writing to write the Writing Policy first; do not draft yet.
-Use academic-writing to build the Paper Framework from the confirmed policy.
-Use academic-writing to revise this introduction for ACL-style clarity.
-Use academic-writing to review this full paper before submission.
-Use academic-writing for a journal paper targeting JMLR.
+Use academic-writing to build a first manuscript from this workspace for EMNLP.
+Use academic-writing to write only the Writing Policy first.
+Use academic-writing to build the Paper Framework after I confirm the policy.
+Use academic-writing to revise this Introduction for ACL-style clarity.
+Use academic-writing to prepare a journal manuscript targeting JMLR.
+Use academic-writing to review this manuscript before submission.
 ```
 
-## Scope Limits
+## Scope
 
-This skill does not:
-
-- run new experiments or modify experimental pipelines by default;
-- invent numbers, citations, baselines, datasets, or claims;
-- silently change the research idea, method mechanism, or evidence boundary;
-- declare a draft submission-ready when compilation, citation, page-limit, or review gates fail.
-
-When writing needs evidence that is missing, the skill weakens the claim, marks the gap, asks the
-user, or reports the issue as unresolved.
+Academic Writing helps produce a cleaner, more defensible manuscript, but it does not guarantee
+acceptance. It will not fabricate evidence, hide unsupported claims, or turn missing experiments into
+confident prose. When the evidence is incomplete, the manuscript should say less, not pretend more.

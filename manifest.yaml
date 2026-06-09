@@ -171,6 +171,8 @@ references:
       path: references/sections/examples/method.md
 
     # Check references (loaded when risks are unresolved)
+    - condition: "Writing Policy stage workspace logic/evidence audit (trace-to-artifact, cross-file consistency, result-to-conclusion logic, scope/integrity smells, independent recheck)"
+      path: references/checks/workspace-logic-audit.md
     - condition: "claim-evidence audit or high-risk central claim"
       path: references/checks/claim-evidence.md
     - condition: "citation integrity check needed"

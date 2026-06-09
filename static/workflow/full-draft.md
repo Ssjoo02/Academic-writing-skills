@@ -74,6 +74,10 @@ Minimum discovery targets:
 - core contribution and central claim,
 - evidence boundary: available results, source evidence, and unsupported claims,
 - key terms and naming conflicts,
+- disclosure boundary: internal identifiers that must be renamed for publication (checkpoint /
+  training-run / sweep / wandb names, internal tool names, unreleased model names) and entities the
+  authors do not want in the paper (withheld baselines or competing methods, internal tools,
+  unreleased datasets, partner/product names),
 - source conflicts affecting claims, evidence, terminology, or paper identity.
 
 Optional context, record only when visible:
@@ -114,7 +118,7 @@ Stage boundaries:
 
 | Stage | Ask now only for | Defer or default |
 |---|---|---|
-| Writing Policy | paper identity, core story, claim/evidence boundary, key terminology, decisive source conflict | venue kind defaults to conference unless explicit journal; venue if unspecified, page budget, section order, figure placement, caption wording, optional ablations |
+| Writing Policy | paper identity, core story, claim/evidence boundary, key terminology, disclosure boundary (internal names to rename, entities to withhold) when an exclusion could affect comparison honesty, decisive source conflict | venue kind defaults to conference unless explicit journal; venue if unspecified, page budget, section order, figure placement, caption wording, optional ablations |
 | Paper Framework | user-required venue-specific planning with missing/contradictory venue, missing official/preloaded template, blocking Writing Policy decision that changes section structure | template choice, page budget, section order, and figure/table plan when the agent can choose conservatively |
 | Section Drafting | facts needed to write the section correctly without false claims | weaken the claim, defer the decision, or insert a precise LaTeX marker |
 
@@ -153,8 +157,9 @@ writing-only actions — downgrade, mark (`needs evidence` / `not verified`), de
 or stop-and-ask when the issue is decisive for paper identity, a central claim, key terminology, or
 an evidence conflict.
 
-Run the six checks (trace-to-artifact / cross-file consistency / result-to-conclusion logic /
-scope-integrity smells / evidence-type labeling / terminology stability), then run the **default-on
+Run the seven checks (trace-to-artifact / cross-file consistency / result-to-conclusion logic /
+scope-integrity smells / evidence-type labeling / terminology stability / disclosure-and-naming),
+then run the **default-on
 independent recheck** (Step D of the audit file): a fresh zero-context subagent receives only the
 intended claims and paths to raw result files, and returns per-claim support verdicts. Fold its
 findings back into the Claims-And-Evidence table and Open Decisions. Skip the recheck only if the
@@ -172,15 +177,32 @@ File format:
    intended reader, core research question, and venue/template constraints if already known.
 3. **Core Story**: problem, failure case or motivating gap, technical challenge, insight,
    proposed method/benchmark/system/study, one-sentence contribution, and final takeaway.
-4. **Claims And Evidence**: a compact table with `claim`, `evidence`, `status`, `drafting action`,
+4. **Audit Findings**: the result of the Workspace Logic And Evidence Audit — a compact table with
+   `item`, `check`, `verdict (pass/risk/blocking)`, `source trace`, and `writing action`. Include
+   the independent recheck's per-claim verdicts here. Keep it short; this section justifies the
+   `status` and `risk` values in the Claims-And-Evidence table below.
+5. **Claims And Evidence**: a compact table with `claim`, `evidence`, `status`, `drafting action`,
    and `risk`. The drafting action must say whether to state, weaken, verify, defer, or avoid the
-   claim.
-5. **Key Terms**: a compact table with `term`, `definition`, `source`, `use policy`, and `status`.
+   claim. Each row's `status` and `risk` must be consistent with the Audit Findings above.
+6. **Key Terms**: a compact table with `term`, `definition`, `source`, `use policy`, and `status`.
    Include only terms that affect the title, abstract, contribution, method identity, dataset/task,
    benchmark, metric, or system components.
-6. **Assets And Constraints**: only visible assets or constraints that affect drafting.
-7. **Open Decisions**: only unresolved decisions that can change the paper identity, central claim,
-   evidence boundary, key terminology, figure/table plan, or venue/template choice.
+7. **Disclosure And Naming**: the publication-boundary registries from contract point 7. Two compact
+   tables. **Naming Map** — `internal identifier`, `public display name`, `source trace`; one row per
+   internal checkpoint / training-run / sweep / wandb / tool / unreleased-model identifier found in
+   the workspace that maps to a public name. **Do-Not-Disclose** — `entity`, `kind` (baseline /
+   method / tool / dataset / partner / result), `reason`, `disclosure status`
+   (`do-not-disclose` / `restricted`), and for any withheld competing method an
+   `integrity check` cell stating whether removing it keeps comparison claims honest (if not, it is
+   an `idea-level risk` → Open Decisions / stop-and-ask, not a silent removal). Leave a table empty
+   only after actively checking the workspace; record `none found` rather than omitting it. After the
+   user confirms the Writing Policy, export both tables to `paper/.disclosure.yaml` (the format the
+   `scripts/audit_draft.py` disclosure check reads — see that script's header) so the static gate can
+   enforce them mechanically.
+8. **Assets And Constraints**: only visible assets or constraints that affect drafting.
+9. **Open Decisions**: only unresolved decisions that can change the paper identity, central claim,
+   evidence boundary, key terminology, disclosure/naming boundary, figure/table plan, or
+   venue/template choice.
 
 Do not add a short translated confirmation summary inside the Writing Policy. If the user requested
 another language version before this stage was generated, create a complete same-content translated
@@ -207,7 +229,13 @@ Writing Policy checkpoint summary must include:
 - research content: core research question, one-sentence contribution, and central claim boundary,
 - evidence snapshot: key source-evidence types and what they support,
 - experiment/result snapshot: current datasets/tasks/models/metrics/result ranges found,
-- top risks: 2-3 claim, evidence, terminology, result, or citation risks,
+- audit snapshot: the Workspace Logic And Evidence Audit verdict — any `blocking`/`risk` findings
+  (phantom claims, cross-file conflicts, result-to-conclusion gaps, scope/integrity smells), the
+  independent recheck outcome, and how each was resolved (downgraded / marked / deferred /
+  stop-and-ask),
+- disclosure snapshot: how many internal identifiers are mapped to public names, how many entities
+  are marked do-not-disclose, and whether any withheld comparison was flagged as an integrity risk,
+- top risks: 2-3 claim, evidence, terminology, result, disclosure, or citation risks,
 - decisions to confirm: split into Required and Optional.
 
 **Compliance Self-Check (Writing Policy) — complete before showing the checkpoint.** Answer each
@@ -219,9 +247,21 @@ gate.** Do not skip a field by leaving it blank.
 2. Is venue kind resolved first (`conference` unless explicit journal), and is the paper type
    resolved against the correct family index (not defaulted to method-paper or journal-method), and
    recorded with its manifest-mapped profile path?
-3. Does every claim in the Claims-And-Evidence table have a `status` and a `drafting action`?
-4. Are all checkpoint-summary fields above filled (no empty field)?
-5. Did I avoid loading downstream references (venue, section, figure, template) not allowed at this
+3. Did I run the Workspace Logic And Evidence Audit (all seven checks) and record the results in the
+   Audit Findings section, with every `blocking`/`risk` finding resolved into downgrade / mark /
+   defer / stop-and-ask — and no claim left untraceable to a real artifact?
+4. Did I run the independent zero-context recheck (or the fresh self second-pass fallback, or note
+   an explicit user opt-out), and fold its per-claim verdicts into the table?
+5. Does every claim in the Claims-And-Evidence table have a `status` and a `drafting action`, and is
+   each `status`/`risk` consistent with the Audit Findings (no wording exceeding its evidence
+   ceiling)?
+6. Are all checkpoint-summary fields above filled (no empty field), including the audit snapshot and
+   the disclosure snapshot?
+7. Did I build the Disclosure And Naming registries (Naming Map + Do-Not-Disclose, each `none found`
+   or populated after actually checking the workspace), confirm no internal identifier or
+   do-not-disclose entity leaked into the Claims-And-Evidence or Key Terms tables, and flag any
+   withheld comparison that would make a claim misleading as an `idea-level risk` / Open Decision?
+8. Did I avoid loading downstream references (venue, section, figure, template) not allowed at this
    stage?
 
 Gate: the user must confirm the Writing Policy before Paper Framework generation.
@@ -280,6 +320,25 @@ Load only the references needed to resolve paper structure and physical format:
 - Journal-only (when `venue_kind=journal`): `references/venues/journal-vs-conference.md` for drafting
   posture, and `references/checks/journal-submission-elements.md` for the mandatory statements and
   display-item caps/tiers that shape the Venue Assembly Plan and the Figure Plan.
+
+**Template Acquisition (local-first — do not web-fetch when a preloaded template exists).** The
+official templates for the major venues are bundled in `templates/`. Acquire the template in this
+strict priority order, stopping at the first that applies:
+
+1. **Preloaded `templates/`** — when the target venue maps to a bundled template in
+   `templates/index.md`, copy that local file. This is the **first and authoritative** source.
+2. **User-provided official template** — when the user supplied template files for this project,
+   use those.
+3. **Targeted official-source fetch — last resort only** — *only* when the venue has **no** preloaded
+   mapping **and** the user provided no template. Use the official URL recorded in the venue card /
+   `maintenance/venue-template-sources.md`, and record it as a Paper Framework template risk.
+
+**Do NOT search the web or download a template when `templates/index.md` maps the target venue to a
+preloaded file** — that is the failure mode this rule exists to prevent. The official-source URLs in
+venue cards and in `maintenance/venue-template-sources.md` are **provenance records (how the bundled
+assets were obtained), not draft-time fetch instructions**. The venue card's "verify the current
+official style file before submission" is a *pre-submission* check against the official page, not a
+license to re-download the template during drafting. Never reconstruct venue formatting from memory.
 
 Build the framework in this order:
 
@@ -465,9 +524,10 @@ apply its semantic color roles and legend rules.
 
 **Before any concept figure (teaser / pipeline / architecture / workflow):** load
 `references/figures/picture-generation.md`. These are **illustrations**, not
-matplotlib boxes: the image API draws a **text-free** scene and all exact labels
-are added with a deterministic TikZ overlay (the hybrid pattern). Do **not**
-hand-draw pipeline boxes in matplotlib, and never let the image model render text.
+matplotlib boxes: the image API draws the scene and may render the short labels
+directly, which are then **verified for correct spelling and terminology**
+(generate-then-verify); the TikZ overlay is a fallback for a label the model
+misspells. Do **not** hand-draw pipeline boxes in matplotlib.
 
 1. Read the confirmed Figure Plan from the Paper Framework.
 2. Resolve the Image Renderer Preference. If the user configured a picture API (GPT-image2, Gemini),
@@ -478,21 +538,31 @@ hand-draw pipeline boxes in matplotlib, and never let the image model render tex
    `paper/figures/<figure-id>.pdf` plus `paper/figures/<figure-id>.png` preview.
    Do not create shared style modules, scripts directories, derived data folders, or audit files by default.
    Do not hardcode results from memory.
-4. **Concept figures (teaser / pipeline / architecture / workflow)**: follow the hybrid pattern in
+4. **Concept figures (teaser / pipeline / architecture / workflow)**: follow
    `references/figures/picture-generation.md`. Write the Picture Brief to
    `paper/figures/prompts/<figure-id>.md` first, with a clean illustrative Direct Image Prompt (a
-   scene, not rounded-rectangle boxes) that ends with the no-text instruction, plus a Text Overlay
-   Plan listing every exact label. Generate a **text-free** `paper/figures/<figure-id>.png` via the
-   configured image API (or current-agent fallback), then add all labels with a TikZ overlay over
-   `\includegraphics`. Use a pure TikZ/FigureSpec schematic only when the user explicitly wants an
-   editable diagram. Do not leave a planned figure blank, and do not ship model-rendered text.
+   scene, not rounded-rectangle boxes) that names the exact short labels to render, spelled
+   correctly, plus a Label Verification Plan. Prompt for a **wide, short banner that fills the frame**
+   (target aspect ~3:1 double-column) so the figure is ~4.5–6 cm tall, not ~10 cm with empty bands.
+   Generate `paper/figures/<figure-id>.png` via the configured image API (or current-agent fallback)
+   with its labels, then **verify every visible label against the Writing Policy terminology**;
+   regenerate (or fix that label with the TikZ overlay fallback) if any word is misspelled, wrong, or
+   duplicated. When an overlay is used, **clamp the `tikzpicture` bounding box to the image**
+   (`\useasboundingbox (img.south west) rectangle (img.north east);`) and **inset edge labels
+   anchored inward** so no overlay node pushes the figure into the margin (the Overlay Bounding-Box
+   Rule). If a render is mis-shaped, cap the height (`height=...,keepaspectratio`) or trim baked-in
+   whitespace (`trim=...,clip`). Use a pure TikZ/FigureSpec schematic only when the user explicitly
+   wants an editable diagram. Do not leave a planned figure blank, and do not ship a misspelled or
+   unsupported label.
 5. **Screenshots/qualitative examples**: use existing workspace assets and record their source.
 6. **Inspect every rendered figure before accepting it.** After rendering, open the PNG and run the
    executable Display Review Gate in `references/figures/figure-planning.md`: check the data-chart
    signatures (muddy overlap, clipped elements, low contrast, label collision) and, for concept
-   figures, the illustration signatures (garbled in-image text, boxy flowchart, empty bands, overlay
-   misalignment). Regenerate until all clear. A script that runs without error is not a passing
-   figure; the looked-at PNG is.
+   figures, the illustration signatures (misspelled / wrong in-image labels, boxy flowchart, empty
+   bands / too tall, out-of-bounds overflow, overlay misalignment). After compiling, also confirm `main.log` has
+   **no `Overfull \hbox` for the figure** (a figure overflowing the margin — "出界" — is a blocking
+   defect that `audit_draft.py` fails on). Regenerate until all clear. A script that runs without
+   error is not a passing figure; the looked-at PNG is.
 7. Insert each figure/table only in the section specified by the confirmed Paper Framework.
 8. After all figures pass the gate, confirm the unified visual family (one palette, one type system,
    consistent encodings) and collect inclusion blocks into `paper/figures/latex_includes.tex`.
@@ -554,6 +624,20 @@ hand-draw pipeline boxes in matplotlib, and never let the image model render tex
     overflow ladder in rule 3d (table* → rotate/split → resize), revise, and recompile before
     returning the draft. A compile-log overfull `\hbox` whose source is a `tabular` is this defect —
     do not dismiss it as cosmetic.
+11. **Design the appendix against the opposite defect — sparseness, not overflow.** Once the page
+    budget is gone, the failure mode flips: short floats scatter across half-empty pages and each
+    appendix section becomes a one-line pointer (`Table~N provides ...`) plus a bare float ("太空").
+    On the same inspection pass, treat a half-empty / table-dump appendix page as a defect to fix.
+    (a) **Do not reflexively widen** — appendix definition / config / boundary / example tables that
+    fit one column stay single-column `table` and pack tight; apply the same single-vs-cross-column
+    test as the body. (b) **Anchor every appendix (sub)section with a real lead paragraph** (2–4
+    sentences: what it is, how to read it, the pattern worth noticing, which main claim it backs), not
+    a pointer. (c) **Pin float placement** with `[h]`/`[ht]` (or `[H]` via the `float` package) and a
+    `\FloatBarrier` (`placeins`) or deliberate `\clearpage` between appendix sections so floats sit
+    under their heading instead of drifting and leaving white bands; never pad with blank `\vspace`.
+    (d) **Carry the full version, never a stub** — no `see supplementary material` placeholder in
+    place of content that exists, and no sketch-only appendix. See `references/sections/figures-and-tables.md`
+    ("The appendix has the opposite failure") for the substantive-material menu and float discipline.
 
 ### Section Drafting
 
@@ -638,6 +722,19 @@ body, convert it to inline parenthetical text, or delete it. **Do not write file
 names, or code identifiers (`\texttt{*.json}`, `\texttt{*.py}`, `\texttt{*.csv}`) in prose.**
 Replace with descriptive natural language. **Do not include local paths or directory names.**
 
+**Apply the Disclosure And Naming registries (Writing Policy section 7) to every section, caption,
+table, and figure.** For every entity in the Naming Map, write only the public display name; the
+internal identifier (checkpoint / training-run / sweep / wandb / tool / unreleased-model name, e.g.
+a `..._step380` tag) MUST NOT appear anywhere — not in prose, captions, table cells, figure labels,
+or comments meant to ship. For every entity on the Do-Not-Disclose list, write nothing that names or
+points at it: not a positive mention, not a passing reference, and **not a negation or exclusion**
+(do not write "the protocol that excludes X", "unlike X", or "we do not compare against X"). When a
+comparison or protocol sentence would otherwise have named a withheld entity, describe the scope on
+its own terms ("against the strongest publicly comparable baselines"), without implying a complete
+comparison and without fabricating a result. If suppressing a withheld competing method would make a
+comparison claim misleading, do not write the flattering claim — surface it as an `idea-level risk`
+per contract point 7.
+
 Do not show internal section plans, paragraph plans, or claim-evidence maps unless the user asks or
 a blocking risk must be surfaced.
 
@@ -700,7 +797,8 @@ gate completes. The first draft returned to the user is the reviewed-and-revised
 Run the two-round Post-Draft Review Loop from `references/sections/paper-review.md` automatically:
 
 - **Round 1 (self-review):** read the LaTeX source and compiled PDF when available, run a skeptical
-  defect-finding pass over the seven dimensions, and fix every `blocking` finding and every feasible
+  defect-finding pass over the eight dimensions (including internal consistency — front-to-back data
+  and claim agreement), and fix every `blocking` finding and every feasible
   `high` finding within writing-only scope. Recompile after review-driven edits when compile tools
   are available.
 - **Round 2 (independent subagent review):** after Round 1 fixes and recompile, launch a reviewer
@@ -754,8 +852,12 @@ python3 "$SKILL_DIR/scripts/audit_draft.py" paper --max-content-pages <limit>
   authors, placeholder `and others`, missing DOI/URL/arXiv, year-key mismatch, malformed
   entries, uncited entries). Then **re-run the audit**. Repeat until `PASS`.
 - `audit_draft.py` reports errors → **fix every error in the LaTeX source** (footnotes,
-  file/code artifacts, leftover `% *_NEEDED` markers, duplicate labels, overfull pages).
-  Then **re-run the audit**. Repeat until `PASS`.
+  file/code artifacts, leftover `% *_NEEDED` markers, duplicate labels, overfull pages, and
+  disclosure leaks — internal identifiers that should use a display name, or do-not-disclose
+  entities that appear in prose). For a disclosure leak, apply the Naming Map (rename to the public
+  display name) or remove the do-not-disclose mention (including any negation/exclusion phrasing);
+  do not edit `paper/.disclosure.yaml` to silence a true leak. Then **re-run the audit**. Repeat
+  until `PASS`.
 - **Do not return the draft while any audit reports errors.** A draft with audit failures
   is incomplete. Fix, re-run, pass, then return.
 - Paste the audit result lines into the internal check log so the user can verify.
@@ -765,8 +867,10 @@ python3 "$SKILL_DIR/scripts/audit_draft.py" paper --max-content-pages <limit>
   BibTeX fields, missing DOI/URL/arXiv on modern entries, vague source labels, year-key
   mismatch, uncited entries, unresolved `% CITATION_NEEDED` markers.
 - `audit_draft.py`: mechanical writing rules — footnotes, file/code artifacts, local
-  paths, subsection budget, duplicate labels, input consistency, leftover markers, and
-  content-page budget.
+  paths, subsection budget, duplicate labels, input consistency, leftover markers,
+  content-page budget, and the disclosure check (internal identifiers and do-not-disclose
+  entities listed in `paper/.disclosure.yaml`, plus a heuristic warning for internal-looking
+  identifier tokens even when no list is present).
 
 ### Missing-Support Markers
 
@@ -808,7 +912,9 @@ Internally check: paragraph flow, section alignment, figure/table placement, Abs
 consistency, Introduction claim support in Experiments, Method and Experiments correspondence,
 Related Work positioning, terminology, missing citations, conclusion overclaiming, venue page
 counting, post-main section order, required statements/checklists, appendix/supplement handling,
-anonymity-sensitive locations, and skeptical reviewer risk.
+anonymity-sensitive locations, **front-to-back data consistency (the same metric reads the same in
+abstract/text/table/caption; deltas and "average over N" match the reported numbers; every headline
+number is backed in the body),** and skeptical reviewer risk.
 
 If `latexmk` or `pdflatex` is available, compile the draft and run the applicable content-page audit
 before returning. For page-limited venues, a draft whose main text exceeds the limit is not complete,
@@ -839,6 +945,11 @@ This check is MANDATORY and cannot be skipped.
    with no silently introduced sections or subsections?
 7. Did I load and apply `references/figures/figure-planning.md` (Display Review Gate) for every
    generated figure?
+8. If the draft has an appendix, did I inspect its compiled pages and confirm it is **substantive,
+   not sparse** — every appendix section has a real lead paragraph (not a `Table~N provides ...`
+   pointer), floats sit under their heading rather than scattering into half-empty pages, and no
+   `see supplementary material` stub stands in for content that exists? (Apply Table Handling rule 11
+   / `figures-and-tables.md` "The appendix has the opposite failure".)
 
 **Load receipt:** list which mandatory references were loaded. A mandatory gate whose reference
 was never loaded counts as a failed check, not a pass.
