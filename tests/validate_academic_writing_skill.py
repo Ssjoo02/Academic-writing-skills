@@ -1,12 +1,22 @@
 #!/usr/bin/env python3
-"""Validate the academic-writing skill contract.
+"""Validate the academic-writing collection contract.
 
-This is a lightweight structural validator for routing and profile contracts.
+After the split into a hub skill (academic-writing) plus sibling skills
+(academic-figure, academic-citation, academic-review) and a shared layer (_shared/),
+this validator checks two things:
+
+1. Structural wiring: every skill's manifest path references resolve (including
+   ../../_shared/* cross-skill references), and the shared layer has its essentials.
+2. The most important semantic contracts, pointed at their new file locations.
+
 It intentionally avoids checking external venue facts.
+
+Run from the collection root:  python3 tests/validate_academic_writing_skill.py
 """
 
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -21,215 +31,423 @@ def require(condition: bool, message: str) -> None:
         raise AssertionError(message)
 
 
-def load_manifest(root: Path) -> dict:
-    manifest_path = root / "manifest.yaml"
-    require(manifest_path.exists(), "manifest.yaml is missing")
-    return yaml.safe_load(manifest_path.read_text()) or {}
+def read(path: Path) -> str:
+    require(path.exists(), f"expected file missing: {path}")
+    return path.read_text(encoding="utf-8")
 
 
-def validate_manifest_paths(root: Path, manifest: dict) -> None:
+def load_yaml(path: Path) -> dict:
+    return yaml.safe_load(read(path)) or {}
+
+
+# --------------------------------------------------------------------------- #
+# Structural wiring
+# --------------------------------------------------------------------------- #
+
+def iter_manifest_paths(manifest: dict):
+    """Yield every relative path a manifest references."""
     for rel in manifest.get("always_load", []):
-        require((root / rel).exists(), f"always_load path missing: {rel}")
-
-    for axis_name, axis in manifest.get("axes", {}).items():
-        for value, rel in axis.get("values", {}).items():
-            require((root / rel).exists(), f"{axis_name}.{value} path missing: {rel}")
-
+        yield rel
+    for axis in manifest.get("axes", {}).values():
+        for rel in axis.get("values", {}).values():
+            yield rel
+    for key in ("stages", "scripts"):
+        for item in manifest.get(key, []):
+            if isinstance(item, dict) and item.get("path"):
+                yield item["path"]
+    for item in manifest.get("delegates", []):
+        if isinstance(item, dict) and item.get("path"):
+            yield item["path"]
     for item in manifest.get("references", {}).get("on_demand", []):
-        rel = item.get("path")
-        if rel:
-            require((root / rel).exists(), f"on_demand path missing: {rel}")
+        if isinstance(item, dict) and item.get("path"):
+            yield item["path"]
 
 
-def validate_venue_kind_first_contract(root: Path, manifest: dict) -> None:
-    skill = (root / "SKILL.md").read_text()
-    manifest_text = (root / "manifest.yaml").read_text()
-    manifest_flat = " ".join(manifest_text.split())
-    full_draft = (root / "static/workflow/full-draft.md").read_text()
-    contract = (root / "static/core/contract.md").read_text()
-    submission_readiness = (root / "references/checks/submission-readiness.md").read_text()
+def validate_skill_manifest_paths(skill_dir: Path) -> dict:
+    manifest = load_yaml(skill_dir / "manifest.yaml")
+    require((skill_dir / "SKILL.md").exists(), f"{skill_dir.name}: SKILL.md missing")
+    for rel in iter_manifest_paths(manifest):
+        resolved = (skill_dir / rel).resolve()
+        require(resolved.exists(), f"{skill_dir.name}: manifest path does not resolve: {rel}")
+    return manifest
 
+
+def validate_evals(skill_dir: Path) -> None:
+    """Each skill ships behavioral evals; keep them well-formed so they cannot rot silently."""
+    evals_path = skill_dir / "evals/evals.json"
+    require(evals_path.exists(), f"{skill_dir.name}: evals/evals.json missing")
+    try:
+        data = json.loads(read(evals_path))
+    except json.JSONDecodeError as exc:
+        raise AssertionError(f"{skill_dir.name}: evals/evals.json is not valid JSON: {exc}") from exc
     require(
-        "venue_kind" in manifest_text,
-        "manifest must define venue_kind as an explicit axis before paper_type",
+        data.get("skill_name") == skill_dir.name,
+        f"{skill_dir.name}: evals.json skill_name must equal the skill directory name",
     )
-    venue_kind_pos = skill.find("`venue_kind`")
-    venue_pos = skill.find("`venue`", venue_kind_pos + 1)
-    paper_type_pos = skill.find("`paper_type`", venue_pos + 1)
+    evals = data.get("evals")
     require(
-        -1 not in {venue_kind_pos, venue_pos, paper_type_pos}
-        and venue_kind_pos < venue_pos < paper_type_pos,
+        isinstance(evals, list) and len(evals) > 0,
+        f"{skill_dir.name}: evals.json must contain a non-empty evals list",
+    )
+    for item in evals:
+        require(
+            isinstance(item, dict) and item.get("id") and item.get("prompt"),
+            f"{skill_dir.name}: every eval must have a non-empty id and prompt",
+        )
+
+
+def validate_root_router(root: Path) -> None:
+    """The root SKILL.md is the discovered entry point; it must route to every sub-skill."""
+    router = read(root / "SKILL.md")
+    require("name: academic-writing" in router, "root SKILL.md must declare name: academic-writing")
+    for sib in (
+        "skills/academic-writing/SKILL.md",
+        "skills/academic-figure/SKILL.md",
+        "skills/academic-citation/SKILL.md",
+        "skills/academic-review/SKILL.md",
+    ):
+        require(sib in router, f"root SKILL.md must route to {sib}")
+
+
+def validate_shared_layer(root: Path) -> None:
+    shared = root / "_shared"
+    for rel in (
+        "core/stance.md",
+        "core/gates.md",
+        "core/contract.md",
+        "templates/index.md",
+        "paper-types/index.md",
+        "paper-types/journal/index.md",
+        "venues/index.md",
+        "checks/claim-evidence.md",
+        "checks/metric-design.md",
+    ):
+        require((shared / rel).exists(), f"_shared essential missing: {rel}")
+
+
+# --------------------------------------------------------------------------- #
+# Hub contract (academic-writing)
+# --------------------------------------------------------------------------- #
+
+def validate_hub(root: Path) -> None:
+    hub = root / "skills/academic-writing"
+    manifest = load_yaml(hub / "manifest.yaml")
+    manifest_text = read(hub / "manifest.yaml")
+    manifest_flat = " ".join(manifest_text.split())
+    skill = read(hub / "SKILL.md")
+    full_draft = read(hub / "static/workflow/full-draft.md")
+    writing_policy = read(hub / "static/workflow/stages/writing-policy.md")
+    paper_framework = read(hub / "static/workflow/stages/paper-framework.md")
+    section_drafting = read(hub / "static/workflow/stages/section-drafting.md")
+    latex_project = read(hub / "static/workflow/stages/latex-project.md")
+    contract = read(root / "_shared/core/contract.md")
+
+    # venue_kind routed before venue before paper_type
+    require("venue_kind" in manifest_text, "manifest must define venue_kind axis")
+    vk = skill.find("`venue_kind`")
+    vn = skill.find("`venue`", vk + 1)
+    pt = skill.find("`paper_type`", vn + 1)
+    require(
+        -1 not in {vk, vn, pt} and vk < vn < pt,
         "SKILL.md must route venue_kind before venue and paper_type",
     )
-    require(
-        "default: conference" in manifest_text,
-        "venue_kind must default to conference",
-    )
+    require("default: conference" in manifest_text, "venue_kind must default to conference")
     require(
         "Select journal only when the user explicitly" in manifest_flat,
         "manifest must say journal is selected only from explicit user evidence",
     )
     require(
-        "manifest-mapped paper type profile path" in full_draft,
-        "Full Draft workflow must use the manifest-mapped paper type profile path",
+        "manifest-mapped paper type profile path" in " ".join(writing_policy.split()),
+        "Writing Policy stage must use the manifest-mapped paper type profile path",
+    )
+    require(
+        "Do NOT raise page/length budgets, per-section length" in writing_policy,
+        "Writing Policy stage must defer page/length/budget decisions to Paper Framework",
     )
     require(
         "venue kind" in contract.lower() and "conference" in contract and "journal" in contract,
         "core contract must include venue kind as part of paper identity",
     )
+
+    # Core section budget contract lives in the Paper Framework stage now
     require(
-        "--max-content-pages" in full_draft and "--max-content-pages" in submission_readiness,
-        "page-limited venues must require compiled content-page auditing",
+        "#### Core Section Budget (protect the paper's center of gravity)" in paper_framework
+        and "Primary core section" in paper_framework
+        and "Evidence core section" in paper_framework
+        and "Compress-first sections" in paper_framework
+        and "Minimum floor" in paper_framework,
+        "Paper Framework stage must identify core sections and minimum floors",
     )
     require(
-        "Display-Item Page Budget" in full_draft
-        and "display-item page cost" in full_draft
-        and "compression margin" in full_draft,
+        "| # | Section | Role | Main Content | Prose budget | Minimum floor | Compression rule |"
+        in paper_framework,
+        "Paper Framework checkpoint must expose role, prose budget, floor, and compression rule",
+    )
+    require(
+        "Display-Item Page Budget" in paper_framework,
         "Paper Framework must budget display items separately from prose pages",
     )
-
-
-def validate_post_draft_review_contract(root: Path, manifest: dict) -> None:
-    skill = (root / "SKILL.md").read_text()
-    full_draft = (root / "static/workflow/full-draft.md").read_text()
-    paper_review = (root / "references/sections/paper-review.md").read_text()
-    on_demand = manifest.get("references", {}).get("on_demand", [])
-    review_conditions = [
-        item.get("condition", "")
-        for item in on_demand
-        if item.get("path") == "references/sections/paper-review.md"
-    ]
-
-    require(review_conditions, "manifest must include paper-review.md in on_demand references")
     require(
-        any("automatic post-draft review" in condition for condition in review_conditions),
-        "manifest must make paper-review an automatic post-draft review trigger",
+        "Do not compress a primary-core section below its floor" in paper_framework
+        and "return to the Paper Framework checkpoint" in paper_framework,
+        "Paper Framework stage must block compressing core sections below the confirmed floor",
+    )
+
+    # Abstract / introduction logic chain (now in section-drafting stage)
+    require(
+        "problem -> challenge/gap -> insight/contribution -> advantage -> evidence" in section_drafting
+        and "state purpose or advantage" in section_drafting,
+        "Section drafting must gate Abstract/Introduction on a coherent logic chain",
     )
     require(
-        "Post-draft review (automatic after Full Draft)" in skill,
-        "SKILL.md must expose automatic post-draft review in the router reference list",
+        "glossary-style taxonomy subsection" in section_drafting,
+        "Section drafting must block glossary-style taxonomy definition lists",
     )
     require(
-        "### Draft Completion Review Gate" in full_draft
-        and "Do not wait for the user to ask for review" in full_draft
-        and "reviewed-and-revised draft" in full_draft,
-        "Full Draft workflow must load and run review automatically after draft completion",
+        "disguised form" in section_drafting
+        and "\\textbf{V1 (...)}." in section_drafting
+        and "do not also re-define every member in prose" in section_drafting,
+        "Section drafting must ban the bold-run-in taxonomy dump and require the body->appendix move",
+    )
+
+    # Orchestrator delegates to the three sibling skills
+    for sib in ("academic-figure", "academic-citation", "academic-review"):
+        require(sib in full_draft, f"orchestrator must delegate to {sib}")
+
+    # A "write the draft" request must complete the whole chain, not emit a marker-only skeleton
+    require(
+        "Completion means the whole chain, not a skeleton." in full_draft,
+        "orchestrator must state that a draft request completes the figure/citation chain, not a skeleton",
+    )
+    require(
+        "four mandatory parts" in full_draft
+        and all(s in full_draft for s in ("academic-figure", "academic-citation", "academic-review")),
+        "orchestrator must enumerate the four-part chain (hub + figure + citation + review) as mandatory",
+    )
+    require(
+        "is NOT an acceptable end" in section_drafting,
+        "section drafting must forbid deferring producible figures/tables/citations as markers",
+    )
+
+    # A named modeled venue (e.g. EMNLP) must force its bundled template, not a generic fallback
+    require(
+        "Silently falling back to" in latex_project and "_shared/templates/index.md" in latex_project,
+        "latex-project must resolve the venue template via index.md and forbid the generic fallback",
+    )
+    require(
+        "Silently falling back to" in paper_framework,
+        "paper-framework must forbid the generic-template fallback when a modeled venue is confirmed",
+    )
+    templates_index = read(root / "_shared/templates/index.md")
+    require(
+        "search the web for and download the official template" in templates_index
+        and "report this to the user explicitly" in templates_index,
+        "templates index must require web fetch for unbundled named venues and a reported generic fallback",
+    )
+
+    # Paper type families
+    values = manifest["axes"]["paper_type"]["values"]
+    conference = [k for k in values if not k.startswith("journal-")]
+    journal = [k for k in values if k.startswith("journal-")]
+    require(conference and journal, "both conference and journal paper-type families required")
+    for k in conference:
+        require(
+            "/paper-types/journal/" not in values[k],
+            f"conference paper type points to journal profile: {k}",
+        )
+    for k in journal:
+        require(
+            "/paper-types/journal/" in values[k],
+            f"journal paper type does not point to journal profile: {k}",
+        )
+
+    # Venue cards declare Venue Kind
+    for venue, rel in manifest["axes"]["venue"]["values"].items():
+        if venue == "generic":
+            continue
+        text = read((hub / rel))
+        require("## Venue Kind\n\n- " in text, f"{rel} must declare Venue Kind")
+        expected = "journal" if venue in {"jmlr", "tpami", "ieee-tpami", "journal"} else "conference"
+        require(f"## Venue Kind\n\n- {expected}" in text, f"{rel} must declare Venue Kind {expected}")
+
+    # Paper-type profiles declare the Priority Contract
+    for profile in (root / "_shared/paper-types").glob("**/*.md"):
+        if profile.name == "index.md":
+            continue
+        text = profile.read_text(encoding="utf-8")
+        rel = profile.relative_to(root)
+        require("## Priority Contract" in text, f"{rel} must declare a Priority Contract")
+        require("Primary core:" in text, f"{rel} must name its primary core section")
+        require("Evidence core:" in text, f"{rel} must name its evidence core section")
+        require("Compress first:" in text, f"{rel} must name compress-first sections")
+        require("floor" in text.lower(), f"{rel} must state a core-section floor")
+        require(
+            "## Section Structure (Paper Framework hard default)" in text,
+            f"{rel} must anchor its section list as a Paper Framework hard default",
+        )
+        require(
+            "Do not copy this structure mechanically" not in text,
+            f"{rel} must not invite mechanical-deviation language that contradicts the hard default",
+        )
+
+
+# --------------------------------------------------------------------------- #
+# Sibling skills
+# --------------------------------------------------------------------------- #
+
+def validate_figure_skill(root: Path) -> None:
+    fig = root / "skills/academic-figure"
+    figure_handling = read(fig / "static/figure-handling.md")
+    table_handling = read(fig / "static/table-handling.md")
+    figures_tables = read(fig / "references/sections/figures-and-tables.md")
+    table_design = read(fig / "references/tables/table-design.md")
+    figure_planning = read(fig / "references/figures/figure-planning.md")
+    conf_sizing = read(fig / "references/figures/conference/figure-sizing.md")
+
+    require(
+        "Column-Span Decision" in figure_planning
+        and "pipeline / framework / architecture" in figure_planning
+        and "teaser / first concept figure" in figure_planning
+        and "one multi-panel `figure*` with a shared legend" in figure_planning,
+        "figure-planning must define the column-span decision (teaser single, pipeline/multi-panel span)",
+    )
+    require(
+        "Column-Span Quick Rule" in conf_sizing,
+        "conference figure-sizing must carry the column-span quick rule",
+    )
+    require(
+        "Long headers overflow narrow columns" in table_handling,
+        "table-handling must flag long-header overflow at small column counts",
+    )
+
+    require(
+        "Framework-to-artifact alignment is a hard gate" in figure_handling
+        and "paper/framework-execution-report.md" in figure_handling
+        and "0.60--0.70\\linewidth" in figure_handling
+        and ">0.70\\linewidth" in figure_handling,
+        "figure-handling must enforce Paper Framework Figure Plan alignment and compact widths",
+    )
+    require(
+        "Never let a table overflow" in table_handling
+        and "hard defect" in table_handling
+        and "Generate width-safe table source on the first pass" in table_handling
+        and "Never hard-code structural numbers in source" in table_handling,
+        "table-handling must make overflow a hard defect and forbid hard-coded structural numbers",
+    )
+    require(
+        "Never let a table overflow" in figures_tables and "appendix" in figures_tables.lower(),
+        "figures-and-tables guide must make body and appendix overflow a hard defect",
+    )
+    require(
+        "Span Decision" in table_design
+        and "Table kind" in table_design
+        and "Span justification" in table_design,
+        "table-design must define the span decision contract",
+    )
+
+
+def validate_citation_skill(root: Path) -> None:
+    cit = root / "skills/academic-citation"
+    workflow = read(cit / "static/citation-workflow.md")
+    integrity = read(cit / "references/checks/citation-integrity.md")
+    audit = read(cit / "scripts/audit_citations.py")
+
+    require(
+        "Complete author lists required" in workflow
+        and "Stable identifier required" in workflow
+        and "audit_citations.py" in workflow,
+        "citation-workflow must state author-list, identifier, and audit rules",
+    )
+    require(len(integrity) > 0, "citation-integrity reference must exist")
+    require("min-citations" in audit or "min_citations" in audit, "audit_citations.py must exist and run")
+
+
+def validate_review_skill(root: Path) -> None:
+    rev = root / "skills/academic-review"
+    closing = read(rev / "static/closing-gates.md")
+    paper_review = read(rev / "references/sections/paper-review.md")
+    submission = read(rev / "references/checks/submission-readiness.md")
+    audit = read(rev / "scripts/audit_draft.py")
+    compile_check = read(rev / "scripts/check_compile_env.py")
+
+    # Compile-environment detection: the agent must detect, not guess, and warn on failure
+    require(
+        "check_compile_env.py" in closing
+        and "Compile unavailable" in closing
+        and "tell the user explicitly" in closing,
+        "closing-gates must run check_compile_env.py and warn the user when compilation is unavailable",
+    )
+    for token in ("def detect_tools", "def evaluate", "can_compile", "latexmk"):
+        require(token in compile_check, f"check_compile_env.py must define {token}")
+
+    # Automatic post-draft review
+    require(
+        "## Draft Completion Review Gate" in closing
+        and "Do not wait for the user to ask for review" in closing
+        and "reviewed-and-revised draft" in closing,
+        "closing-gates must run review automatically after draft completion",
     )
     require(
         "triggered automatically by the Full Draft Workflow" in paper_review,
         "paper-review.md must say the Full Draft workflow triggers it automatically",
     )
-
-
-def validate_final_quality_gates(root: Path) -> None:
-    full_draft = (root / "static/workflow/full-draft.md").read_text()
-    submission_readiness = (root / "references/checks/submission-readiness.md").read_text()
-    figures_tables = (root / "references/sections/figures-and-tables.md").read_text()
-    conclusion = (root / "references/sections/conclusion.md").read_text()
-    audit_script = (root / "scripts/audit_draft.py").read_text()
-
+    # Page budget gate
     require(
-        "Table ??" in full_draft and "undefined references" in full_draft,
-        "Full Draft workflow must block unresolved rendered references such as Table ??",
+        "--max-content-pages" in closing and "--max-content-pages" in submission,
+        "page-limited venues must require compiled content-page auditing",
     )
     require(
-        "invalid LaTeX section environment" in audit_script
-        and "check_invalid_latex_environments" in audit_script,
-        "audit_draft.py must block invalid section environments such as \\end{section}",
+        "numeric content-page limit" in closing
+        and "compiled content-page count" in paper_review
+        and "moving Limitations to an appendix" in submission,
+        "review and submission gates must block page-limit overflow and define Limitations movement",
     )
     require(
-        "check_unresolved_pdf_refs" in audit_script
-        and "UNRESOLVED_RENDERED_REF_RE" in audit_script,
-        "audit_draft.py must scan the rendered PDF for Table ?? / Figure ?? references",
-    )
-    require(
-        "check_hardcoded_structural_refs" in audit_script
-        and "HARDCODED_STRUCTURAL_REF_RE" in audit_script
-        and "Never hard-code structural numbers" in full_draft
-        and "Reference Contract" in figures_tables,
-        "skill must block hard-coded structural references such as Section~5.4",
-    )
-    require(
-        "undefined references present" in audit_script
-        and "errors.append" in audit_script,
-        "audit_draft.py must treat undefined references as errors",
-    )
-    require(
-        "section is long" in audit_script
-        and "errors.append" in audit_script
-        and "LIMITATIONS_MAX_WORDS = 180" in audit_script
-        and "120-180 words" in conclusion
-        and "blocking" in conclusion.lower(),
-        "over-long Limitations must be a blocking defect, not a warning-only style note",
-    )
-    require(
-        "Never let a table overflow" in figures_tables
-        and "hard defect" in figures_tables
-        and "appendix" in figures_tables.lower(),
-        "figure/table guide must make body and appendix overflow a hard defect",
-    )
-    require(
-        "Generate width-safe table source on the first pass" in full_draft
-        and "prose in a non-wrapping column" in audit_script
-        and "wide table" in audit_script,
-        "skill must prevent width-unsafe table source, not only inspect rendered PDFs",
-    )
-    require(
-        "undefined references or citations" in submission_readiness
-        and "BLOCKED" in submission_readiness,
+        "undefined references or citations" in submission and "BLOCKED" in submission,
         "submission-readiness must block undefined references and citations",
     )
-
-
-def validate_paper_type_families(root: Path, manifest: dict) -> None:
-    paper_type_values = manifest["axes"]["paper_type"]["values"]
-    conference = [key for key in paper_type_values if not key.startswith("journal-")]
-    journal = [key for key in paper_type_values if key.startswith("journal-")]
-
-    require(conference, "conference paper type family is empty")
-    require(journal, "journal paper type family is empty")
-
-    for key in conference:
-        rel = paper_type_values[key]
-        require(
-            not rel.startswith("references/paper-types/journal/"),
-            f"conference paper type points to journal profile: {key} -> {rel}",
-        )
-
-    for key in journal:
-        rel = paper_type_values[key]
-        require(
-            rel.startswith("references/paper-types/journal/"),
-            f"journal paper type does not point to journal profile: {key} -> {rel}",
-        )
-
-
-def validate_venue_cards(root: Path, manifest: dict) -> None:
-    venue_values = manifest["axes"]["venue"]["values"]
-    for venue, rel in venue_values.items():
-        if venue == "generic":
-            continue
-        path = root / rel
-        text = path.read_text()
-        require(f"## Venue Kind\n\n- " in text, f"{rel} must declare Venue Kind")
-
-        expected = "journal" if venue in {"jmlr", "tpami", "ieee-tpami", "journal"} else "conference"
-        require(
-            f"## Venue Kind\n\n- {expected}" in text,
-            f"{rel} must declare Venue Kind {expected}",
-        )
+    # audit_draft.py mechanical checks
+    for token in (
+        "check_invalid_latex_environments",
+        "check_unresolved_pdf_refs",
+        "UNRESOLVED_RENDERED_REF_RE",
+        "check_hardcoded_structural_refs",
+        "HARDCODED_STRUCTURAL_REF_RE",
+        "check_framework_alignment",
+        "parse_framework_display_items",
+        "COMPACT_SINGLE_COLUMN_WIDTH_MAX",
+        "LIMITATIONS_MAX_WORDS = 180",
+        "TAXONOMY_LABEL_RE",
+        "BODY_TAXONOMY_RUNIN_RE",
+        "LONG_HEADER_CHARS",
+    ):
+        require(token in audit, f"audit_draft.py must define {token}")
 
 
 def main(argv: list[str]) -> int:
     root = Path(argv[1] if len(argv) > 1 else ".").resolve()
-    manifest = load_manifest(root)
-    validate_manifest_paths(root, manifest)
-    validate_venue_kind_first_contract(root, manifest)
-    validate_post_draft_review_contract(root, manifest)
-    validate_final_quality_gates(root)
-    validate_paper_type_families(root, manifest)
-    validate_venue_cards(root, manifest)
-    print(f"academic-writing skill validation passed: {root}")
+
+    validate_root_router(root)
+    validate_shared_layer(root)
+
+    skills_dir = root / "skills"
+    require(skills_dir.is_dir(), "skills/ directory missing")
+    skill_dirs = [d for d in skills_dir.iterdir() if (d / "SKILL.md").exists()]
+    require(
+        {d.name for d in skill_dirs}
+        >= {"academic-writing", "academic-figure", "academic-citation", "academic-review"},
+        "collection must contain the hub plus figure, citation, and review skills",
+    )
+    for skill_dir in skill_dirs:
+        validate_skill_manifest_paths(skill_dir)
+        validate_evals(skill_dir)
+
+    validate_hub(root)
+    validate_figure_skill(root)
+    validate_citation_skill(root)
+    validate_review_skill(root)
+
+    print(f"academic-writing collection validation passed: {root}")
     return 0
 
 

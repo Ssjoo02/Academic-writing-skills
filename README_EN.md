@@ -1,8 +1,26 @@
 # Academic Writing
 
-**Academic Writing** is a skill focused on academic paper writing. It is designed to generate complete manuscript drafts that follow the format requirements of specific conferences or journals, and can be used in local skill environments such as Claude Code and Codex.
+**Academic Writing** is a skill collection focused on academic paper writing. It is designed to generate complete manuscript drafts that follow the format requirements of specific conferences or journals, and can be used in local skill environments such as Claude Code and Codex.
 
 中文: [README.md](README.md)
+
+## Repository Structure (multi-skill collection)
+
+This repository is one **hub skill** plus three independently invokable **sub-skills**, with cross-skill content kept at the repository root under `_shared/`. The repository-root `SKILL.md` is the **entry router**: it is the first file the host environment discovers and loads, and it dispatches each request to the right sub-skill.
+
+```text
+academic-writing/                  ← repository root = collection root
+├── SKILL.md                       ← entry router (discovered first; dispatches to a sub-skill below)
+├── _shared/                       ← cross-skill: core stance/gates/contract, venue templates,
+│   ├── core/  templates/  paper-types/  venues/  checks/
+└── skills/
+    ├── academic-writing/          ← HUB: writing pipeline + writing body (Policy→Framework→draft)
+    ├── academic-figure/           ← figure/table subsystem (standalone: just plot/lay out a table)
+    ├── academic-citation/         ← citation search + bib integrity audit (standalone: just citations)
+    └── academic-review/           ← pre-submission review + static audits + readiness (standalone: just review)
+```
+
+On install the whole repository is copied to `.../skills/academic-writing/`, and the host discovers and starts the collection from the **repository-root `SKILL.md`**. The hub **delegates** to the matching sub-skill when figures/citations/review are needed, with zero rule duplication. Each sub-skill ships its own `SKILL.md`, so "just make one figure", "just check citations", or "just run one review" can also be dispatched directly by the entry router without going through the full writing flow.
 
 ## Use Cases
 
@@ -210,7 +228,7 @@ It is not just a loose `.tex` snippet, but a complete paper project. To compile 
 - `latexmk` or `pdflatex`: from TeX Live / MacTeX, used to compile LaTeX;
 - `pdfinfo` / `pdftotext`: from poppler-utils, used to read the compiled PDF and check page budgets.
 
-As long as `latexmk` or `pdflatex` exists in the environment, the agent will **automatically compile the paper during the writing workflow and use the compiled PDF as the source of truth** for layout checks. These checks include, but are not limited to:
+The agent **automatically detects whether the compile toolchain is present** via `skills/academic-review/scripts/check_compile_env.py`. As long as `latexmk` or `pdflatex` exists in the environment, the agent will **automatically compile the paper during the writing workflow and use the compiled PDF as the source of truth** for layout checks. These checks include, but are not limited to:
 
 - Whether figures overflow the page;
 - Whether `Overfull \hbox` appears;
@@ -218,7 +236,7 @@ As long as `latexmk` or `pdflatex` exists in the environment, the agent will **a
 - Whether appendix formatting is abnormal;
 - Whether the page count exceeds the target venue’s budget.
 
-If these tools are not available in the environment, the agent will still generate the complete LaTeX source and run static audits, but it cannot verify the final PDF layout.
+If the compile toolchain is not detected, the agent will still generate the complete LaTeX source and run static audits, but it will **explicitly warn you**: that the PDF could not be compiled, which tools are missing, and that the page-count/layout gates (which rely on the compiled PDF) ran static-only — it will not silently skip compilation.
 
 To compile locally:
 

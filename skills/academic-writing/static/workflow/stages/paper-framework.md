@@ -1,0 +1,264 @@
+# Stage: Paper Framework
+
+Load this fragment when the Writing Policy has been confirmed and you reach the Paper Framework
+stage. It ends at a **blocking confirmation gate**: do not create `paper/` until the user confirms.
+
+The Paper Framework is a concise section-level plan. It is not a paragraph plan and not prose.
+
+#### Profile Structure Adherence (the profile is a hard default)
+
+The resolved manifest-mapped paper type profile path defines the **default
+section list, order, naming, and count**. Treat it as binding by default, not as loose inspiration.
+
+- **Default = reproduce the profile's structure.** Match its section list, order, names, and section
+  count. Do not split one profile section into two, add a section the profile does not list (e.g., a
+  standalone Discussion), merge sections, rename, or reorder **for convenience**.
+- **Deviation is allowed only when necessary** — when the actual contribution, evidence, venue
+  requirement, or explicit user request genuinely cannot fit the profile structure. A deviation that
+  is merely "cleaner" or "more standard" does not qualify.
+- **Every deviation must be surfaced and approved.** At the Paper Framework checkpoint, show the
+  profile's canonical section list next to the adopted section list, and give a one-line reason for
+  **each** split / merge / rename / addition / reorder. Do not apply a structural deviation silently;
+  the user must be able to see and approve it before `paper/` is created. If the structure matches the
+  profile, state "matches profile" explicitly.
+
+#### Subsection Granularity (avoid over-fragmentation)
+
+Plan and present the framework at **section level**. Within-section structure is content blocks and
+paragraph roles, not a numbered table of contents.
+
+- **Do not pre-commit a deep numbered subsection breakdown** (e.g., §3.1–§3.6, §4.1–§4.6) in the
+  framework. Listing every step as its own subsection fragments a section into thin pieces and reads
+  like an outline dump.
+- **Subsections are expected where a section is genuinely large; they are not banned.** Short
+  sections (Abstract, Introduction, Related Work, Conclusion) normally use **0 subsections** and run
+  as flowing prose. Large sections (Method, Benchmark/Dataset Construction, Experiments) normally use
+  **2–4 subsections**.
+- Promote a content block to an actual `\subsection` only when it spans multiple paragraphs or owns a
+  distinct figure, table, protocol, or formal result that needs its own heading. A block that is only
+  one paragraph long should stay a paragraph (optionally a `\paragraph{}` run-in or a `\textbf{}`
+  lead-in), not become a subsection.
+- **Subsection budget:** **0 for short sections, at most 2–4 for any one main section. Five or more
+  subsections in one section is a smell** — merge related steps into one subsection, demote
+  single-paragraph items to paragraphs, or move fine-grained detail to the appendix.
+- In the checkpoint **Main Content** cell, describe each section as a short phrase or a few content
+  blocks (e.g., "construction pipeline, quality control, coverage comparison"), **not** an enumerated
+  `3.1 … 3.2 … 3.3 …` subsection list.
+
+#### Core Section Budget (protect the paper's center of gravity)
+
+Every Paper Framework must identify where the paper's main contribution lives before assigning page
+budgets. A page plan is invalid if it fits the venue limit by shrinking the core contribution below
+the floor required by the paper type.
+
+- **Primary core section**: the section that explains the central contribution itself (e.g.,
+  Method, Benchmark / Dataset Construction, System Design, Taxonomy, Main Results).
+- **Evidence core section**: the section that proves the central contribution works or matters
+  (e.g., Results and Analysis, Benchmark Experiments, Empirical Findings, Comparative Summary).
+- **Compress-first sections**: sections to shorten before touching core sections, usually
+  Conclusion, broad background, extended related work, secondary analysis, and implementation detail
+  that can move to an appendix when the venue permits it.
+- **Minimum floor**: the smallest acceptable prose budget for each core section. Use the loaded
+  paper-type profile's Priority Contract as the default floor; if the venue is shorter than the
+  profile assumes, scale the floor conservatively and surface the tradeoff in the checkpoint.
+- For method / algorithm papers, Method is the primary core. In an 8-page generic or conference
+  draft, plan Method at 2.0-3.0 pages and do not reduce it below 1.5 pages or roughly 25% of the
+  main prose budget unless the user explicitly approves the tradeoff. In a 4-page short paper,
+  Method may shrink to about 0.8-1.0 pages, but the framework must say what technical detail moved
+  to appendix or was omitted.
+- Do not compress a primary-core section below its floor to solve overflow. First compress
+  compress-first sections and move nonessential detail to appendix/supplement when allowed. If the
+  draft still cannot fit, return to the Paper Framework checkpoint and ask the user to approve a
+  changed core-section floor, target venue, or scope.
+
+Load only the references needed to resolve paper structure and physical format:
+
+- Template selection: `_shared/templates/index.md`,
+- Venue framework constraints: `_shared/venues/<venue>.md` when a target venue is confirmed,
+- Paper type section/page-budget reference: the manifest-mapped paper type profile path under
+  `_shared/paper-types/`,
+- Figure/table planning: load the **`academic-figure`** skill (its figure-planning reference); for
+  table span decisions also use its table-design reference,
+- Journal-only (when `venue_kind=journal`): `_shared/venues/journal-vs-conference.md` for drafting
+  posture, and the **`academic-review`** skill's `journal-submission-elements` reference for the
+  mandatory statements and display-item caps/tiers that shape the Venue Assembly Plan and the Figure
+  Plan, plus the **`academic-figure`** skill's journal figure-contract for journal-specific figure
+  archetypes and panel logic that inform the Figure Plan's panel count and evidence hierarchy.
+
+**Template Acquisition (local-first — do not web-fetch when a preloaded template exists).** The
+official templates for the major venues are bundled in `_shared/templates/`. Acquire the template in
+this strict priority order, stopping at the first that applies:
+
+1. **Preloaded `_shared/templates/`** — when the target venue maps to a bundled template in
+   `_shared/templates/index.md`, copy that local file and all its companions. This is the **first and
+   authoritative** source.
+2. **User-provided official template** — when the user supplied template files for this project,
+   use those (they take precedence over a web fetch).
+3. **Targeted web fetch for a named-but-unbundled venue** — when the named venue has **no** preloaded
+   mapping **and** the user provided no template, **search the web for and download the official
+   template** from the venue's official source (CFP / author kit / official style files). Record the
+   source URL as a Paper Framework template risk to re-verify before submission.
+4. **Generic fallback — only as a reported stopgap** — if web acquisition also fails (no network, or
+   no official template can be found), use `generic_article.tex` **and report this to the user
+   explicitly**: the official template for the named venue could not be obtained locally or online, the
+   generic template is a temporary stopgap, and it must be replaced before submission. Record the
+   unresolved-template risk in the Paper Framework.
+
+**A named venue forces a real template.** If the user named a venue, it MUST be resolved through tiers
+1→2→3 above; for a bundled venue that means its mapped files (EMNLP / ACL / NAACL → `acl2026.tex` +
+`acl.sty` + `acl_natbib.bst`; ICLR → `iclr2026.tex`; NeurIPS → `neurips2026.tex`; ICML →
+`icml2026.tex`; AAAI → `aaai2026.tex`; etc.), so set the `venue` axis to that value and select its
+mapped template. Silently falling back to `generic_article.tex` while a venue was named is a template
+error, not an acceptable default — the generic template is allowed only as the **reported** tier-4
+stopgap or for the genuinely unspecified-venue case.
+
+**Do NOT search the web or download a template when `_shared/templates/index.md` maps the target venue
+to a preloaded file** — that is the failure mode this rule exists to prevent. The official-source URLs
+in venue cards and in `maintenance/venue-template-sources.md` are **provenance records (how the
+bundled assets were obtained), not draft-time fetch instructions**. The venue card's "verify the
+current official style file before submission" is a *pre-submission* check against the official page,
+not a license to re-download the template during drafting. Never reconstruct venue formatting from
+memory.
+
+Build the framework in this order:
+
+1. **Venue first**: apply venue constraints as a framework constraint card. If no target venue is
+   confirmed, use a generic framework with `generic_article.tex` and a soft 6-8 main-text-page
+   drafting budget.
+2. **Paper type second — the profile section list is a HARD DEFAULT, not inspiration.** Use the
+   paper type profile's candidate sections, order, and naming **as the structure**. Reproduce its
+   section count and granularity unless an adaptation is genuinely required (see Profile Structure
+   Adherence above). Do not silently split, merge, rename, add, or reorder sections, and do not
+   inflate the profile's section count for convenience.
+3. **Writing Policy last**: keep only sections and claims supported by available evidence.
+
+Page-budget arithmetic must be explicit. Start with the venue or generic total budget, subtract
+fixed front/back matter only when it counts toward the limit, assign a `Page budget` to each planned
+section, and ensure the total planned pages must not exceed the venue limit or generic drafting
+budget. If the draft would overflow, compress or move lower-priority material to appendix before
+creating `paper/`.
+
+File format:
+
+1. **Inputs Used**: Writing Policy path, target venue, selected template, venue format summary,
+   page/length budget, paper type, evidence snapshot.
+2. **Page Budget Summary**: state the numeric content-page limit as a bound value (e.g. ACL long
+   `8`, short `4`; generic fallback `8`) and exactly what is excluded from it (references always;
+   plus Limitations / Acknowledgments / Ethics for venues that exclude them). Record the planned
+   main-text total and any overflow or compression decisions. This bound is the `--max-content-pages`
+   value the final page-budget audit must run with, and it is a blocking gate, not a target.
+3. **Core Section Budget**: name the `Primary core section`, `Evidence core section`, and
+   `Compress-first sections`; state each core section's Minimum floor and any venue-driven tradeoff.
+4. **Section Framework**: ordered section list with section name, role
+   (`primary-core` / `evidence-core` / `support` / `compress-first`), main content, Prose budget,
+   Minimum floor, Compression rule, key evidence or figure/table, and writing cautions. Keep this at
+   section level. List subsections only when a section genuinely needs them, and respect the
+   Subsection Granularity budget (0, or at most 2–4 per section); do not enumerate every paragraph as
+   a numbered subsection.
+5. **Figure Plan**: a short table with `ID`, `type`, `layout`, `section`, `message`, `source`, and
+   `generation route`. Keep only likely main-paper figures and tables. The `layout` value must be
+   `single-column`, `double-column`, `appendix`, or `supplement`.
+6. **Venue Assembly Plan**: post-main order, required statements or checklists, optional appendices,
+   and `not verified` venue fields. Record that the appendix begins on a fresh page (`\clearpage`
+   before `\appendix`). When the venue requires a Limitations section (ACL family), plan it as a
+   single dedicated `\section{Limitations}` placed after Conclusion and before References — it is the
+   only home for limitations in the paper, and it is excluded from the content-page budget. When the
+   venue does **not** require a pre-reference Limitations section and permits appendices, record
+   whether Limitations may be moved to an appendix if the compiled draft exceeds the page limit. When
+   appendix pages count against the limit or appendices are forbidden, record that appendix movement
+   is not an available compression path.
+7. **Open Decisions**: only blocking missing evidence, uncertain section choices, terminology,
+   figure/table choices, or user decisions.
+
+For the Figure Plan, use the **`academic-figure`** skill's figure-planning reference. Deciding whether
+the main paper needs figures or tables, their layout target, and how they will be generated is part of
+the framework. Do not generate figures or tables during framework writing.
+
+Generic fallback: keep the main Figure Plan to 3-5 figures/tables for the generic draft.
+
+Optional translated output files, only when requested before generation:
+
+```text
+writing-policies/<paper-slug>-paper-framework.<language-code>.md
+```
+
+Show the framework to the user for confirmation using this exact format. Do not use a
+generic dimension/content table or any other format.
+```text
+Checkpoint: Paper Framework
+Stage result: <one sentence>
+Output: <framework artifact path>
+
+Paper Title: <confirmed working name / title from Writing Policy>
+
+Section Plan:
+
+| # | Section | Role | Main Content | Prose budget | Minimum floor | Compression rule |
+|---:|---|---|---|---:|---:|---|
+| 1 | Abstract | support | <main content, one sentence> | <pages> | n/a | <compress / keep> |
+| 2 | Introduction | support | <main content, one sentence> | <pages> | n/a | <compress / keep> |
+| ... | ... | ... | ... | ... | ... | ... |
+
+Keep `Main Content` as a one-sentence phrase or a few content blocks. Do not list a numbered
+subsection breakdown (no `3.1 … 3.6`) here; subsections, if any, follow the Subsection Granularity
+budget and are decided at drafting time.
+
+Core Section Budget:
+- Primary core section: <section + minimum floor + reason>
+- Evidence core section: <section + minimum floor + reason>
+- Compress-first sections: <sections to cut before touching core sections>
+- Core tradeoffs: <none, or explicit venue/scope tradeoff needing confirmation>
+
+Figure Plan:
+
+| ID | Type | Layout | Section | Message |
+|---|---|---|---|---|
+| Fig. 1 | <teaser/pipeline/bar/...> | <single-column/double-column> | Introduction | <what the figure shows> |
+| Tab. 1 | <taxonomy/result/...> | <single-column/double-column/supplement> | Method | <what the table shows> |
+| ... | ... | ... | ... | ... |
+
+Display-Item Page Budget:
+
+| ID | Main-paper placement | Estimated page cost | Compression fallback |
+|---|---|---:|---|
+| Fig. 1 | <single-column/double-column/supplement> | <0.25/0.5/1.0 page> | <shrink / merge / move to appendix> |
+| Tab. 1 | <single-column/double-column/supplement> | <0.25/0.5/1.0 page> | <compress columns / move full version to appendix> |
+
+Structure vs paper-type profile:
+- Profile: <paper-type name> → <the profile file's section table, its section column copied verbatim in order — not paraphrased>
+- Adopted: <the section list above, in order>
+- Deviations: <"matches profile", OR one line per split / merge / rename / addition / reorder with its reason>
+
+Decisions to confirm:
+- Required: <section order / core-section floors / prose page budget / display-item page budget / venue assembly>
+- Structure basis: <which paper type drove the structure; if any deviation is listed above, why it is necessary and not just "cleaner">
+- Optional: <template / language variant defaults>
+Unresolved blockers: <none or concise list>
+User action required: Please confirm whether to proceed to paper/, or what to change. If any
+structural deviation or core-section floor tradeoff is listed, confirm it explicitly before paper/ is
+created.
+```
+
+Do not output a separate `Content snapshot` bullet list.
+
+**Compliance Self-Check (Paper Framework) — complete before showing the checkpoint.** Answer each
+item yes/no internally; **any "no" means this stage is not complete — fix it before stopping at the
+gate.**
+
+1. Is the `Profile:` line copied verbatim from the paper-type file's section table (its section
+   column, in order) rather than paraphrased, and does the adopted section list match it, OR is every
+   split / merge / rename / addition / reorder listed with a necessity reason in the "Structure vs
+   paper-type profile" block? (A deviation that is only "cleaner" is not allowed.)
+2. Is the `Main Content` cell free of numbered subsection dumps (no `3.1 … 3.6`), and is each
+   section's planned subsection count within budget (0 for short sections, ≤4 for main sections)?
+3. Is the page-budget arithmetic shown explicitly and within the venue/generic limit, including both
+   prose and display-item page cost?
+4. Does the plan name the Primary core section, Evidence core section, Compress-first sections, and
+   Minimum floor for each core section, and do all prose budgets respect those floors?
+5. Does the Figure Plan declare a `layout` for every figure/table, does the Display-Item Page Budget
+   estimate each item's main-paper page cost, and does each item map to a confirmed section?
+6. For a strict page-limited conference venue, does the plan leave a practical compression margin
+   rather than spending the whole limit on planned prose and floats?
+7. Are all checkpoint fields filled, including the "Structure vs paper-type profile" comparison?
+
+Gate: the user must confirm the Paper Framework before full-draft writing.

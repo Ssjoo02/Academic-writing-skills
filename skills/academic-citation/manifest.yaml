@@ -1,0 +1,21 @@
+name: academic-citation
+version: 3.0.0
+description: >
+  Declarative manifest for the academic-citation skill. SKILL.md loads the citation
+  workflow fragment and the citation-integrity reference on demand, and runs the
+  blocking bibliography audit. Cross-skill stance lives at ../../_shared/core. Part of
+  the academic-writing collection.
+
+always_load:
+  - ../../_shared/core/stance.md
+  - static/citation-workflow.md
+
+references:
+  on_demand:
+    - condition: "searching for, writing, or verifying a citation; citation integrity check"
+      path: references/checks/citation-integrity.md
+
+scripts:
+  - condition: "blocking bibliography audit before a draft is returned"
+    path: scripts/audit_citations.py
+    usage: "python3 <skill>/scripts/audit_citations.py paper [--min-citations <floor>]"

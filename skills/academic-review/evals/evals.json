@@ -1,0 +1,46 @@
+{
+  "skill_name": "academic-review",
+  "description": "Behavioral evals for the review subsystem: independent second-round review, page-budget blocking, blocking static audits, and automatic post-draft review.",
+  "evals": [
+    {
+      "id": "round2-independent-isolated-context",
+      "prompt": "Review my finished paper/ before submission to NeurIPS.",
+      "expected_output": "The assistant runs two review rounds. Round 2 runs in a fresh, isolated context that receives only the reviewer role, venue/format constraints, review axes, a neutral required-move rubric, and the LaTeX/PDF paths. It does not pass the author's section plan, Round 1 findings, or fix summaries into Round 2.",
+      "assertions": [
+        {"name": "two_rounds_run", "description": "Both a self-review (Round 1) and an independent subagent review (Round 2) are performed."},
+        {"name": "round2_context_is_isolated", "description": "Round 2 is not fed the author plan, Round 1 findings, or fix summaries — only role, constraints, axes, rubric, and paper paths."}
+      ],
+      "files": []
+    },
+    {
+      "id": "page-budget-blocking-on-overflow",
+      "prompt": "Run the pre-submission check on my paper/. The venue is CVPR with an 8-page content limit and my compiled PDF is 9 pages.",
+      "expected_output": "The assistant audits the compiled content-page count and blocks on the overflow. It proposes concrete fixes (e.g., compressing non-core sections, moving Limitations to an appendix) and does not pass the submission-readiness gate while the page limit is exceeded.",
+      "assertions": [
+        {"name": "blocks_on_page_overflow", "description": "The compiled content-page count is checked against the numeric limit and the overflow blocks readiness."},
+        {"name": "proposes_in_bounds_fixes", "description": "Concrete length fixes are proposed rather than silently accepting the over-length draft."}
+      ],
+      "files": []
+    },
+    {
+      "id": "static-audits-block-undefined-and-disclosure",
+      "prompt": "Check my paper/ for submission. It has an undefined \\ref to a missing label and an author name left in an anonymous-submission draft.",
+      "expected_output": "The static audits flag and block on the undefined reference/citation and on the disclosure/anonymity leak. The assistant reports these as blocking issues and fixes or surfaces them before declaring the draft submission-ready.",
+      "assertions": [
+        {"name": "blocks_undefined_refs", "description": "Undefined references/citations are reported as blocking, not ignored."},
+        {"name": "flags_disclosure_leak", "description": "Author-identifying content in an anonymous draft is flagged as a blocking disclosure issue."}
+      ],
+      "files": []
+    },
+    {
+      "id": "auto-review-after-draft",
+      "prompt": "Use academic-writing to produce my full draft. (The user does not separately ask for a review.)",
+      "expected_output": "After the first complete paper/ draft exists, the closing review runs automatically without being requested, and the draft returned to the user is the reviewed-and-revised draft.",
+      "assertions": [
+        {"name": "review_runs_unprompted", "description": "The closing review gate runs automatically once a complete draft exists, even though the user did not ask for review."},
+        {"name": "returns_revised_draft", "description": "The returned artifact is the reviewed-and-revised draft, not an unreviewed first pass."}
+      ],
+      "files": []
+    }
+  ]
+}

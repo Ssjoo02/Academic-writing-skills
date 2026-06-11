@@ -1,0 +1,115 @@
+# Journal Figure Sizing
+
+Load this file for **journal papers** after `plot-style.md`. It contains the
+journal-calibrated figure sizes, font size hierarchy, height budget, display-item
+caps, and export format additions. All other plotting rules (rcParams, colors,
+per-chart-type rules, legend rules, multi-panel architecture) are in `plot-style.md`.
+
+## Column Widths (Journal)
+
+The column width for a journal figure comes from the active venue card and the
+journal's template, not from any conference default.
+
+- **JMLR**: single-column, `\textwidth = 6.0 in` → figures fill the full text
+  block. Use `width=\textwidth` or `width=\linewidth`. No `figure*` needed
+  (single-column venue).
+- **TPAMI**: IEEEtran two-column → single-column ≈ 3.5 in, full-page ≈ 7.0 in.
+  Use `figure*` with `width=\textwidth` for cross-column figures. Same
+  `\columnwidth` / `\textwidth` discipline as ICML/CVPR.
+- **journal-generic**: column layout is `not verified` in the venue card. Confirm
+  single vs double column from the target journal's template before picking a
+  `figsize`. Record the actual `\textwidth` / `\columnwidth` values as a working
+  note.
+
+## Figure Sizes
+
+The `figsize` values assume the figure is placed at the column's native width
+without shrinking.
+
+| Layout context | Example venues | `figsize` (width, height) | Notes |
+|---|---|---|---|
+| Single-column journal, full text width | JMLR | `(6.0, 3.5)` to `(6.5, 5.0)` | Wider than NeurIPS; can fit more bars or a full-width heatmap |
+| Two-column journal, single column | TPAMI, other IEEE/ACM transactions | `(3.5, 2.5)` to `(4.0, 3.5)` | Slightly wider than conference single-column (~3.25 in); adjust per template |
+| Two-column journal, cross-column (`figure*`) | TPAMI, other IEEE/ACM transactions | `(7.0, 4.0)` to `(7.5, 6.0)` | Full page width; use only when content genuinely needs the span |
+| Square (radar, scatter matrix) | Any | `(5, 5)` to `(6, 6)` | Keep legend inside or directly below the axes |
+| Wide multi-panel figure (3+ panels) | Any (full page) | `(14, 10)` to `(24, 18)` | Journals have more room; scale proportionally to panel count |
+
+### LaTeX Inclusion
+
+Prefer `width=\columnwidth` or `width=\linewidth`; do not use absolute
+`\textwidth` in a two-column context (it overflows the column). For cross-column
+figures in a two-column template, use `figure*` with `width=\textwidth`.
+
+### Height Budget
+
+Journals do not have the extreme page crunch of a conference, so the height
+budget is slightly more relaxed. A teaser/pipeline banner can be ~5–7 cm tall
+(conference: ~4.5–6 cm). Data figures can use more vertical space for clarity —
+a full-page double-column result figure can be ~8–10 cm tall when the content
+justifies it. The same anti-empty-band rule applies: the image must fill its
+frame without baked-in blank bands.
+
+## Font Sizes
+
+Journals with wider columns or single-column layouts can use slightly larger
+base font sizes than conferences:
+
+| Figure type | Base `font.size` | Notes |
+|---|---|---|
+| Standard single-panel (JMLR single-column 6.0 in) | 10–12 | Wider column; 9 pt is the floor |
+| Standard single-panel (TPAMI two-column, single column) | 9–10 | Same as conference two-column |
+| Dense multi-panel (journal full-page) | 8–9 | Slightly more room than conference equivalent |
+| Hero / teaser (journal full-page) | 11–13 | Wider canvas allows larger text |
+
+**Minimum legibility rule**: No text element may render below 6pt at final column
+width. Labels below 7pt should be rare and only for secondary information (tick
+labels, legend entries for 5+ methods). When in doubt, render the PNG and check
+readability at 100% zoom.
+
+## Display-Item Caps
+
+Journals may cap the total number of figures and tables combined. See the
+`academic-review` skill's `references/checks/journal-submission-elements.md` §2 (Display Items: Caps And
+Tiers) and the active venue card. Plan main-paper display items within the cap;
+overflow goes to supplementary material per the venue card's supplementary model.
+
+## Export Formats
+
+The standard SVG (primary, editable text) + PDF (LaTeX inclusion) + PNG (raster
+preview, ≥300 DPI) triplet from `plot-style.md` remains the default. For journals
+that require it (especially life-sciences, imaging, or microscopy venues), add:
+
+```python
+fig.savefig('figure.tiff', dpi=600, bbox_inches='tight', pil_kwargs={'compression': 'tiff_lzw'})
+```
+
+Confirm the requirement from the venue card or author guidelines; do not generate
+TIFF by default for CS journals (JMLR, TPAMI) unless asked.
+
+## QA Notes
+
+- **JMLR (single-column, 6.0 in text block)**: figures fill the full text width;
+  no `figure*` needed. Base font 10–12pt. No hard page limit — let evidence set
+  the figure count, but every figure must carry unique evidence (anti-redundancy
+  checklist in `references/figures/journal/figure-contract.md`). Appendices in
+  the same PDF after acknowledgments.
+- **TPAMI (IEEEtran two-column)**: single-column ~3.5 in, cross-column ~7.0 in.
+  Hard page limits by manuscript type (Regular 12–18pp, Survey 20pp, Short 8pp)
+  — figures count toward the page budget. Move extra figures to separate
+  supplemental files. See `_shared/venues/ieee-tpami.md` for current limits.
+- **journal-generic**: column layout `not verified` — confirm from the target
+  journal template before setting `figsize`. Apply the journal figure archetypes
+  and reviewer-risk checklist from `references/figures/journal/figure-contract.md`.
+  Resolve display-item caps and supplementary model from the venue card.
+
+## Cross-Reference
+
+- `plot-style.md` — rcParams, colors, per-chart-type rules, legend rules,
+  multi-panel architecture (load first)
+- `chart-patterns.md` — reusable Python plotting helpers
+- `references/figures/journal/figure-contract.md` — journal figure archetypes,
+  panel logic, aesthetic integration, reviewer-risk checklist
+- `figure-planning.md` — Display Item Contract, Display Review Gate, generation
+  routes
+- `qa-contract.md` — submission-readiness checklist
+- `academic-review` skill: `references/checks/journal-submission-elements.md` — display-item caps and tiers

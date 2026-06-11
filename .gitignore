@@ -1,7 +1,10 @@
-# Unbundled reference adapters: kept locally, not shipped in the skill repo
-references/domains/
-references/style/user-style-profile.md
-references/style/reference-paper-learning.md
+# Local-only files: isolated under _local/, kept out of the shipped collection
+# (unbundled domain adapters, style profiles, maintenance provenance notes)
+_local/
 
-# Orphan maintenance note: kept locally, not tracked
-maintenance/venue-template-sources.md
+# Self-check doc, kept local
+SKILL-FLOW.md
+
+# Python cache
+**/__pycache__/
+*.pyc

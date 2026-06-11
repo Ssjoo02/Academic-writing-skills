@@ -9,7 +9,9 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SPEC = importlib.util.spec_from_file_location("audit_draft", ROOT / "scripts/audit_draft.py")
+SPEC = importlib.util.spec_from_file_location(
+    "audit_draft", ROOT / "skills/academic-review/scripts/audit_draft.py"
+)
 assert SPEC is not None and SPEC.loader is not None
 audit_draft = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(audit_draft)
@@ -187,6 +189,302 @@ class CompileIntegrityTests(unittest.TestCase):
             audit_draft.check_prose_in_narrow_column(path, base, errors)
 
         self.assertTrue(any("prose in a non-wrapping column" in e for e in errors), errors)
+
+    def test_taxonomy_definition_list_in_body_is_error(self) -> None:
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            path = base / "sections" / "benchmark-design.tex"
+            path.parent.mkdir()
+            path.write_text(
+                "\\section{Benchmark Design}\n"
+                "\\begin{itemize}\n"
+                "\\item \\textbf{V1 -- Email}: malicious instructions in email bodies.\n"
+                "\\item \\textbf{V2 -- SMS}: injected content in SMS messages.\n"
+                "\\item \\textbf{V3 -- Web}: instructions embedded in web pages.\n"
+                "\\item \\textbf{V4 -- Social}: injected posts on social platforms.\n"
+                "\\item \\textbf{V5 -- Chat}: malicious content in work chat.\n"
+                "\\end{itemize}\n",
+                encoding="utf-8",
+            )
+            errors: list[str] = []
+
+            audit_draft.check_enumeration(path, base, errors)
+
+        self.assertTrue(any("taxonomy/inventory definition list" in e for e in errors), errors)
+
+    def test_checklist_tex_is_not_body_taxonomy_prose(self) -> None:
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            path = base / "checklist.tex"
+            path.write_text(
+                "\\begin{enumerate}\n"
+                "\\item {\\bf Claims}\n"
+                "\\item[] Question: Do claims reflect scope?\n"
+                "\\item[] Answer: \\answerTODO{}\n"
+                "\\item[] Justification: \\justificationTODO{}\n"
+                "\\item[] Guidelines:\n"
+                "\\begin{itemize}\n"
+                "\\item The abstract should clearly state the claims.\n"
+                "\\item The claims should match results.\n"
+                "\\item Aspirational goals must be marked as motivation.\n"
+                "\\end{itemize}\n"
+                "\\item {\\bf Limitations}\n"
+                "\\item[] Question: Does the paper discuss limitations?\n"
+                "\\item[] Answer: \\answerTODO{}\n"
+                "\\item[] Justification: \\justificationTODO{}\n"
+                "\\item[] Guidelines:\n"
+                "\\begin{itemize}\n"
+                "\\item The authors should create a Limitations section.\n"
+                "\\item The paper should discuss scope.\n"
+                "\\item The paper should discuss efficiency.\n"
+                "\\end{itemize}\n"
+                "\\end{enumerate}\n",
+                encoding="utf-8",
+            )
+            errors: list[str] = []
+
+            audit_draft.check_enumeration(path, base, errors)
+
+        self.assertEqual(errors, [])
+
+    def test_framework_planned_teaser_must_materialize(self) -> None:
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            framework = root / "writing-policies" / "paper-framework.md"
+            framework.parent.mkdir()
+            framework.write_text(
+                "## 4. Figure Plan\n\n"
+                "| ID | Type | Layout | Section | Message | Source | Generation route |\n"
+                "|---|---|---|---|---|---|---|\n"
+                "| Fig. 1 | teaser / pipeline | double-column | Introduction | Shows the attack chain. | Policy | AI illustration (picture-generation.md) |\n"
+                "| Fig. 2 | heatmap | single-column | Benchmark | Shows coverage. | Data | Python matplotlib heatmap |\n",
+                encoding="utf-8",
+            )
+            paper = root / "paper"
+            (paper / "figures").mkdir(parents=True)
+            (paper / "sections").mkdir()
+            (paper / "main.tex").write_text(
+                "\\input{sections/introduction}\n"
+                "\\input{sections/benchmark}\n",
+                encoding="utf-8",
+            )
+            (paper / "sections" / "introduction.tex").write_text(
+                "\\section{Introduction}\nNo teaser here.\n",
+                encoding="utf-8",
+            )
+            (paper / "sections" / "benchmark.tex").write_text(
+                "\\section{Benchmark}\n"
+                "\\begin{figure}[t]\n"
+                "\\centering\n"
+                "\\includegraphics[width=\\linewidth]{figures/vh_heatmap.pdf}\n"
+                "\\caption{Coverage.}\n"
+                "\\label{fig:vh_heatmap}\n"
+                "\\end{figure}\n",
+                encoding="utf-8",
+            )
+            (paper / "figures" / "latex_includes.tex").write_text(
+                "% Fig. 1 (teaser): not yet generated -- see paper/figures/prompts/fig1_teaser.md\n"
+                "% Fig. 2 (vh_heatmap): embedded in sections/benchmark.tex\n",
+                encoding="utf-8",
+            )
+
+            errors, _warnings = audit_draft.audit(paper, framework_path=framework)
+
+        self.assertTrue(any("planned figure missing" in e for e in errors), errors)
+        self.assertTrue(any("not yet generated" in e for e in errors), errors)
+
+    def test_framework_compact_heatmap_cannot_use_near_full_linewidth(self) -> None:
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            framework = root / "writing-policies" / "paper-framework.md"
+            framework.parent.mkdir()
+            framework.write_text(
+                "## 4. Figure Plan\n\n"
+                "| ID | Type | Layout | Section | Message | Source | Generation route |\n"
+                "|---|---|---|---|---|---|---|\n"
+                "| Fig. 1 | heatmap | single-column | Benchmark | Shows compact coverage. | Data | Python matplotlib heatmap |\n",
+                encoding="utf-8",
+            )
+            paper = root / "paper"
+            (paper / "figures").mkdir(parents=True)
+            (paper / "sections").mkdir()
+            (paper / "main.tex").write_text("\\input{sections/benchmark}\n", encoding="utf-8")
+            (paper / "sections" / "benchmark.tex").write_text(
+                "\\section{Benchmark}\n"
+                "\\begin{figure}[t]\n"
+                "\\centering\n"
+                "\\includegraphics[width=0.85\\linewidth]{figures/vh_heatmap.pdf}\n"
+                "\\caption{Coverage.}\n"
+                "\\label{fig:vh_heatmap}\n"
+                "\\end{figure}\n",
+                encoding="utf-8",
+            )
+
+            errors, _warnings = audit_draft.audit(paper, framework_path=framework)
+
+        self.assertTrue(any("oversized compact single-column figure" in e for e in errors), errors)
+
+    def test_framework_compact_heatmap_is_not_confused_with_later_large_result_figure(self) -> None:
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            framework = root / "writing-policies" / "paper-framework.md"
+            framework.parent.mkdir()
+            framework.write_text(
+                "## 4. Figure Plan\n\n"
+                "| ID | Type | Layout | Section | Message | Source | Generation route |\n"
+                "|---|---|---|---|---|---|---|\n"
+                "| Fig. 1 | teaser / pipeline | double-column | Introduction | Shows the attack chain. | Policy | AI illustration |\n"
+                "| Fig. 2 | heatmap | single-column | Benchmark | Shows compact coverage. | Data | Python matplotlib heatmap |\n"
+                "| Fig. 3 | grouped bar chart | double-column | Experiments | Shows main results. | Data | Python matplotlib grouped bar chart |\n",
+                encoding="utf-8",
+            )
+            paper = root / "paper"
+            (paper / "figures" / "prompts").mkdir(parents=True)
+            (paper / "sections").mkdir()
+            (paper / "main.tex").write_text(
+                "\\input{sections/introduction}\n"
+                "\\input{sections/benchmark}\n"
+                "\\input{sections/experiments}\n",
+                encoding="utf-8",
+            )
+            (paper / "sections" / "introduction.tex").write_text(
+                "\\section{Introduction}\n"
+                "\\begin{figure}[t]\\includegraphics[width=\\textwidth]{figures/fig1_teaser.png}\\end{figure}\n",
+                encoding="utf-8",
+            )
+            (paper / "sections" / "benchmark.tex").write_text(
+                "\\section{Benchmark}\n"
+                "\\begin{figure}[t]\n"
+                "\\includegraphics[width=0.64\\linewidth]{figures/vh_heatmap.pdf}\n"
+                "\\caption{Coverage heatmap.}\n"
+                "\\label{fig:vh_heatmap}\n"
+                "\\end{figure}\n",
+                encoding="utf-8",
+            )
+            (paper / "sections" / "experiments.tex").write_text(
+                "\\section{Experiments}\n"
+                "\\begin{figure}[t]\n"
+                "\\includegraphics[width=0.95\\textwidth]{figures/main_results.pdf}\n"
+                "\\caption{Main results.}\n"
+                "\\label{fig:main_results}\n"
+                "\\end{figure}\n",
+                encoding="utf-8",
+            )
+            (paper / "figures" / "prompts" / "fig1_teaser.md").write_text("brief", encoding="utf-8")
+            (paper / "figures" / "fig1_teaser.png").write_bytes(b"fake")
+
+            errors, _warnings = audit_draft.audit(paper, framework_path=framework)
+
+        self.assertFalse(any("oversized compact single-column figure" in e for e in errors), errors)
+
+    def test_framework_main_results_table_must_fill_textwidth(self) -> None:
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            framework = root / "writing-policies" / "paper-framework.md"
+            framework.parent.mkdir()
+            framework.write_text(
+                "## 4. Figure Plan\n\n"
+                "| ID | Type | Layout | Section | Message | Source | Generation route |\n"
+                "|---|---|---|---|---|---|---|\n"
+                "| Tab. 1 | main results table | double-column | Experiments | Shows headline metrics. | Data | LaTeX table |\n",
+                encoding="utf-8",
+            )
+            paper = root / "paper"
+            (paper / "sections").mkdir(parents=True)
+            (paper / "main.tex").write_text("\\input{sections/experiments}\n", encoding="utf-8")
+            (paper / "sections" / "experiments.tex").write_text(
+                "\\section{Experiments}\n"
+                "\\begin{table}[t]\n"
+                "\\centering\n"
+                "\\caption{Main results.}\n"
+                "\\label{tab:main_results}\n"
+                "\\begin{tabular}{l r r r r r}\n"
+                "\\toprule\n"
+                "Model & ASR & TCR & Exec & Def & RF \\\\\n"
+                "\\bottomrule\n"
+                "\\end{tabular}\n"
+                "\\end{table}\n",
+                encoding="utf-8",
+            )
+
+            errors, _warnings = audit_draft.audit(paper, framework_path=framework)
+
+        self.assertTrue(any("planned full-width table" in e for e in errors), errors)
+
+    def test_framework_compact_table_must_not_be_planned_double_column(self) -> None:
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            framework = root / "writing-policies" / "paper-framework.md"
+            framework.parent.mkdir()
+            framework.write_text(
+                "## 4. Figure Plan\n\n"
+                "| ID | Type | Layout | Section | Message | Source | Generation route |\n"
+                "|---|---|---|---|---|---|---|\n"
+                "| Tab. 1 | compact ablation table | double-column | Experiments | Shows a small 3-row ablation. | Data | LaTeX table |\n",
+                encoding="utf-8",
+            )
+            paper = root / "paper"
+            (paper / "sections").mkdir(parents=True)
+            (paper / "main.tex").write_text("\\input{sections/experiments}\n", encoding="utf-8")
+            (paper / "sections" / "experiments.tex").write_text(
+                "\\section{Experiments}\n"
+                "\\begin{table}[t]\n"
+                "\\centering\n"
+                "\\caption{Compact ablation.}\n"
+                "\\label{tab:ablation}\n"
+                "\\begin{tabular}{l r r}\n"
+                "\\toprule\n"
+                "Setting & ASR & TCR \\\\\n"
+                "\\bottomrule\n"
+                "\\end{tabular}\n"
+                "\\end{table}\n",
+                encoding="utf-8",
+            )
+
+            errors, _warnings = audit_draft.audit(paper, framework_path=framework)
+
+        self.assertTrue(any("unjustified double-column table plan" in e for e in errors), errors)
+
+    def test_table_star_must_fill_textwidth(self) -> None:
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            path = base / "sections" / "experiments.tex"
+            path.parent.mkdir()
+            path.write_text(
+                "\\section{Experiments}\n"
+                "\\begin{table*}[t]\n"
+                "\\centering\n"
+                "\\caption{Main results.}\n"
+                "\\label{tab:main_results}\n"
+                "\\begin{tabular}{l r r}\n"
+                "\\toprule\n"
+                "Model & ASR & TCR \\\\\n"
+                "\\bottomrule\n"
+                "\\end{tabular}\n"
+                "\\end{table*}\n",
+                encoding="utf-8",
+            )
+            errors: list[str] = []
+
+            audit_draft.check_tables(path, base, errors, [])
+
+        self.assertTrue(any("narrow double-column table" in e for e in errors), errors)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,53 @@
+name: academic-figure
+version: 3.0.0
+description: >
+  Declarative manifest for the academic-figure skill. SKILL.md uses this to load
+  the figure/table execution fragments and the deep references on demand. Cross-skill
+  stance/integrity lives at ../../_shared/core. Part of the academic-writing collection.
+
+always_load:
+  - ../../_shared/core/stance.md
+
+axes:
+  display_item:
+    detect: |
+      Decide which execution fragment to load from the request. figure for any
+      data-driven plot or concept/teaser/pipeline illustration; table for any
+      LaTeX table. A request with both loads both fragments.
+    values:
+      figure: static/figure-handling.md
+      table: static/table-handling.md
+    multi: true
+
+  venue_kind:
+    detect: |
+      Conference or journal. Selects the sizing reference and, for journal, the
+      figure-contract. Default to conference unless the caller explicitly says journal.
+    values:
+      conference: references/figures/conference/figure-sizing.md
+      journal: references/figures/journal/figure-sizing.md
+    default: conference
+    multi: false
+
+references:
+  on_demand:
+    - condition: "data-driven plots — venue-agnostic shared rules (rcParams, colors, per-chart-type rules, legend rules, multi-panel architecture); load before the venue-specific sizing file"
+      path: references/figures/plot-style.md
+    - condition: "non-data picture figure (teaser, illustration, conceptual picture, pipeline, architecture)"
+      path: references/figures/picture-generation.md
+    - condition: "data-driven plots require reusable code patterns (grouped bars, trend lines, heatmaps, radar, save helpers)"
+      path: references/figures/chart-patterns.md
+    - condition: "figure planning, Display Item Contract, Display Review Gate, failure signatures, generation routes"
+      path: references/figures/figure-planning.md
+    - condition: "Venue Kind is conference AND data-driven plots need column widths, figsize, font hierarchy, height budget"
+      path: references/figures/conference/figure-sizing.md
+    - condition: "Venue Kind is journal AND data-driven plots need column widths, figsize, font hierarchy, height budget, display-item caps, export formats"
+      path: references/figures/journal/figure-sizing.md
+    - condition: "Venue Kind is journal AND figure planning needs journal-specific archetypes, panel logic, aesthetic integration, reviewer-risk checklist"
+      path: references/figures/journal/figure-contract.md
+    - condition: "all figures have passed individual review gates AND submission-readiness cross-figure check is needed (statistics minimum, image-integrity, export bundle)"
+      path: references/figures/qa-contract.md
+    - condition: "table span decisions, LaTeX patterns, or table QA gate is needed"
+      path: references/tables/table-design.md
+    - condition: "how figures and tables sit in the prose and appendix (placement, captions, appendix float discipline)"
+      path: references/sections/figures-and-tables.md

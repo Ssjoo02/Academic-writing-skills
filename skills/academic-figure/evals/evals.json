@@ -1,0 +1,46 @@
+{
+  "skill_name": "academic-figure",
+  "description": "Behavioral evals for the figure/table subsystem: the Display Review Gate, data integrity, venue-kind sizing, and table-overflow as a hard defect.",
+  "evals": [
+    {
+      "id": "display-review-gate-look-before-accept",
+      "prompt": "Make the main comparison bar chart from results/metrics.json for my paper.",
+      "expected_output": "The assistant renders the figure (SVG+PDF+PNG), opens and visually inspects the PNG, and runs the Display Review Gate (scoring against failure signatures, regenerating on a hit) before accepting it. A script that merely runs without error is not treated as a passing figure.",
+      "assertions": [
+        {"name": "inspects_rendered_png", "description": "The assistant looks at the rendered PNG/compiled page rather than accepting the figure because the plotting script ran."},
+        {"name": "runs_display_review_gate", "description": "The figure is scored against failure signatures and regenerated if a defect (muddy overlap, clipping, low contrast, label collision) is found."}
+      ],
+      "files": []
+    },
+    {
+      "id": "no-hardcoded-numbers-from-memory",
+      "prompt": "Plot our method's accuracy against the baselines. (No data file is attached.)",
+      "expected_output": "The assistant reads the numbers from a workspace results file. It does not hardcode or invent values from memory; if no results file exists, it stops and asks for the data instead of fabricating it.",
+      "assertions": [
+        {"name": "no_fabricated_values", "description": "No numeric values are invented or hardcoded from memory; values come from a workspace results file."},
+        {"name": "asks_when_data_missing", "description": "When no data source is available, the assistant asks for it rather than producing a plausible-looking fabricated chart."}
+      ],
+      "files": []
+    },
+    {
+      "id": "table-overflow-hard-defect",
+      "prompt": "Add a results table with 12 numeric columns to my two-column ICML paper.",
+      "expected_output": "The assistant produces a width-safe table (e.g., resizing, restructuring, abbreviating, or moving to a full-width/appendix layout) and treats a table that overflows the column/page as a hard defect, not acceptable output. It does not hardcode structural numbers in the source.",
+      "assertions": [
+        {"name": "overflow_treated_as_defect", "description": "An overflowing table is not accepted; the assistant generates width-safe source and verifies it fits."},
+        {"name": "no_hardcoded_structural_numbers", "description": "Row/column counts and other structural references are not hardcoded from memory."}
+      ],
+      "files": []
+    },
+    {
+      "id": "venue-kind-sizing-journal",
+      "prompt": "Make a results figure for my JMLR journal paper.",
+      "expected_output": "The assistant resolves venue_kind to journal and uses the journal figure-sizing reference plus the journal figure-contract (prototypes, panel logic, display-item cap, optional TIFF), not the conference sizing rules.",
+      "assertions": [
+        {"name": "selects_journal_sizing", "description": "Journal figure-sizing/figure-contract is used because the venue is a journal."},
+        {"name": "no_conference_sizing_substitution", "description": "Conference column-width sizing is not applied to the journal figure by default."}
+      ],
+      "files": []
+    }
+  ]
+}

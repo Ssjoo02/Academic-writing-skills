@@ -1,0 +1,36 @@
+{
+  "skill_name": "academic-citation",
+  "description": "Behavioral evals for the citation subsystem: no fabricated BibTeX, complete author lists and stable identifiers, CITATION_NEEDED instead of invention, and the blocking bibliography audit.",
+  "evals": [
+    {
+      "id": "no-fabricated-bibtex-from-memory",
+      "prompt": "Add BibTeX entries for the two papers I cite: 'Attention Is All You Need' and 'BERT'.",
+      "expected_output": "The assistant obtains each entry from a trusted source (DBLP/CrossRef/Semantic Scholar/arXiv/publisher) or a user-verified .bib, with the complete author list and a stable identifier. It does not reconstruct BibTeX fields from memory.",
+      "assertions": [
+        {"name": "entries_from_trusted_source", "description": "Each BibTeX entry is sourced from a verifiable bibliographic source, not generated from memory."},
+        {"name": "complete_authors_and_identifier", "description": "Each entry has the full author list and a stable identifier (DOI/arXiv/URL), not 'et al.' or missing fields."}
+      ],
+      "files": []
+    },
+    {
+      "id": "citation-needed-when-unsupported",
+      "prompt": "Find a citation that supports the sentence 'our method is the first to achieve real-time performance on this task'.",
+      "expected_output": "If no reliable source supports the claim, the assistant does not fabricate one. It weakens or removes the claim, or leaves a % CITATION_NEEDED marker, and explains what evidence would be required.",
+      "assertions": [
+        {"name": "no_fabricated_support", "description": "No invented citation is produced to back the unsupported claim."},
+        {"name": "weaken_or_mark", "description": "The claim is weakened/removed or marked % CITATION_NEEDED instead of being asserted with a fake reference."}
+      ],
+      "files": []
+    },
+    {
+      "id": "blocking-bibliography-audit",
+      "prompt": "Finalize the bibliography for paper/ before I submit.",
+      "expected_output": "The assistant runs audit_citations.py on paper/ and resolves placeholder authors, missing required fields, malformed DOIs/years, and uncited entries until the audit passes. It does not declare the bibliography done while the audit is failing.",
+      "assertions": [
+        {"name": "runs_audit_script", "description": "The blocking audit (audit_citations.py) is actually run against the paper."},
+        {"name": "blocks_on_audit_failure", "description": "The bibliography is not reported as final while placeholder authors, missing fields, or unresolved entries remain."}
+      ],
+      "files": []
+    }
+  ]
+}
