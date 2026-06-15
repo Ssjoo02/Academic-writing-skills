@@ -9,6 +9,24 @@ immediately after the first complete `paper/` draft exists; the user does not ne
 Do not load this file during Writing Policy generation unless the user explicitly asks for a formal
 review.
 
+## Bounded Review Intake
+
+Use the full two-round review only when a complete `paper/` draft exists: `main.tex`, intended section
+files, bibliography, figures/tables, post-main material, and ideally the compiled PDF. If the user
+provides only a PDF, selected sections, an abstract, notes, or an incomplete TeX fragment, run a
+bounded review instead.
+
+For bounded review:
+
+1. State the input scope, assessment boundary, visible evidence base, and missing materials.
+2. Review only what the supplied material can support; do not infer missing experiments, line numbers,
+   figure panels, venue rules, citations, or appendix contents.
+3. Use `Not assessable from supplied material` for checks that need the missing draft parts.
+4. Report risks and concrete next actions, but do not run the full Final Static Audits.
+5. A bounded review **must not produce a `PASS` submission-readiness verdict**. Use
+   `OPEN_DECISION` when the missing material could resolve the risk, or `BLOCKED` when the supplied
+   material already shows a blocker.
+
 ## Acceptance Drivers
 
 The paper should have:
@@ -299,10 +317,25 @@ Write `paper/review-report.md` only when the user explicitly asks for a review r
 is the primary task, or when `blocking` or unresolved `high` findings remain after revision. Do not
 create `paper/review-report.md` for a routine internal review when no user-facing review is needed.
 
+### Finding Evidence Schema
+
+Every `blocking` or `high` finding must carry enough evidence for another agent or the user to verify
+it without trusting the reviewer summary. Use section names when line numbers are unavailable; do not
+invent line numbers, PDF pages, figure panels, datasets, citations, or manuscript changes.
+
+| Field | Required content |
+|---|---|
+| Location | File:line, PDF page, section name, figure/table id, or `not locatable from supplied material` |
+| Evidence basis | Exact manuscript fact, audit output line, visible table/figure fact, or missing-material reason |
+| Assessment boundary | `full paper`, `compiled PDF`, `source-only`, `bounded review`, or `not assessable` |
+| Risk level | `blocking`, `high`, `medium`, or `low` |
+| Action type | `PROSE_REVISION`, `CLAIM_WEAKENING`, `CITATION_VERIFICATION`, `ADDITIONAL_ANALYSIS`, `NEW_EXPERIMENT`, `OPEN_DECISION`, or `BLOCKED` |
+| Required revision | Concrete writing-scoped fix, claim weakening, or user/evidence requirement |
+
 When showing full-paper review, produce:
 
-| Dimension | Reviewer question | Current answer | Risk level | Required revision |
-|---|---|---|---|---|
+| Dimension | Reviewer question | Current answer | Location | Evidence basis | Assessment boundary | Risk level | Action type | Required revision |
+|---|---|---|---|---|---|---|---|---|
 
 Use these eight dimensions:
 

@@ -113,8 +113,9 @@ downstream files early, or bypassing mandatory checkpoints.
 - Do not continue past a mandatory gate by saying the step was "compressed", "batched",
   "assumed", "implicitly confirmed", or "handled internally".
 
-At every confirmation gate, use this user-facing checkpoint shape. Localize user-facing labels to
-the interaction language when appropriate:
+At every confirmation gate, use this user-facing checkpoint shape. Always localize user-facing
+checkpoint labels to the interaction language. Keep file paths, stage names, artifact names, and
+machine-parsed markers in their original form.
 
 ```text
 Checkpoint: <Writing Policy | Paper Framework | workflow-specific gate>

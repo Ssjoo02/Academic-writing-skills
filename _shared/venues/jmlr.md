@@ -29,7 +29,7 @@
 - Abstract limit: not a hard word cap; keep it short, single-block, and self-contained.
 - OSS track: software papers are short (~8 pages); keep the design and usage focus tight.
 - Supplementary material count: code/data linked externally; authors maintain the links.
-- Word budget: JMLR is length-by-evidence, not word-capped, so the Methods-in-cap trap does not apply. Still propose a proportional per-section budget before drafting to avoid padding. See `references/checks/journal-submission-elements.md` (Length And Word Budget).
+- Word budget: JMLR is length-by-evidence, not word-capped, so the Methods-in-cap trap does not apply. Still propose a proportional per-section budget before drafting to avoid padding. See the `academic-review` skill's `references/checks/journal-submission-elements.md` (Length And Word Budget).
 
 ## Blinding
 

@@ -14,15 +14,15 @@ fixed templates, and they must be adapted to the actual paper, venue, evidence, 
 
 ## Conference vs Journal: Pick The Family First
 
-Paper types are split by `Venue Kind` (see `references/venues/index.md`):
+Paper types are split by `Venue Kind` (see `_shared/venues/index.md`):
 
 - **Conference** (`Venue Kind: conference`, the default): use the conference paper-type files listed
   in this file (`method-paper.md`, `systems-implementation-paper.md`, `benchmark-dataset-paper.md`,
   `imrad-paper.md`, `survey-paper.md`, `generic-paper.md`). These assume a hard page limit.
 - **Journal** (`Venue Kind: journal`, e.g., JMLR, TPAMI): use the journal paper-type files under
-  `references/paper-types/journal/` (see `references/paper-types/journal/index.md`). Journal types
+  `_shared/paper-types/journal/` (see `_shared/paper-types/journal/index.md`). Journal types
   use different section conventions, are usually longer/complete, set a proportional budget, and take
-  absolute length from the venue card. Also load `references/venues/journal-vs-conference.md`.
+  absolute length from the venue card. Also load `_shared/venues/journal-vs-conference.md`.
 
 Conference and journal paper types are intentionally NOT shared. Do not draft a journal paper from a
 conference paper-type file, and vice versa.

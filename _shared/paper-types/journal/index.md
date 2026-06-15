@@ -1,9 +1,9 @@
 # Journal Paper Type Index
 
-Use this index when the confirmed `Venue Kind` is `journal` (see `references/venues/index.md`).
+Use this index when the confirmed `Venue Kind` is `journal` (see `_shared/venues/index.md`).
 Journal paper types are kept separate from conference paper types because journal articles use
 different section conventions, are usually longer and more complete, and are written to survive a
-multi-round review. The conference paper-type files at the top level of `references/paper-types/`
+multi-round review. The conference paper-type files at the top level of `_shared/paper-types/`
 are NOT used for journal submissions.
 
 First decide the journal paper type, then load the matching profile before building the Paper
@@ -14,7 +14,7 @@ safely captured by a specific profile.
 
 Journal paper-type profiles set section structure and a PROPORTIONAL budget. Absolute length comes
 from the venue card (e.g., JMLR has no hard page limit; TPAMI uses double-column manuscript-type
-limits). Also load `references/venues/journal-vs-conference.md` for the journal drafting posture.
+limits). Also load `_shared/venues/journal-vs-conference.md` for the journal drafting posture.
 
 ## Journal Type Selection Map
 

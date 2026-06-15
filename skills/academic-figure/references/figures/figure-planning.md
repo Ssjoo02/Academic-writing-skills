@@ -33,6 +33,13 @@ Before assigning a generation route or writing code, establish:
    Writing Policy. A panel without a mapped claim or evidence source is decoration and should be
    removed. The chain must trace back to concrete workspace result files or confirmed paper facts.
 
+   For data-driven plots, load `chart-taxonomy.md` immediately after this contract and record a
+   chart design row for each panel: chart family, source file, statistic/interval, layout target,
+   palette preset, label strategy, and export formats. This includes the full chart families in
+   `type.md`: vertical/horizontal bars, grouped bars, stacked bars, line charts, scatter plots,
+   Pareto frontiers, radar charts, heatmaps, box plots, histograms, violin plots, density plots,
+   pie charts, and donut charts.
+
 3. **Display type**: classify the item into one of:
    - `quantitative comparison`: bar, line, scatter, heatmap, or table driven by result data,
    - `pipeline-architecture`: ordered stages, system components, or workflow with node-edge
@@ -43,15 +50,13 @@ Before assigning a generation route or writing code, establish:
      directly in LaTeX.
    The display type determines the generation route, not the other way around.
 
-4. **Backend**: for data-driven plots, confirm the plotting backend. Python (matplotlib/seaborn) is
-   the default. If R (ggplot2/patchwork) is preferred, the user must explicitly request it. For
-   non-data pictures **and pipeline / architecture / teaser concept figures**, the backend is the
-   configured picture API; the image model may render the labels directly, and every label must then
-   be verified for correct spelling and terminology (the generate-then-verify policy in
-   `picture-generation.md`). Use the TikZ overlay only as a fallback when the model misspells a label.
-   Use a pure TikZ/FigureSpec schematic only when the user explicitly asks for an editable diagram.
-   Do not hand-draw pipeline boxes in matplotlib; that route produced faint boxes, broken arrows,
-   and overflowing text.
+4. **Backend / route**: for data-driven plots, confirm the plotting backend. Python
+   (matplotlib/seaborn) is the default unless the user explicitly requests another plotting stack.
+   For pipeline, framework, architecture, workflow, taxonomy, benchmark-construction, and
+   system-overview diagrams, default to a deterministic schematic route (FigureSpec, Mermaid, TikZ,
+   or hand-authored SVG; see `schematic-design.md`). For teaser and conceptual method pictures,
+   use `picture-generation.md`; an image renderer may render labels directly, but every label must
+   be verified. Do not hand-draw pipeline boxes in matplotlib; use the schematic route instead.
 
 5. **Export contract**: set final dimensions (single-column or double-column), primary output format
    (PDF for LaTeX data charts; PNG for AI-generated pictures; SVG for editable diagrams), target
@@ -74,6 +79,15 @@ Every planned figure or table must declare one layout target:
 Span is a real design decision — do not default everything to one column, and do not span everything.
 Decide per item:
 
+**First-figure vs. main-process rule.** In a two-column paper, the opening story / teaser figure
+usually stays single-column when it is a compact problem-setting visual; the main process,
+framework, pipeline, or architecture diagram normally spans both columns because the reader follows a
+horizontal structure. These may be the same figure only when the opening figure is also the real
+framework/pipeline figure; otherwise keep the teaser compact and let the later framework figure use
+the cross-column slot. In a one-column paper, both are ordinary `figure` floats: the teaser is usually
+`0.55--0.75\linewidth`, while the process/framework/pipeline figure is usually
+`0.90--1.00\linewidth`.
+
 **Two-column venues (ACL/EMNLP, ICML, CVPR, AAAI, IJCAI, IEEE-conf).** Default is single-column
 (`figure`/`table` + `\columnwidth`). Promote to cross-column (`figure*`/`table*` + `\textwidth`,
 placed at the top or bottom of the page) when ANY of these hold:
@@ -83,13 +97,16 @@ placed at the top or bottom of the page) when ANY of these hold:
   column and belong full-width;
 - it is a **multi-panel figure** (≥2 panels side by side — e.g. a per-vector and a per-harm radar, or
   grouped small-multiples);
-- it is a **wide comparison**: a grouped-bar/heatmap/radar with a legend, or a results table with
-  long headers or ≳5–6 numeric columns, that cannot stay legible (≥6–7 pt) at column width.
+- it is a **wide comparison**: a grouped-bar/heatmap/radar with a legend, or a table that the
+  table-placement contract classifies as wide enough to need full width.
 
 **Keep single-column** when the item reads comfortably at ~3 in: the **teaser / first concept figure**
 that conveys the idea in a compact (often vertical) composition; a single small plot (one bar/line/
 scatter, ≤4–5 categories); a narrow taxonomy/definition/setup table (≤~4 short columns). A teaser that
-genuinely fits one column stays single-column rather than being stretched across the page.
+genuinely fits one column stays single-column rather than being stretched across the page. For a
+two-column conference paper, the story/teaser Fig. 1 defaults to single-column unless it is also the
+paper's pipeline / framework / architecture figure and truly needs a horizontal reading path; record
+that exception in the Paper Framework instead of silently stretching the first image.
 
 **One-column venues (NeurIPS, ICLR) and single-column journals.** There is no `figure*`/`table*`; the
 text block is one wide column (~5.5 in). Decide width as a fraction of `\linewidth` instead of span:
@@ -98,6 +115,25 @@ text block is one wide column (~5.5 in). Decide width as a fraction of `\linewid
 - a centered fraction (`0.6–0.8\linewidth`) or a `subfigure` row for a small/secondary single plot, so
   it does not dominate the column;
 - combine related small charts into one multi-panel figure rather than stacking many tiny floats.
+
+**Single-column papers have no cross-column float class.** Do not write `figure*` or `table*` in a
+single-column template. Instead, size by role as a fraction of `\linewidth`: story/teaser figures
+usually sit at `0.55--0.75\linewidth` when they are illustrative and compact; pipeline/framework/
+architecture figures and multi-panel evidence figures use `0.90--1.00\linewidth`; small secondary
+plots use `0.55--0.70\linewidth`; wide numeric comparisons use full `\linewidth` only when the
+reader must compare many columns or panels at once. If two small related charts explain one claim,
+merge them into a single multi-panel figure with a shared legend instead of scattering them as
+separate floats.
+
+Compact single-column heatmaps, coverage matrices, and secondary data grids should normally be
+inserted at `0.60--0.70\linewidth` in one-column templates. Treat `>0.70\linewidth` as a layout
+defect unless the confirmed Paper Framework explicitly budgets the item as a large main evidence
+figure.
+
+For a one-column template, the Figure Plan `Layout` should remain `single-column`; record the actual
+width fraction in the message, display-item budget, or framework execution report (for example,
+`single-column, 0.65\linewidth teaser` or `single-column, 0.95\linewidth pipeline`). Do not encode
+one-column full-width figures as `double-column`.
 
 **Multi-panel layout.** Prefer **one hero/primary panel plus subordinate evidence panels** over a grid
 of equal-sized subplots; panels need not be equal when the evidence is not equally important. Give a
@@ -109,10 +145,8 @@ single-column floats**, which read as disconnected and waste space. A radar/pola
 read at single-column width with 6+ spokes and 3+ methods; use a cross-column multi-panel layout, or
 switch to grouped bars / a heatmap if the radar still muddies.
 
-Long-text tables must use wrapping columns (`tabularx` or `p{...}` widths tied to `\linewidth` or
-`\textwidth`). Pure `l/c/r` columns are allowed only when every cell is short enough to fit the
-declared layout. Scaling a table down with `\resizebox` is a last resort for numeric tables, not a
-default for prose-heavy tables.
+For table-specific span, wrapping, resize, appendix, and supplement decisions, load
+`references/tables/table-placement.md`; Figure Planning only records the provisional layout target.
 
 **Height also has a budget, not just width.** A picture set to `width=\textwidth` is as tall as its
 aspect ratio dictates: a 16:9 render at double-column width is ~9–10 cm tall, which for a teaser or
@@ -149,13 +183,14 @@ to one), run this loop:
 | **Low contrast / color-only** | A foreground series is grey/washed out; cell/in-bar text disappears into its background; series are told apart by hue alone (fails in grayscale / for colorblind readers); a rainbow/jet colormap is used. | Grey only for neutral/receding series; give compared series distinct hues from a luminance-balanced, colorblind-safe palette plus a redundant marker/hatch; pick text color by luminance of the rendered color; never use rainbow/jet. |
 | **Label collision** | Tick labels, spoke labels, radial ticks, legend, or annotations overlap each other or the data. | Offset spoke labels beyond the outer ring; rotate/`ha` x-ticks; move legend below; remove default polar grid/ticks. |
 
-**For illustration / pipeline / teaser figures (AI-generated), also score these:**
+**For schematic and picture figures, also score these:**
 
 | Signature | What to look for in the PNG | Fix |
 |---|---|---|
-| **Garbled / wrong in-image text** | A label the model rendered is misspelled (`Indulator`, `Missformation`), uses the wrong term, is duplicated, or a prompt header such as `Message:` leaked into the figure. | Model-rendered labels are allowed but must be **verified**: read each word against the Writing Policy terms; regenerate emphasizing the correct spelling, or fix that label via the TikZ overlay fallback (`picture-generation.md`). A misspelled label must not ship. |
-| **Boxy flowchart** | Just rounded rectangles in a row with arrows — a slide diagram, not an illustration. | Rewrite the Direct Image Prompt toward a scene (devices, UI, icons, actors); drop "rounded rectangles / boxes in a row". |
-| **Empty bands / off-center / too tall** | A large blank strip (e.g. top/bottom or right ~30–40%) while content crowds a strip; or a banner that is ~9–10 cm tall and eats a third of the page ("上下边距太长"). | Re-prompt for a wide, short, edge-to-edge banner (aspect ~3:1 double-column); cap the height (`height=...,keepaspectratio`) or trim the bands (`trim=...,clip`). |
+| **Wrong schematic semantics** | A module is missing, edge direction is reversed, grouping implies the wrong dependency, or novelty is not identifiable. | Edit the FigureSpec/Mermaid/TikZ/SVG source and re-render; do not hide a semantic error in the caption. |
+| **Garbled / wrong picture text** | In a picture-style image, a label the model rendered is misspelled (`Indulator`, `Missformation`), uses the wrong term, is duplicated, or a prompt header such as `Message:` leaked into the figure. | Model-rendered labels are allowed only for picture figures and must be **verified**: read each word against the Writing Policy terms; regenerate emphasizing the correct spelling, or fix that label via the TikZ overlay fallback (`picture-generation.md`). |
+| **Boxy illustration** | A picture route produced only rounded rectangles in a row with arrows — a slide diagram, not an illustration. | If the paper needs a formal diagram, reroute to `schematic-design.md`; if it needs an illustration, rewrite the Direct Image Prompt toward a scene (devices, UI, icons, actors). |
+| **Empty bands / off-center / too tall** | A large blank strip (e.g. top/bottom or right ~30–40%) while content crowds a strip; or a banner that is ~9–10 cm tall and eats a third of the page ("上下边距太长"). | For pictures, re-prompt for a wide, short, edge-to-edge banner; cap the height (`height=...,keepaspectratio`) or trim the bands (`trim=...,clip`). For schematics, resize the canvas and redistribute nodes. |
 | **Out of bounds / overflow ("出界")** | The figure runs past the column/text edge into the margin; `main.log` shows `Overfull \hbox (... too wide)` for the figure. | Clamp the `tikzpicture` box to the image (`\useasboundingbox (img.south west) rectangle (img.north east);`) and inset edge labels (anchor inward, `x≈0.04`/`0.96`); for a plain image, cap the width. |
 | **Overlay misalignment** | After TikZ overlay, a label floats off its element or runs off the image. | Open the PDF, nudge the normalized `(x,y)` coordinates, keep label boxes inside `[0,1]`, recompile, re-inspect. |
 
@@ -248,15 +283,15 @@ Use the lightest reliable route:
 | existing asset | screenshots, qualitative examples, already-drawn diagrams | copied asset under `paper/figures/` |
 | reproducible plot script | numeric results, ablations, scaling, heatmaps | Python script following `plot-style.md` rules and `chart-patterns.md` patterns + SVG/PDF/PNG |
 | LaTeX table | result tables, feature comparison, benchmark statistics | `.tex` table or inline table |
-| AI illustration (default for concept figures) | teasers, conceptual method illustrations, **pipeline / architecture / workflow** overview figures | labeled PNG from the picture API (labels verified for spelling/terminology); TikZ overlay only as a fallback for a label the model misspells |
-| TikZ / FigureSpec schematic | only when the user explicitly wants an editable node-edge diagram or a formal graph/state machine | `.tex`/JSON spec + SVG/PDF |
-| current-agent drawing | fallback when no image API exists | agent-created illustration plus Picture Brief; still overlay text deterministically |
+| deterministic schematic | pipeline, framework, architecture, workflow, taxonomy, benchmark construction, system overview | FigureSpec/Mermaid/TikZ/SVG source + SVG/PDF/PNG |
+| AI picture illustration | teasers, conceptual method illustrations, scene-like overview pictures | Picture Brief + renderer route + labeled PNG from a separate renderer; TikZ overlay only as a fallback for a label the model misspells |
+| current-agent picture drawing | fallback when no image API exists for a picture route | agent-created illustration plus Picture Brief; still verify or overlay text |
 
 For plots, data-driven plots default to Python. Do not hardcode numbers from memory. Read from
-result files and follow `plot-style.md`. For diagrams, keep the source specification or source file
-so the figure can be revised. For AI-generated pictures, follow `picture-generation.md`: always
-write `paper/figures/prompts/<figure-id>.md` before rendering, and do not let the image renderer
-invent claims, modules, datasets, results, or labels.
+result files and follow `plot-style.md`. For schematics, keep the source specification or source
+file so the figure can be revised. For AI-generated pictures, follow `picture-generation.md`:
+always write `paper/figures/prompts/<figure-id>.md` before rendering, and do not let the image
+renderer invent claims, modules, datasets, results, or labels.
 
 ## MCP Contract
 
@@ -264,12 +299,15 @@ If a `paper-figure` or FigureSpec-compatible MCP is available, use it only for f
 tasks:
 
 - classify a proposed visual into a route,
-- write a FigureSpec JSON skeleton,
-- validate or render a deterministic diagram,
+- write a templated FigureSpec JSON skeleton,
+- validate or render a medium-complexity deterministic diagram,
+- write a Picture Brief and record the renderer route for a picture item,
 - record figure metadata for later LaTeX insertion.
 
 The MCP must not invent paper claims, experiment results, citations, or section structure. It works
-from the confirmed Writing Policy, confirmed Paper Framework, and concrete source files.
+from the confirmed Writing Policy, confirmed Paper Framework, and concrete source files. It also
+must not call image-generation APIs; picture rendering happens in a separate renderer step or
+current-agent fallback.
 
 Suggested MCP outputs:
 

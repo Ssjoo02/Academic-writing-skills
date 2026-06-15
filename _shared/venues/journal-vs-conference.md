@@ -4,16 +4,17 @@ Load this file when the confirmed `Venue Kind` is `journal`. It captures how jou
 from conference drafting. It is a writing-posture reference only: it does not set absolute length
 (the venue card does) and does not change the paper identity, claims, or evidence.
 
-This file pairs with the journal paper-type files under `references/paper-types/journal/`. The
+This file pairs with the journal paper-type files under `_shared/paper-types/journal/`. The
 paper-type file controls section structure and proportional budget; this file controls tone, scope,
 and what reviewers expect across a multi-round review.
 
 Two companions carry the journal deltas that are not covered here:
 
-- Section-level journal adjustments: `references/sections/journal/` overlays (Abstract,
+- Section-level journal adjustments: the `academic-writing` hub's `references/sections/journal/`
+  overlays (Abstract,
   Introduction, Method, Discussion/Conclusion). Load the base section guide first, then the
-  matching overlay. See `references/sections/journal/index.md`.
-- Journal-wide submission requirements: `references/checks/journal-submission-elements.md`
+  matching overlay. See the `academic-writing` hub's `references/sections/journal/index.md`.
+- Journal-wide submission requirements: the `academic-review` skill's `references/checks/journal-submission-elements.md`
   (mandatory statements, display-item caps and tiers, methods placement, word/length budget). Plan
   these at the planning stage, not after drafting.
 
@@ -76,10 +77,10 @@ Most structural differences below follow from that one difference.
 
 - Confirmed venue card loaded and `Venue Kind: journal`.
 - Absolute length taken from the venue card, not from a conference budget.
-- Journal paper-type file selected from `references/paper-types/journal/`.
+- Journal paper-type file selected from `_shared/paper-types/journal/`.
 - Decided what belongs in main text vs supplementary material.
 - For an extended paper: the delta over the conference version is stated.
 - Mandatory statements (data/code availability, contributions, conflicts, funding, ethics) planned
-  from `references/checks/journal-submission-elements.md`.
-- Section overlays under `references/sections/journal/` queued for Abstract, Introduction, Method,
-  and Discussion/Conclusion drafting.
+  from the `academic-review` skill's `references/checks/journal-submission-elements.md`.
+- Section overlays under the `academic-writing` hub's `references/sections/journal/` queued for
+  Abstract, Introduction, Method, and Discussion/Conclusion drafting.

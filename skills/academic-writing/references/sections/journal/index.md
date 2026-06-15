@@ -27,13 +27,14 @@ guides alone.
 | Abstract | `references/sections/abstract.md` | `journal/abstract.md` |
 | Introduction | `references/sections/introduction.md` | `journal/introduction.md` |
 | Method / System | `references/sections/method.md` | `journal/method.md` |
+| Results / Experiments / Evaluation | `references/sections/experiments.md` | `journal/results.md` |
 | Discussion / Conclusion | `references/sections/conclusion.md` | `journal/discussion.md` |
 | Figures (sizing) | `academic-figure` skill: `references/figures/plot-style.md` (shared) | `academic-figure` skill: `references/figures/journal/figure-sizing.md` |
 | Figures (contract) | `academic-figure` skill: `references/figures/figure-planning.md` (shared) | `academic-figure` skill: `references/figures/journal/figure-contract.md` |
 
-Sections without an overlay here (Related Work, Experiments, Demo/Application,
-Figures/Tables section-level insertion rules, paragraph flow) use the base guide
-directly. The journal posture for those is covered by
+Sections without an overlay here (Related Work, Figures/Tables section-level
+insertion rules, paragraph flow) use the base guide directly. The
+journal posture for those is covered by
 `_shared/venues/journal-vs-conference.md` (complete, self-contained story;
 thorough evaluation; written to survive multi-round review) and the active venue
 card.
@@ -50,6 +51,7 @@ reviewer-risk assessment — no conference venue names enter context.
 - `academic-review` skill: `references/checks/journal-submission-elements.md` — mandatory statements,
   display-item caps and tiers, methods placement, and word-budget mechanics that
   are journal-wide rather than per-section.
-- The active venue card under `_shared/venues/` (`jmlr.md`, `ieee-tpami.md`, `journal-generic.md`) — the
-  authoritative length, abstract cap, blinding, and post-main order facts the
-  overlays defer to.
+- The active venue card under `_shared/venues/` (`jmlr.md`, `ieee-tpami.md`,
+  `nature.md`, `nature-communications.md`, `journal-generic.md`) — the
+  authoritative length, abstract cap, blinding, display tier, and post-main order
+  facts the overlays defer to.

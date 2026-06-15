@@ -75,13 +75,14 @@ extra.
 |---|---|---|
 | Sentence polish | `references/style/copyediting-standard.md` | `../../_shared/checks/claim-evidence.md` |
 | Paragraph polish / flow | `references/sections/paragraph-flow.md`, `references/style/copyediting-standard.md` | style references, `../../_shared/checks/claim-evidence.md` |
-| Caption rewrite | `../academic-figure/references/sections/figures-and-tables.md` | `../../_shared/checks/claim-evidence.md`, `../../_shared/checks/metric-design.md` |
+| Caption rewrite | `../academic-figure/references/prose/display-in-prose.md` | `../../_shared/checks/claim-evidence.md`, `../../_shared/checks/metric-design.md` |
 | Abstract rewrite | `references/sections/abstract.md`, `references/sections/paragraph-flow.md` | `references/sections/examples/abstract-examples.md`, `../../_shared/checks/claim-evidence.md`, `../academic-review/references/checks/reviewer-risk.md` |
 | Introduction rewrite | `references/sections/introduction.md`, `references/sections/paragraph-flow.md` | `references/sections/examples/introduction-examples.md`, `../../_shared/checks/claim-evidence.md`, `../academic-review/references/checks/reviewer-risk.md` |
 | Related Work rewrite | `references/sections/related-work.md`, `references/sections/paragraph-flow.md` | `../academic-citation/references/checks/citation-integrity.md` |
-| Method rewrite | `references/sections/method.md`, `references/sections/paragraph-flow.md` | `references/sections/examples/method-examples.md`, `../academic-figure/references/sections/figures-and-tables.md`, `../academic-review/references/checks/reviewer-risk.md` |
-| Experiments rewrite | `references/sections/experiments.md`, `references/sections/paragraph-flow.md` | `../../_shared/checks/metric-design.md`, `../academic-figure/references/sections/figures-and-tables.md`, `../academic-review/references/checks/reviewer-risk.md` |
+| Method rewrite | `references/sections/method.md`, `references/sections/paragraph-flow.md` | `references/sections/examples/method-examples.md`, `../academic-figure/references/prose/display-in-prose.md`, `../academic-figure/references/tables/table-design.md`, `../academic-review/references/checks/reviewer-risk.md` |
+| Experiments rewrite | `references/sections/experiments.md`, `references/sections/paragraph-flow.md` | `../../_shared/checks/metric-design.md`, `../academic-figure/references/prose/display-in-prose.md`, `../academic-figure/references/tables/table-design.md`, `../academic-figure/references/tables/table-placement.md`, `../academic-review/references/checks/reviewer-risk.md` |
 | Conclusion rewrite | `references/sections/conclusion.md`, `references/sections/paragraph-flow.md` | `../../_shared/checks/claim-evidence.md` |
+| Appendix / Supplement rewrite | `references/sections/appendix.md`, `references/sections/paragraph-flow.md` | `../academic-figure/references/tables/table-placement.md`, `../academic-review/references/checks/submission-readiness.md` |
 | Whole-paper review | `../academic-review/references/sections/paper-review.md`, `references/sections/paragraph-flow.md` | `../academic-review/references/checks/reviewer-risk.md`, `../../_shared/checks/claim-evidence.md`, `../../_shared/checks/metric-design.md`, `../academic-citation/references/checks/citation-integrity.md` |
 
 **Journal overlay (only when the revision target is a journal paper).** For a section rewrite against

@@ -3,6 +3,14 @@
 Use this check after the full draft exists and before calling a paper
 submission-ready. This is a gate, not a writing guide.
 
+## Scope Boundary
+
+Run this gate only for a complete local `paper/` draft whose source, bibliography, intended figures
+and tables, post-main material, and compile/PDF status can be inspected. For PDF-only, excerpt-only,
+notes-only, or incomplete TeX inputs, run the bounded review path in
+`references/sections/paper-review.md` instead. A bounded review may identify blockers or open
+decisions, but it cannot produce a `PASS` submission-readiness verdict.
+
 ## Verdicts
 
 | Verdict | Meaning | Allowed claim |
@@ -35,20 +43,27 @@ cd paper && latexmk -pdf -file-line-error -interaction=nonstopmode -halt-on-erro
 
 ```bash
 python3 scripts/audit_draft.py paper --max-content-pages <limit>
+# when the Framework records a body-page target:
+python3 scripts/audit_draft.py paper --max-content-pages <limit> --min-content-pages <target>
 ```
 
 Use the confirmed venue content-page limit (or the generic 6-8 main-text page drafting budget, with
-8 as the upper bound). The audit uses the compiled PDF and is venue-aware: it stops counting at the
-first post-matter heading — `References` or a venue-excluded section such as `Limitations`,
-`Acknowledgments`, or `Ethics` — so a correctly placed dedicated Limitations/Ethics section does not
-consume the budget, but main text (or a limitations block left inside a body section) that reaches a
-page makes that page count. Over the limit is `BLOCKED`; if the venue rule is unconfirmed, report
-`OPEN_DECISION`. Do not rely on the Paper Framework's planned page arithmetic alone; compiled PDF
-page count is authoritative.
+8 as the upper bound). If the Paper Framework records a content-page target for a strict
+page-limited full paper, pass it as `--min-content-pages`. The audit uses the compiled PDF and is
+venue-aware: it stops counting at the first post-matter heading — `References` or a venue-excluded
+section such as `Limitations`, `Acknowledgments`, or `Ethics` — so a correctly placed dedicated
+Limitations/Ethics section does not consume the budget, but main text (or a limitations block left
+inside a body section) that reaches a page makes that page count. Over the limit is `BLOCKED`;
+under the confirmed target is also `BLOCKED` because the draft failed to use the available body
+budget. If the venue rule is unconfirmed, report `OPEN_DECISION`. Do not rely on the Paper
+Framework's planned page arithmetic alone; compiled PDF page count is authoritative.
 
 Do not mark a draft `PASS` with an unresolved page-count workaround. If the compiled PDF exceeds the
-active content-page limit, revise and recompile until the audit passes. The usual first repair is to
-move misplaced limitations prose out of the numbered body into the venue-correct Limitations home.
+active content-page limit, revise and recompile until the audit passes. If it underfills the
+confirmed target, expand primary/evidence-core sections with supported analysis, protocol detail,
+metric semantics, or result interpretation; do not pad with copied background or unsupported claims.
+The usual first overflow repair is to move misplaced limitations prose out of the numbered body into
+the venue-correct Limitations home.
 For ACL-family venues, that home is the required dedicated `\section{Limitations}` after Conclusion
 and before References, not the appendix, because the ACL-style order already excludes it from content
 pages. For venues that do not require a pre-reference Limitations section and allow appendices,
@@ -149,7 +164,9 @@ python3 ../academic-citation/scripts/audit_citations.py paper --min-citations <f
 
 When the confirmed venue is a journal, run the journal-specific element checks in
 `references/checks/journal-submission-elements.md` in addition to the venue/format
-checks above. Treat the following as `BLOCKED`:
+checks above. When data, code, source data, checkpoints, or repository identifiers
+are involved, also run `references/checks/data-code-availability.md`. Treat the
+following as `BLOCKED`:
 
 - A required mandatory statement is missing (Data Availability, Code Availability,
   Author Contributions, Competing Interests, Funding/Acknowledgments, Ethics, or

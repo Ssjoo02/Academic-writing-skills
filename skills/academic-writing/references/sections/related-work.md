@@ -7,6 +7,12 @@ citation list.
 
 ## Template
 
+List directly competing and recent baseline papers first, before broader topic grouping. These
+papers anchor the section and prevent the strongest baselines from being hidden in background.
+
+Use 2-4 focused topics by default. Merge thin topics, and move broad background that does not help
+position the technical challenge out of the main Related Work section.
+
 For each related-work group:
 
 1. Name the research line.
@@ -52,14 +58,6 @@ Choose one organization:
 Choose the organization internally based on how the paper needs to position its technical
 challenge. Do not expose template-selection notes unless the user asks for reasoning.
 
-## Required Output
-
-For Full Draft Workflow, write English LaTeX prose into the corresponding section file. Keep a
-compact `Section Plan`, `Paragraph Plan`, and `Evidence And Risk Notes` internally unless the user
-asks to see them. Every citation-dependent claim must be marked verified, not verified, partially
-supports, or does not support internally, and unresolved cases must be surfaced in `Evidence And
-Risk Notes`. Run reverse outlining and citation/claim-evidence mapping internally before returning.
-
 ## Principles
 
 - Organize by contrastive roles, not by chronology.
@@ -73,9 +71,16 @@ Risk Notes`. Run reverse outlining and citation/claim-evidence mapping internall
 - "A did X; B did Y; C did Z" paragraphs with no argument.
 - Dismissing prior work without evidence.
 - Claiming novelty before checking citation support.
+- Do not hide strongest baselines.
+- Do not make Related Work a citation dump.
+- Do emphasize the exact gap your method fills.
 
 ## Self-Check
 
 - Does each paragraph explain a difference that matters for the story?
 - Are citations verified or marked not verified?
 - Does this section make the contribution look necessary rather than isolated?
+- Are all strongest/recent competitors covered?
+- Is each topic connected to your problem setting?
+- Is your difference explained in technical terms, not marketing terms?
+- Is citation coverage complete for all core claims?

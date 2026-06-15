@@ -1,9 +1,12 @@
 # Method Principles And Templates
 
-## Section Role
+## Goal
 
-The Method section explains how the contribution works and why each design choice supports the
-paper's claims. It should be reproducible, motivated, and connected to the Method Tree.
+Write the Method section clearly by following this sequence:
+
+1. Answer key method-design questions.
+2. Draw a pipeline figure sketch.
+3. Write the method section step by step.
 
 ## Pre-Writing Questions
 
@@ -22,23 +25,21 @@ Before writing Method, answer:
    not by step. A Method section should usually have 0–4 subsections; prefer flowing prose or a
    `\paragraph{}` run-in over a numbered subsection for any block that is only one paragraph long.
    Do not emit one numbered subsection per pipeline step (no `3.1 … 3.6`).
-3. For each subsection, plan motivation, module design, and technical advantage.
+3. For each subsection, plan four parts: motivation, module design, technical advantages, and
+   evidence hook.
 4. Write module design first to build the concrete backbone.
-5. Add motivation and technical advantage.
-6. Add implementation details needed for reproduction.
+5. Add motivation, technical advantage, and evidence hook.
 
-## Method Floor Check
+## Method Completeness Check
 
-When the confirmed Paper Framework marks Method / Approach / System Design as the primary core
-section, the section must meet both its page floor and its content floor. A short section is
-acceptable only if the venue or user explicitly approved that floor in the Paper Framework.
+Every load-bearing module or design step must cover motivation, design, technical advantage, and
+evidence hook. The evidence hook names which claim, experiment, metric, analysis, or figure will
+later verify why the unit matters.
 
-The content floor is: every load-bearing module or design step must cover motivation, design,
-technical advantage, and evidence hook. In short, each core method unit needs motivation, design,
-technical advantage, and evidence hook. If a method paper's Method section is below the confirmed
-floor, or if the reader cannot reconstruct the algorithm, architecture, training/inference flow,
-protocol, or implementation-critical settings, treat the section as underdeveloped and revise before
-returning the draft.
+A method unit is underdeveloped if the reader cannot reconstruct the algorithm, architecture,
+training/inference flow, protocol, or implementation-critical settings. Treat an underdeveloped unit
+as a content defect and revise before returning. Length budgets and confirmed minimum lengths are set
+in the Paper Framework and audited by review gates; this guide owns only method content completeness.
 
 ## Pipeline Figure Sketch
 
@@ -211,14 +212,6 @@ template-selection notes unless the user asks for reasoning.
   Compression rules in `references/sections/paragraph-flow.md`.
 - **Burying the point.** Each subsection must open with its key decision or claim, not with
   background, definitions, or counts. Allocate length by importance, not by what is available.
-
-## Required Output
-
-For Full Draft Workflow, write English LaTeX prose into the corresponding section file. Keep a
-compact `Section Plan`, `Paragraph Plan`, and `Evidence And Risk Notes` internally unless the user
-asks to see them. Each method paragraph must map to a Method Tree node and include motivation,
-design, technical advantage, or implementation detail as its role. Run reverse outlining and
-claim-evidence mapping internally before returning.
 
 ## Self-Check
 

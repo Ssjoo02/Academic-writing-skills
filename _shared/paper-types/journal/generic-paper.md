@@ -22,7 +22,7 @@ Framework checkpoint; silent structural deviation is a workflow violation.
 
 This is a journal paper. Do NOT use a conference soft page budget. Take absolute length from the
 venue card and plan sections as proportions first. Prefer a complete, self-contained article over a
-compressed one. Also load `references/venues/journal-vs-conference.md`.
+compressed one. Also load `_shared/venues/journal-vs-conference.md`.
 
 ## Priority Contract
 
@@ -52,6 +52,6 @@ compressed one. Also load `references/venues/journal-vs-conference.md`.
 
 - If the contribution is clearly theory, method/scaling, systems/tool, evaluation, dataset,
   application, survey, or position, prefer that specific journal profile under
-  `references/paper-types/journal/`.
+  `_shared/paper-types/journal/`.
 - Favor completeness and thorough evidence over conference-style compression; this is a journal.
 - Keep the absolute length governed by the venue card, not by this file.

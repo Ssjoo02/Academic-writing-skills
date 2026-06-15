@@ -82,7 +82,9 @@ Load only the references needed to resolve paper structure and physical format:
 - Journal-only (when `venue_kind=journal`): `_shared/venues/journal-vs-conference.md` for drafting
   posture, and the **`academic-review`** skill's `journal-submission-elements` reference for the
   mandatory statements and display-item caps/tiers that shape the Venue Assembly Plan and the Figure
-  Plan, plus the **`academic-figure`** skill's journal figure-contract for journal-specific figure
+  Plan, the **`academic-review`** skill's `data-code-availability` reference when empirical data,
+  code, source data, repositories, accession numbers, or reproducibility statements are involved,
+  plus the **`academic-figure`** skill's journal figure-contract for journal-specific figure
   archetypes and panel logic that inform the Figure Plan's panel count and evidence hierarchy.
 
 **Template Acquisition (local-first — do not web-fetch when a preloaded template exists).** The
@@ -132,21 +134,52 @@ Build the framework in this order:
    inflate the profile's section count for convenience.
 3. **Writing Policy last**: keep only sections and claims supported by available evidence.
 
+#### Draft-stage page budget
+
+Before writing any numeric page budget, resolve the draft stage as
+`submission / camera-ready / custom / unresolved`.
+
+- **Submission**: use the venue's submission-stage content-page limit as the active bound.
+- **Camera-ready**: use the camera-ready allowance only when the user explicitly says the paper is
+  accepted, camera-ready, proceedings-final, or reviewer-response final.
+- **Custom**: use only when the user explicitly requests a non-venue page target for a local draft,
+  technical report, class project, or stress test. Label it as custom and do not call it the venue
+  limit.
+- **Unresolved**: stop at the Paper Framework gate and ask; do not create `paper/` with guessed
+  page arithmetic.
+
+Do not promote a camera-ready allowance into the submission limit. For ACL-family / ARR venues such
+as ACL, EMNLP, and NAACL, long-paper submissions normally use the submission limit, while accepted
+final versions may receive an additional content page. If a user-provided page count conflicts with
+the loaded venue card, resolve the conflict explicitly: either relabel it as `camera-ready`, relabel
+it as `custom`, or ask the user to choose. Never write "EMNLP long paper = 9 content pages" unless
+the framework also says the draft stage is camera-ready or custom.
+
 Page-budget arithmetic must be explicit. Start with the venue or generic total budget, subtract
 fixed front/back matter only when it counts toward the limit, assign a `Page budget` to each planned
 section, and ensure the total planned pages must not exceed the venue limit or generic drafting
-budget. If the draft would overflow, compress or move lower-priority material to appendix before
-creating `paper/`.
+budget. For a strict page-limited full-paper venue, the framework must also define a **content-page
+target**: normally the target equals the limit, because the first complete draft should use the
+available body budget for substantive supported content rather than stopping several pages early. If
+the target is lower than the limit, record the reason as an explicit framework tradeoff. If the draft
+would overflow, compress or move lower-priority material to appendix before creating `paper/`; if the
+draft would underfill the target, expand the primary/evidence core with supported analysis, protocol
+detail, or result interpretation before padding support sections.
 
 File format:
 
 1. **Inputs Used**: Writing Policy path, target venue, selected template, venue format summary,
    page/length budget, paper type, evidence snapshot.
-2. **Page Budget Summary**: state the numeric content-page limit as a bound value (e.g. ACL long
-   `8`, short `4`; generic fallback `8`) and exactly what is excluded from it (references always;
-   plus Limitations / Acknowledgments / Ethics for venues that exclude them). Record the planned
-   main-text total and any overflow or compression decisions. This bound is the `--max-content-pages`
-   value the final page-budget audit must run with, and it is a blocking gate, not a target.
+2. **Page Budget Summary**: state the draft stage and the numeric content-page limit as a bound
+   value. Include these fields explicitly: **Draft stage**, **Submission content-page limit**,
+   **Camera-ready allowance**, **Active content-page bound**, and **Content-page target**. For
+   example, an EMNLP/ARR long-paper submission records `Submission content-page limit: 8`, while the
+   separate `Camera-ready allowance` is `up to 9 after acceptance`; the active submission bound
+   remains `8`. State exactly what is excluded from the active bound (references always; plus
+   Limitations / Acknowledgments / Ethics for venues that exclude them). Record the planned main-text
+   total and any overflow or compression decisions. The active bound is the `--max-content-pages`
+   value; the target is the `--min-content-pages` value when the venue/framework says the draft
+   should fill the page budget. Both are blocking gates once confirmed.
 3. **Core Section Budget**: name the `Primary core section`, `Evidence core section`, and
    `Compress-first sections`; state each core section's Minimum floor and any venue-driven tradeoff.
 4. **Section Framework**: ordered section list with section name, role
@@ -167,7 +200,22 @@ File format:
    whether Limitations may be moved to an appendix if the compiled draft exceeds the page limit. When
    appendix pages count against the limit or appendices are forbidden, record that appendix movement
    is not an available compression path.
-7. **Open Decisions**: only blocking missing evidence, uncertain section choices, terminology,
+7. **Journal Submission Package Plan**: include only when `venue_kind=journal`; otherwise state
+   `n/a`. Materialize journal companion artifacts early in a table with `Item`, `Required?`,
+   `Source/status`, `Owner/reference`, and `Blocker?`. Include Data/Code Availability, Author
+   Contributions, Competing Interests, Funding/Acknowledgments, Ethics / IRB / consent, Reporting
+   Summary / checklist, Cover letter, graphical abstract / highlights / key points, source-data
+   files, and any venue-specific submission forms. Mark real repository identifiers, DOI/accession
+   status, and embargo/restriction wording as source/status facts; missing required identifiers are
+   blockers or Open Decisions, not prose to invent later.
+8. **Appendix / Supplement Plan**: list every planned appendix or supplement item, or state `none`.
+   This plan becomes `paper/appendix-plan.md` during LaTeX project setup. Each item must record
+   `Item ID`, `Type`, `Claim backed`, `Source availability`, `Fill status`, `Main-text anchor`, and
+   `Fallback`. Include appendix-only full lists, proofs, protocol details, full result matrices,
+   prompts, configurations, robustness sweeps, and qualitative example sets only when the source is
+   available or the item is explicitly omitted. Do not use appendix movement to hide main evidence
+   needed for the central claim.
+9. **Open Decisions**: only blocking missing evidence, uncertain section choices, terminology,
    figure/table choices, or user decisions.
 
 For the Figure Plan, use the **`academic-figure`** skill's figure-planning reference. Deciding whether
@@ -182,8 +230,18 @@ Optional translated output files, only when requested before generation:
 writing-policies/<paper-slug>-paper-framework.<language-code>.md
 ```
 
-Show the framework to the user for confirmation using this exact format. Do not use a
-generic dimension/content table or any other format.
+Terminal-facing Paper Framework checkpoint: mirror the user's interaction language. In a Chinese
+conversation, translate the overview headings, section summaries, Figure Plan summaries,
+Display-Item Page Budget summaries, Journal Submission Package Plan summaries, Appendix /
+Supplement summaries, decisions, blockers, and user action request into Chinese. Keep file paths,
+LaTeX commands, BibTeX/citation keys, manifest values, figure/table IDs, and machine-parsed markers
+in their original form; the saved framework artifact remains English by default unless the user
+requested a translated sibling artifact.
+
+Show the framework to the user for confirmation using this semantic structure. Do not use a generic
+dimension/content table or any other structure. The English labels below are the saved-artifact
+schema; terminal-facing labels and natural-language cell content must be translated to the user's
+interaction language when different.
 ```text
 Checkpoint: Paper Framework
 Stage result: <one sentence>
@@ -224,6 +282,22 @@ Display-Item Page Budget:
 | Fig. 1 | <single-column/double-column/supplement> | <0.25/0.5/1.0 page> | <shrink / merge / move to appendix> |
 | Tab. 1 | <single-column/double-column/supplement> | <0.25/0.5/1.0 page> | <compress columns / move full version to appendix> |
 
+Journal Submission Package Plan:
+
+| Item | Required? | Source/status | Owner/reference | Blocker? |
+|---|---|---|---|---|
+| Data/Code Availability | <yes/no/not verified> | <repository, DOI/accession, URL, embargo/restriction, or missing> | academic-review: data-code-availability.md | <yes/no/open> |
+| Reporting Summary / checklist | <yes/no/not verified> | <filled/missing/not applicable> | academic-review: journal-submission-elements.md | <yes/no/open> |
+| Cover letter | <yes/no/not verified> | <scope/significance points available or missing> | active venue card | <yes/no/open> |
+| n/a | n/a | n/a | n/a | n/a |
+
+Appendix / Supplement Plan:
+
+| Item ID | Type | Claim backed | Source availability | Fill status | Main-text anchor | Fallback |
+|---|---|---|---|---|---|---|
+| App. A | <taxonomy/proof/protocol/result matrix/...> | <claim/section/table/figure> | <source path / user supplied / missing> | <filled/partial/omitted> | <body pointer> | <compress/omit/supplement/evidence risk> |
+| none | n/a | n/a | n/a | n/a | n/a | n/a |
+
 Structure vs paper-type profile:
 - Profile: <paper-type name> → <the profile file's section table, its section column copied verbatim in order — not paraphrased>
 - Adopted: <the section list above, in order>
@@ -252,13 +326,18 @@ gate.**
 2. Is the `Main Content` cell free of numbered subsection dumps (no `3.1 … 3.6`), and is each
    section's planned subsection count within budget (0 for short sections, ≤4 for main sections)?
 3. Is the page-budget arithmetic shown explicitly and within the venue/generic limit, including both
-   prose and display-item page cost?
+   prose and display-item page cost, and does it name the draft stage, Submission content-page limit,
+   Camera-ready allowance, active content-page bound, and content-page target for the first full
+   draft?
 4. Does the plan name the Primary core section, Evidence core section, Compress-first sections, and
    Minimum floor for each core section, and do all prose budgets respect those floors?
 5. Does the Figure Plan declare a `layout` for every figure/table, does the Display-Item Page Budget
    estimate each item's main-paper page cost, and does each item map to a confirmed section?
-6. For a strict page-limited conference venue, does the plan leave a practical compression margin
+6. Does the Appendix / Supplement Plan either list every planned appendix item with `Claim backed`,
+   `Source availability`, `Fill status`, `Main-text anchor`, and `Fallback`, or explicitly state
+   `none`?
+7. For a strict page-limited conference venue, does the plan leave a practical compression margin
    rather than spending the whole limit on planned prose and floats?
-7. Are all checkpoint fields filled, including the "Structure vs paper-type profile" comparison?
+8. Are all checkpoint fields filled, including the "Structure vs paper-type profile" comparison?
 
 Gate: the user must confirm the Paper Framework before full-draft writing.

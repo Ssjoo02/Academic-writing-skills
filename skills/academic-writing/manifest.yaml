@@ -34,8 +34,9 @@ axes:
       Decide this immediately after workflow routing and before paper_type.
       Allowed values are conference and journal. Select journal only when the
       user explicitly says the target is a journal article or names a journal
-      venue/track (for example JMLR, TPAMI, TMLR, IEEE Transactions, ACM
-      Transactions, Elsevier/Springer/Wiley journal, or a "journal paper").
+      venue/track (for example JMLR, TPAMI, Nature-family, Nature
+      Communications, TMLR, IEEE Transactions, ACM Transactions,
+      Elsevier/Springer/Wiley journal, or a "journal paper").
       Default to conference otherwise.
       Do not infer journal merely from long length, IMRaD structure, survey
       style, complete experiments, or lack of a named conference. If the target
@@ -54,8 +55,9 @@ axes:
       select a modeled conference venue when the user explicitly names one;
       otherwise use generic with generic_article.tex and a soft 6-8 main-text-page
       drafting budget. For venue_kind=journal, name the modeled card (jmlr,
-      tpami) or fall back to journal (journal-generic) for any journal not
-      individually modeled, then verify its fields against the target journal.
+      tpami, nature, nature-communications) or fall back to journal
+      (journal-generic) for any journal not individually modeled, then verify
+      its fields against the target journal.
       Ask about venue at most once in the whole workflow. Do not ask before
       Writing Policy when merely unspecified; unspecified means conference +
       generic.
@@ -80,6 +82,8 @@ axes:
       jmlr: ../../_shared/venues/jmlr.md
       tpami: ../../_shared/venues/ieee-tpami.md
       ieee-tpami: ../../_shared/venues/ieee-tpami.md
+      nature: ../../_shared/venues/nature.md
+      nature-communications: ../../_shared/venues/nature-communications.md
       journal: ../../_shared/venues/journal-generic.md
     default: generic
     multi: false
@@ -152,10 +156,10 @@ references:
       path: references/sections/method.md
     - condition: "drafting or revising Experiments / Evaluation"
       path: references/sections/experiments.md
-    - condition: "drafting or revising Demo / Application"
-      path: references/sections/demo-application.md
     - condition: "drafting or revising Conclusion / Limitations"
       path: references/sections/conclusion.md
+    - condition: "drafting or revising Appendix / Supplement material"
+      path: references/sections/appendix.md
     - condition: "paragraph flow diagnosis or section-level revision"
       path: references/sections/paragraph-flow.md
 
@@ -170,6 +174,8 @@ references:
       path: references/sections/journal/introduction.md
     - condition: "Venue Kind is journal AND drafting or revising Method / System (overlay on references/sections/method.md)"
       path: references/sections/journal/method.md
+    - condition: "Venue Kind is journal AND drafting or revising Results / Experiments / Evaluation (overlay on references/sections/experiments.md)"
+      path: references/sections/journal/results.md
     - condition: "Venue Kind is journal AND drafting or revising Discussion / Conclusion (overlay on references/sections/conclusion.md)"
       path: references/sections/journal/discussion.md
 

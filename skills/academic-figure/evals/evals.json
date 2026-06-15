@@ -41,6 +41,28 @@
         {"name": "no_conference_sizing_substitution", "description": "Conference column-width sizing is not applied to the journal figure by default."}
       ],
       "files": []
+    },
+    {
+      "id": "chart-taxonomy-before-plotting",
+      "prompt": "Use these CSV files to make a grouped bar, Pareto plot, heatmap, radar chart, violin plot, density plot, and donut chart for a paper.",
+      "expected_output": "Before writing code, the assistant states each figure's core conclusion, evidence chain, chart family, statistic/interval, layout target, palette preset, label strategy, and export bundle. It uses the chart taxonomy to choose chart types and treats pie/donut charts as limited whole-part summaries rather than main comparison figures.",
+      "assertions": [
+        {"name": "core_conclusion_before_code", "description": "The assistant defines a chart-level conclusion and evidence chain before plotting."},
+        {"name": "taxonomy_covers_requested_families", "description": "The assistant routes grouped bar, Pareto, heatmap, radar, violin, density, and donut charts through explicit chart-family rules."},
+        {"name": "palette_and_label_strategy_recorded", "description": "Palette preset, labels, statistics, layout, and SVG/PDF/PNG export are chosen before rendering."}
+      ],
+      "files": []
+    },
+    {
+      "id": "pipeline-framework-defaults-to-schematic",
+      "prompt": "Draw the main pipeline/framework figure for my EMNLP method section.",
+      "expected_output": "The assistant routes the request to the schematic workflow, not the picture workflow. It records exact modules, edges, labels, and source facts, then produces or plans an editable deterministic artifact such as FigureSpec/SVG, Mermaid, or TikZ. It uses a picture renderer only if the user explicitly asks for an illustrative raster image.",
+      "assertions": [
+        {"name": "routes_to_schematic", "description": "Framework/pipeline/architecture diagrams default to deterministic schematic workflow."},
+        {"name": "not_api_by_default", "description": "The assistant does not default to image API or Picture Brief for formal technical schematics."},
+        {"name": "keeps_editable_source", "description": "The assistant keeps editable source such as FigureSpec JSON, Mermaid, TikZ, or SVG."}
+      ],
+      "files": []
     }
   ]
 }

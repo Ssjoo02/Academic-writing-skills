@@ -14,12 +14,22 @@ It is split into two layers:
 - A **static layer** at `static/closing-gates.md` — the mandatory closing sequence (Draft Completion
   Review Gate → Final Static Audits → Submission Readiness → Before-Returning Compliance Self-Check).
 - A **dynamic layer** (this file + `manifest.yaml`) plus deep references (`paper-review.md`,
-  `reviewer-risk.md`, `submission-readiness.md`, `writing-craft.md`, `journal-submission-elements.md`)
-  and the mechanical gate `scripts/audit_draft.py`.
+  `reviewer-risk.md`, `submission-readiness.md`, `writing-craft.md`,
+  `journal-submission-elements.md`, `data-code-availability.md`,
+  `high-impact-journal-review.md`) and the mechanical gate `scripts/audit_draft.py`.
 
 Cross-skill stance/integrity and the shared claim-evidence / metric-design rubrics live in
 `../../_shared/`. Review is **writing-only**: it surfaces defects and risks; it never invents
 results or strengthens unsupported claims.
+
+## Intake boundary
+
+When a complete `paper/` draft is available, run the full closing sequence below. When the user
+provides only a partial manuscript packet (PDF only, selected sections, abstract, notes, or an
+uncompiled TeX fragment), run the **Bounded Review Intake** in `references/sections/paper-review.md`
+instead: report the input scope, assessment boundary, visible evidence base, missing materials, and
+review risks. Do not run the full static-audit/readiness gate or produce a `PASS` submission-ready
+verdict until a complete local `paper/` draft can be checked.
 
 ## ⚠️ Reviewer independence
 

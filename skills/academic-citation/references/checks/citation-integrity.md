@@ -80,6 +80,8 @@ Before calling a draft citation-clean, run a local citation audit and fix every 
 - Every `references.bib` entry must be cited in the manuscript.
 - Modern sources should carry a stable DOI, URL, or arXiv ID.
 - Use full verified author metadata; no `and others`, fake team names, or placeholder titles.
+- When BibTeX has generated `paper/*.bbl`, treat it as part of the audit surface: no rendered
+  `and N others`, and no modern bibliography item without a visible DOI, URL, or arXiv marker.
 - Do not leave `% CITATION_NEEDED` in a final citation-clean draft.
 
 ## Source Verification Gate

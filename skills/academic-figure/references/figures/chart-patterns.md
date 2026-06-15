@@ -446,6 +446,214 @@ def dedicated_legend_panel(fig, subplot_spec, handles, labels,
 
 ---
 
+## Pattern: horizontal_bars(ax, labels, values, ...)
+
+Use horizontal bars for rankings, ablations, long labels, and delta contributions.
+
+```python
+def horizontal_bars(ax, labels, values, colors=None, errors=None,
+                    xlabel='', annotate=True, zero_line=False):
+    """Publication horizontal bars with optional uncertainty and value labels."""
+    values = np.asarray(values, dtype=float)
+    y = np.arange(len(labels))
+    if colors is None:
+        colors = [HERO_BLUE] * len(labels)
+    error_kw = {'elinewidth': 1.4, 'capthick': 1.4, 'capsize': 3}
+    bars = ax.barh(y, values, color=colors, edgecolor='black', linewidth=0.9,
+                   xerr=errors, error_kw=error_kw)
+    ax.set_yticks(y)
+    ax.set_yticklabels(labels)
+    ax.set_xlabel(xlabel)
+    ax.invert_yaxis()
+    if zero_line:
+        ax.axvline(0, color=NEUTRAL_MID, lw=1.0, ls='--', zorder=0)
+    if annotate:
+        span = max(values.max() - values.min(), 1e-6)
+        pad = span * 0.03
+        for bar, val in zip(bars, values):
+            ha = 'left' if val >= 0 else 'right'
+            x = val + pad if val >= 0 else val - pad
+            ax.text(x, bar.get_y() + bar.get_height() / 2,
+                    f'{val:.1f}', va='center', ha=ha, fontsize=8)
+    ax.figure.tight_layout(pad=1.2)
+```
+
+---
+
+## Pattern: stacked_bars(ax, categories, components, component_labels, ...)
+
+Use stacked bars for whole-part composition only. State totals/denominators in the caption.
+
+```python
+def stacked_bars(ax, categories, components, component_labels, colors=None,
+                 ylabel='', normalize=False, annotate_totals=True):
+    """
+    Stacked bar chart.
+
+    components: list[array] — one array per component, each length len(categories)
+    normalize: if True, convert each category to shares summing to 100
+    """
+    vals = np.vstack([np.asarray(c, dtype=float) for c in components])
+    totals = vals.sum(axis=0)
+    plot_vals = np.divide(vals, totals, out=np.zeros_like(vals), where=totals != 0) * 100 if normalize else vals
+    if colors is None:
+        colors = list(BASELINE_PALETTE[:len(component_labels)])
+    x = np.arange(len(categories))
+    bottom = np.zeros(len(categories))
+    for comp, label, color in zip(plot_vals, component_labels, colors):
+        ax.bar(x, comp, bottom=bottom, label=label, color=color,
+               edgecolor='black', linewidth=0.8)
+        bottom += comp
+    ax.set_xticks(x)
+    ax.set_xticklabels(categories)
+    ax.set_ylabel(ylabel or ('Share (%)' if normalize else 'Count'))
+    ax.legend(frameon=False, loc='upper center', bbox_to_anchor=(0.5, -0.12),
+              ncol=min(4, len(component_labels)))
+    if annotate_totals:
+        for xi, total, top in zip(x, totals, bottom):
+            ax.text(xi, top * 1.01, f'n={total:.0f}', ha='center', va='bottom', fontsize=8)
+    ax.figure.tight_layout(pad=1.2)
+```
+
+---
+
+## Pattern: scatter_with_pareto(ax, x, y, labels=None, ...)
+
+Use this for performance-cost or performance-latency tradeoffs. Always declare direction.
+
+```python
+def pareto_frontier(x, y, minimize_x=True, maximize_y=True):
+    """Return indices of non-dominated points sorted by x."""
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    idx = np.argsort(x if minimize_x else -x)
+    frontier = []
+    best = -np.inf if maximize_y else np.inf
+    for i in idx:
+        yi = y[i]
+        improves = yi > best if maximize_y else yi < best
+        if improves:
+            frontier.append(i)
+            best = yi
+    return np.asarray(frontier, dtype=int)
+
+def scatter_with_pareto(ax, x, y, labels=None, sizes=None, colors=None,
+                        xlabel='', ylabel='', minimize_x=True, maximize_y=True,
+                        annotate_frontier=True):
+    """Scatter plot with a connected Pareto frontier."""
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    if sizes is None:
+        sizes = np.full_like(x, 55.0)
+    if colors is None:
+        colors = list(PEER_PALETTE[:len(x)])
+    ax.scatter(x, y, s=sizes, c=colors, edgecolors='white', linewidths=0.8, alpha=0.9)
+    front = pareto_frontier(x, y, minimize_x=minimize_x, maximize_y=maximize_y)
+    front = front[np.argsort(x[front])]
+    ax.plot(x[front], y[front], color=NEUTRAL_DARK, lw=1.5, ls='--', zorder=2)
+    if labels is not None and annotate_frontier:
+        for i in front:
+            ax.text(x[i], y[i], f' {labels[i]}', fontsize=8, va='center')
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.figure.tight_layout(pad=1.2)
+    return front
+```
+
+---
+
+## Pattern: distribution_plot(ax, groups, labels, kind='box')
+
+Use distribution plots only when the spread/shape is part of the evidence. Record `n`, center, and
+spread definition in the caption or source-data note.
+
+```python
+def distribution_plot(ax, groups, labels, kind='box', colors=None,
+                      ylabel='', bins=18, density=True):
+    """
+    kind: 'box', 'violin', 'hist', or 'density'.
+    Density uses scipy gaussian_kde when available; fall back to a normalized histogram otherwise.
+    """
+    groups = [np.asarray(g, dtype=float) for g in groups]
+    if colors is None:
+        colors = list(PEER_PALETTE[:len(groups)])
+    if kind == 'box':
+        bp = ax.boxplot(groups, tick_labels=labels, patch_artist=True, showfliers=True)
+        for patch, color in zip(bp['boxes'], colors):
+            patch.set_facecolor(color)
+            patch.set_alpha(0.35)
+            patch.set_edgecolor('black')
+    elif kind == 'violin':
+        vp = ax.violinplot(groups, showmeans=False, showmedians=True, showextrema=False)
+        for body, color in zip(vp['bodies'], colors):
+            body.set_facecolor(color)
+            body.set_alpha(0.30)
+            body.set_edgecolor('black')
+        ax.set_xticks(np.arange(1, len(labels) + 1))
+        ax.set_xticklabels(labels)
+    elif kind == 'hist':
+        shared_bins = np.histogram_bin_edges(np.concatenate(groups), bins=bins)
+        for g, label, color in zip(groups, labels, colors):
+            ax.hist(g, bins=shared_bins, histtype='step', density=density,
+                    lw=1.8, label=label, color=color)
+        ax.legend(frameon=False)
+    elif kind == 'density':
+        xs = np.linspace(min(g.min() for g in groups), max(g.max() for g in groups), 300)
+        try:
+            from scipy.stats import gaussian_kde
+            for g, label, color in zip(groups, labels, colors):
+                ys = gaussian_kde(g)(xs)
+                ax.plot(xs, ys, color=color, lw=1.8, label=label)
+                ax.fill_between(xs, 0, ys, color=color, alpha=0.10)
+        except Exception:
+            shared_bins = np.histogram_bin_edges(np.concatenate(groups), bins=bins)
+            for g, label, color in zip(groups, labels, colors):
+                ax.hist(g, bins=shared_bins, histtype='step', density=True,
+                        lw=1.8, label=label, color=color)
+        ax.legend(frameon=False)
+    else:
+        raise ValueError("kind must be 'box', 'violin', 'hist', or 'density'")
+    ax.set_ylabel(ylabel)
+    ax.figure.tight_layout(pad=1.2)
+```
+
+---
+
+## Pattern: pie_or_donut(ax, labels, values, ...)
+
+Pie/donut charts are allowed only for one simple whole-part snapshot. Prefer stacked bars for
+comparisons across groups.
+
+```python
+def pie_or_donut(ax, labels, values, colors=None, donut=True,
+                 center_label=None, max_slices=5):
+    """Restrained pie/donut chart with sorted slices and a required total."""
+    values = np.asarray(values, dtype=float)
+    order = np.argsort(values)[::-1]
+    labels = [labels[i] for i in order]
+    values = values[order]
+    if len(values) > max_slices:
+        other = values[max_slices-1:].sum()
+        labels = labels[:max_slices-1] + ['Other']
+        values = np.concatenate([values[:max_slices-1], [other]])
+    if colors is None:
+        colors = list(BASELINE_PALETTE[:len(values)])
+    wedges, texts, autotexts = ax.pie(
+        values, labels=labels, autopct='%1.0f%%', startangle=90,
+        counterclock=False, colors=colors,
+        wedgeprops={'edgecolor': 'white', 'linewidth': 1.0},
+        textprops={'fontsize': 8}
+    )
+    if donut:
+        ax.add_artist(plt.Circle((0, 0), 0.58, color='white'))
+        if center_label is None:
+            center_label = f'n={values.sum():.0f}'
+        ax.text(0, 0, center_label, ha='center', va='center', fontsize=9, fontweight='bold')
+    ax.set_aspect('equal')
+```
+
+---
+
 ## Usage in Full Draft
 
 When generating figures for a paper:

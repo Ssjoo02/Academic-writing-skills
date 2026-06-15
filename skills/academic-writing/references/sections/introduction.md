@@ -8,16 +8,48 @@ the contribution works, and what evidence will support it.
 
 ## Introduction Logic Map
 
-Plan the section around this chain:
+Plan the section around this rhetorical chain:
 
-1. Task and application or setting.
-2. Target metric, target capability, or evaluation goal.
-3. Prior/current methods or practice.
-4. Failure case and limitation.
-5. Technical reason behind the limitation.
-6. Proposed contribution or pipeline.
-7. Why the contribution works.
-8. One brief experiment mention, then contribution bullets.
+```mermaid
+graph LR
+  L1[What task or setting are we solving]
+  L2[Which target capability, metric, or evaluation goal matters]
+  L3[Why prior methods, benchmarks, or current practice fail]
+  L4[Root technical issue behind this failure]
+  L5[Our contribution or method pipeline]
+  L6[Why the contribution works]
+  L7[Additional contributions or implications]
+
+  R1[Part 1 Task, setting, and target goal]
+  R2[Part 2 Prior failure and root technical issue]
+  R3[Part 3 Proposed contribution and why it works]
+  R4[Part 4 Contribution bullets and impact]
+  R5[Part 5 Evidence preview]
+
+  L1 --> L2
+  L2 --> L3
+  L3 --> L4
+  L4 --> L5
+  L5 --> L6
+  L6 --> L7
+
+  R1 --> R2
+  R2 --> R3
+  R3 --> R4
+  R4 --> R5
+
+  L1 --> R1
+  L2 --> R1
+  L3 --> R2
+  L4 --> R2
+  L5 --> R3
+  L6 --> R3
+  L7 --> R4
+```
+
+Evidence preview is not a results paragraph. It is at most one sentence that tells the reader what
+kind of evidence will support the contribution. Do not introduce a specific experiment, ablation,
+table, model list, or result recap in the Introduction.
 
 ## Backward-Then-Forward Planning
 
@@ -25,37 +57,40 @@ Use backward-then-forward reasoning before drafting the section.
 
 Backward:
 
-1. What contribution should reviewers remember?
-2. What benefit or new insight does it provide?
-3. What technical challenge makes the contribution necessary?
-4. Which prior-work/current-practice discussion makes the challenge natural?
+1. What technical problem do we solve, and why is there no well-established solution? (important)
+2. What are the contributions of our pipeline (e.g., a new valuable task, a new valuable metric,
+   a new technical problem, or a new technique)?
+3. What benefits do our contributions provide, why can they solve this technical challenge, and
+   what new insight do they bring? (important)
+4. How can prior methods be written to lead readers to the technical challenge we solve and to our
+   new insight?
 
 Forward:
 
-1. Introduce task or setting.
-2. Lead to the technical challenge.
-3. Present contributions that solve the challenge.
-4. Explain technical advantage and new insight.
-5. Summarize evidence in one brief mention.
+1. Introduce the paper's task.
+2. Use discussion of prior methods to lead to the technical challenge we solve.
+3. To solve this technical challenge, present the contributions we propose.
+4. Explain the technical advantages of these contributions and express our new insight. (important)
 
 ## Section Skeleton
 
-The Introduction contains exactly these five blocks, in order. Treat this skeleton as a hard
-boundary on scope and length: do not add a separate results-recap paragraph, a roadmap paragraph,
-or a difference-from-prior-work section to the Introduction by default.
+The Introduction contains these blocks in order. Treat this skeleton as a hard boundary on scope and
+length: do not add a separate results-recap paragraph, a roadmap paragraph, or a
+difference-from-prior-work section to the Introduction by default.
 
 ```latex
 \section{Introduction}
 % Task and application
 % Technical challenge for previous methods (limitation + technical reason)
 % Our pipeline for solving the challenge
-% Experiment (one brief mention)
 % Contributions
+% Evidence preview (optional one sentence, no specific experiment recap)
 ```
 
-The `% Experiment` block is **one brief sentence** that signals the evidence exists; the detailed
-numbers belong in the Experiments section. Do not repeat the same statistic in both the experiment
-mention and the contribution bullets — any given number appears at most once in the Introduction.
+For page-limited conference papers, target 5-7 paragraphs or about 550-750 words. If the
+Introduction spills beyond roughly 1.5 pages in a two-column format, compress it before expanding
+other sections. Detailed numbers belong in Experiments; any statistic that appears in the
+Introduction should be a headline claim, appear once, and directly support the central contribution.
 
 ## Part A: Introduce Task and Application
 
@@ -120,8 +155,8 @@ Template:
 
 1. State application importance.
 2. Briefly state how representative previous methods/current systems work.
-3. State their failure case.
-4. Explain the technical reason.
+3. Immediately expose the unresolved failure case + technical reason.
+4. Use this opening as a bridge to the later prior-work paragraphs.
 
 Sentence skeleton:
 
@@ -135,6 +170,8 @@ Expert note:
 
 1. It is often good if the first paragraph already states what problem you want to solve, instead of requiring several paragraphs of prior work before the challenge appears.
 2. This style needs the right conditions and is less common than Version 1–3.
+3. Typical Version 4 flow: Part 1 (task + application and directly expose challenge via previous methods 1) -> Part 2 (previous methods 2 try to solve it but still fail) -> Part 3 (our method).
+4. More common general flow: Part 1 (task + application) -> Part 2 (previous methods 1 + limitation) -> Part 3 (previous methods 2 + limitation; here the target challenge emerges) -> Part 4 (our method).
 
 ## Part B: Introduce Technical Challenge (Very Important)
 
@@ -143,6 +180,12 @@ Purpose:
 1. Discuss around the exact technical challenge we solved.
 2. Build reader curiosity about how to solve this challenge.
 3. Make motivation/benefit of our method clear.
+
+Key logic before writing (faithful translation):
+
+1. First make clear the logic for "leading to the technical challenge we solved".
+2. For existing tasks: identify which recent methods have this challenge, why those methods exist, and optionally what earlier challenge they were trying to solve.
+3. For novel tasks: at minimum, define the technical challenge solved by our pipeline.
 
 Important warning:
 
@@ -201,10 +244,10 @@ into concrete points.
 
 Template:
 
-1. State the goal.
-2. Say the problem is challenging for several reasons.
-3. Use separate challenge points such as first, second, and finally.
-4. For each point, state observable difficulty and technical reason.
+1. State the goal and explain that the problem is challenging for N reasons.
+2. Use `First/Second/Finally` to separate independent challenge points.
+3. For each point, state the observable limitation and the technical reason.
+4. End with a transition to your pipeline.
 
 Sentence skeleton:
 
@@ -217,6 +260,21 @@ Matching example: `references/sections/examples/introduction/technical-challenge
 
 ## Part C: Introduce Our Pipeline for Solving the Challenge
 
+Key questions before writing:
+
+### For existing tasks
+
+1. What technical challenge does our pipeline solve?
+2. What is our technical contribution?
+3. Why can our method work in essence?
+4. What benefits does our method have over previous methods?
+
+### For novel tasks
+
+1. What technical challenge does our pipeline solve?
+2. What is our technical contribution?
+3. Why can our method work in essence?
+
 ### Pipeline Version 1 (one contribution, multiple advantages)
 
 Use when there is one contribution with multiple advantages and a teaser figure.
@@ -226,9 +284,8 @@ Template:
 1. Introduce the framework/representation/system for the task.
 2. Point to the teaser or basic-idea figure.
 3. State the key novelty in one readable sentence.
-4. Briefly explain how it works.
-5. State advantage 1.
-6. State advantage 2.
+4. Explain concrete implementation steps (`Specifically, ...`).
+5. State multiple advantages (`In contrast ...`, `Another advantage ...`).
 
 Sentence skeleton:
 
@@ -247,12 +304,11 @@ Use when there are two contributions.
 
 Template:
 
-1. Introduce the framework or pipeline.
-2. State contribution 1 and its core novelty.
-3. Explain the basic idea with a figure if useful.
-4. Describe contribution 1 concretely enough to be understood.
-5. State the technical challenge that remains.
-6. Introduce contribution 2 as the answer to that challenge.
+1. Introduce framework and key novelty sentence.
+2. Point to teaser figure.
+3. Explain contribution 1 and its advantage.
+4. Introduce a remaining challenge.
+5. Explain contribution 2 as the response to that challenge.
 
 Sentence skeleton:
 
@@ -272,11 +328,11 @@ Use when the contribution is a new module added to a prior pipeline.
 
 Template:
 
-1. Name the prior-style pipeline.
-2. State the new module.
-3. Explain why the existing pipeline lacks the capability.
-4. Describe how the module operates.
-5. Explain why the module improves the relevant metric or behavior.
+1. Start from prior pipeline setup.
+2. Introduce one new module as key innovation.
+3. Provide an observation that motivates the module design.
+4. Explain the module mechanism.
+5. Compare against generic alternatives and state why it is better.
 
 Sentence skeleton:
 
@@ -330,7 +386,7 @@ turns the contribution list into a dense wall. A bullet is a claim, not a compon
 
 - One claim sentence per contribution.
 - At most one short evidence or section pointer.
-- No repeated numbers (any statistic already used in the experiment mention stays out of the bullets).
+- No repeated numbers; if a statistic already appears in the evidence preview, leave it out of the bullets.
 
 Positioning against the closest prior work belongs in Related Work, not in a dedicated Introduction
 section. A roadmap paragraph is not part of the default Introduction; add one only when the venue or
@@ -352,16 +408,10 @@ Pipeline version internally. If the paper is a benchmark or new setting, conside
 Version 3 and Technical-Challenge Version 3 before using existing-task templates. Do not expose
 template-selection notes unless the user asks for reasoning.
 
-## Required Output
-
-For Full Draft Workflow, write English LaTeX prose into the corresponding section file, following
-the five-block Section Skeleton above. Run reverse outlining and claim-evidence mapping internally
-before returning; do not expose internal plans unless the user asks.
-
 ## Quality Checklist
 
 1. Does the first sentence of each paragraph state its message?
 2. Does each paragraph carry one message only?
 3. Are technical challenge, technical reason, and solved mechanism all explicit?
-4. Are claims in Introduction aligned with experiment evidence?
+4. Are claims in Introduction aligned with available evidence without becoming a results recap?
 5. Is terminology stable across all sections?

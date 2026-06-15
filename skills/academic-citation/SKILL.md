@@ -13,31 +13,34 @@ needs citation support.
 It is split into two layers:
 
 - A **static layer** at `static/citation-workflow.md` — when to search, the citation/bibliography
-  integrity rules, and how to run the blocking audit.
+  integrity rules, the evidence ledger, the static-audit boundary, and how to run the blocking audit.
 - A **dynamic layer** (this file + `manifest.yaml`) plus the deep reference
-  `references/checks/citation-integrity.md` and the mechanical gate `scripts/audit_citations.py`.
+  `references/search/source-routing.md`, `references/checks/citation-integrity.md`, and the
+  mechanical gate `scripts/audit_citations.py`.
 
 Cross-skill stance and integrity rules live in `../../_shared/core/`. Never fabricate a citation —
 weaken or mark the claim instead.
 
 ## ⚠️ Integrity
 
-**Do not generate BibTeX from memory.** Every entry must come from a trusted source (DBLP, CrossRef,
-Semantic Scholar, arXiv, publisher page) or the user's verified `.bib`. Complete author lists and a
-stable identifier (DOI/URL/arXiv) are required. If reliable support is not found, weaken or remove
-the claim, or leave `% CITATION_NEEDED: <reason>` — never invent a source. Mirror the user's
-interaction language (`../../_shared/core/stance.md`).
+**Do not generate BibTeX from memory.** Use verified project sources or live lookup; if reliable
+support is not found, weaken/remove the claim or leave `% CITATION_NEEDED: <reason>`. Do not copy the detailed BibTeX rules into this router; they live in `static/citation-workflow.md` and `references/checks/citation-integrity.md`. Mirror the user's interaction language (`../../_shared/core/stance.md`).
 
 ## Routing protocol
 
 1. **Load the core layer.** Read `manifest.yaml`, the `always_load` file
    (`../../_shared/core/stance.md`), and `static/citation-workflow.md`.
-2. **Decide the task:** targeted search for missing support, verification of existing entries, or a
-   full bibliography audit.
-3. **For search/verify**, open `references/checks/citation-integrity.md` and run a targeted live
-   lookup before writing any final citation; log added/changed citations and their support judgment to
+2. **Select the workflow axis** from `manifest.yaml`:
+   - `search` — find support for a concrete claim or missing citation.
+   - `verify` — check an existing citation, BibTeX entry, or citation context.
+   - `audit` — run the blocking static bibliography audit.
+   Combined requests may load more than one workflow value.
+3. **Source routing.** For `search` or metadata-heavy `verify`, load
+   `references/search/source-routing.md` before lookup so source choice and fallback are explicit.
+4. **Claim support.** For search/verify, open `references/checks/citation-integrity.md`, run targeted
+   live lookup before writing any final citation, and log added/changed citations to
    `paper/citation-evidence.md`.
-4. **For the audit (blocking gate)**, run `scripts/audit_citations.py` against the paper directory and
+5. **Static audit.** For `audit`, run `scripts/audit_citations.py` against the paper directory and
    fix every error in `references.bib` until it reports `PASS`. The script is path-agnostic:
 
    ```bash
@@ -50,3 +53,5 @@ interaction language (`../../_shared/core/stance.md`).
 - Citation search and bibliography integrity are a self-contained, frequently standalone task, so
   they live in their own skill with the audit script alongside.
 - The hub and the `academic-review` closing gates invoke this skill rather than duplicating its rules.
+- The router stays short on purpose; update the workflow, source-routing, integrity reference, or
+  audit script rather than expanding this file.

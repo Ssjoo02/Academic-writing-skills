@@ -2,6 +2,24 @@
 
 Use this file with any section-specific guide when drafting or revising prose.
 
+## What Flow Means
+
+"Does my writing flow?", "does this make sense?", and "can readers understand this?" are checks for
+clarity, coherence, and conciseness. Treat flow as the reader's ability to follow the paper's train
+of thought without needing the author's private context.
+
+## Reader Perspective Check
+
+Read the draft as an external reader who is not familiar with the topic, not as the author who built
+the work. Ask:
+
+1. Is the vocabulary understandable for the target research audience?
+2. Do body paragraphs connect back to the section thesis, and is the connection easy to see?
+3. Could someone outside the immediate project understand what the paragraph is trying to say?
+
+If the author starts losing sight of the train of thought, assume readers will be confused and
+revise the paragraph order, topic sentence, or support.
+
 ## One Paragraph, One Message
 
 Each paragraph should have one clear message: one paragraph, one message. The first sentence should usually state the paragraph
@@ -95,6 +113,13 @@ to the contribution or previous section. These markers act as re-entry points fo
 and reviewers. Example: "Having established the benchmark design, we now evaluate each baseline
 against the three criteria defined in §2."
 
+## Headings And Sections As Flow Check
+
+When a complete outline is hard to produce, use temporary sections and subsections with headings as
+a drafting and revision diagnostic. Headings expose the main parts of the paper, show how those
+parts work together, and tell the reader what each part is about. Keep only headings that help the
+final paper's argument; remove scaffolding headings that were useful only during revision.
+
 ## Sentence-To-Sentence Flow
 
 Every sentence should connect to the previous sentence through one of these relations:
@@ -108,17 +133,35 @@ Every sentence should connect to the previous sentence through one of these rela
 
 If the relation is unclear, revise the transition or split the paragraph.
 
+## Transition Cues
+
+Use transition cues when the logical relation between sentences or paragraphs is not already clear.
+Do not stuff transitions into every sentence; choose the cue that names the actual relation:
+
+| Relation | Useful cues |
+|---|---|
+| cause and effect | accordingly, as a result, because, consequently, hence, so, then, therefore, thus |
+| comparison | also, in the same way, likewise, similarly |
+| contrast or exception | although, but, even though, however, in contrast, instead, nevertheless, nonetheless, on the contrary, on the one hand ... on the other hand, still, yet |
+| example | even, for example, for instance, indeed, in fact, of course, such as |
+| place or position | above, adjacent to, below, beyond, finally, furthermore, last, moreover, next, too |
+| time | after, as soon as, at first, at the same time, before, eventually, finally, immediately, later, meanwhile, next, simultaneously, so far, soon, then, thereafter |
+| summary or conclusion | as a result, as we have seen, finally, in a word, in any event, in brief, in conclusion, in other words, in short, in the end, in a final analysis, on the whole, therefore, thus, to summarize |
+
 ## Reverse Outline Check
 
 After drafting a section, write:
 
-1. section thesis,
+1. section thesis or thesis statement,
 2. each paragraph topic sentence,
-3. evidence or explanation under each paragraph,
+3. main points of evidence or explanation under each paragraph,
 4. evidence mapping from paragraph to source or experiment,
 5. mapping from paragraph to section thesis.
 
-Remove or revise paragraphs that do not map cleanly.
+Check that every topic sentence clearly relates to the section thesis and that every point of
+evidence or explanation supports the paragraph topic. If a paragraph does not map cleanly, revise it or remove it.
+If the reverse outline is hard to create, the section thesis, topic sentences, or supporting points
+are probably unclear.
 
 ## During Revision
 

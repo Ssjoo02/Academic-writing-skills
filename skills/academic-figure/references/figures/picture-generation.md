@@ -1,9 +1,9 @@
 # Picture Generation
 
-Use this reference when the confirmed Figure Plan contains a non-data picture:
+Use this reference when the confirmed Figure Plan contains a picture-style figure:
 teaser, overview illustration, conceptual method picture, qualitative visual
-summary, paper-ready raster illustration, or a generated architecture-style
-picture that is not better handled by deterministic FigureSpec.
+summary, paper-ready raster illustration, screenshot composite, or an explicitly
+requested AI-generated concept picture.
 
 ## Boundary
 
@@ -13,14 +13,15 @@ datasets, results, or labels. Every visible element must come from the
 confirmed Writing Policy, confirmed Paper Framework, or concrete workspace
 source files.
 
-This route now covers **both** conceptual teasers **and** pipeline / architecture
-/ workflow concept figures, because the goal is a polished *illustrative* figure
-(devices, UI panels, icons, actors, a scene), not a flowchart of rounded
-rectangles. The image model may render the labels directly in the image (see the
-next section); the labels must then be verified. Reserve a deterministic node-edge
-diagram (FigureSpec / TikZ) only when the user explicitly asks for an editable
-schematic, or when the figure is genuinely a formal graph/state machine where a
-clean schematic reads better than an illustration.
+This route is for polished *illustrative* figures (devices, UI panels, icons,
+actors, a scene), not formal framework or pipeline schematics. Formal pipeline,
+architecture, workflow, taxonomy, and system-overview diagrams default to
+`schematic-design.md` and `workflows/schematic.md`. Use this picture route for
+such content only when the user explicitly wants an illustrative raster rendering
+rather than an editable technical schematic. The image model may render labels
+directly in the image; every visible label must then be verified.
+
+Formal pipeline diagrams default to `schematic-design.md`.
 
 ## Text In The Image Is Allowed, But Must Be Verified (critical)
 
@@ -111,7 +112,7 @@ The image model emits a fixed canvas (often 16:9, e.g. 1376×768). Forcing
 or pipeline banner — and if the scene only occupies a central strip, the baked-in
 empty top/bottom bands read as excessive vertical margin. Control this:
 
-- **Prompt for the right shape.** For a double-column teaser/pipeline **banner**,
+- **Prompt for the right shape.** For a double-column teaser or method-illustration **banner**,
   ask for a **wide, short composition that fills the whole canvas edge to edge**
   (target aspect roughly `3:1` to `4:1`, so at `\textwidth` the height is ~4.5–6
   cm). For a single-column figure target roughly `1.6:1` to `2:1`. State "fill the
@@ -127,14 +128,22 @@ empty top/bottom bands read as excessive vertical margin. Control this:
   `left bottom right top` in **bigpoints**; read the values off the PNG). Do not
   leave a thin content strip floating in a tall empty box.
 
-## Required Dual Output
+## Required Output
 
-Always create both planning artifacts before considering the picture complete:
+Always create the planning artifact and both rendered formats before considering
+the picture complete:
 
 ```text
 paper/figures/prompts/<figure-id>.md
 paper/figures/<figure-id>.png
+paper/figures/<figure-id>.pdf
 ```
+
+The PNG is the source raster returned by the image renderer and is the easiest
+artifact to inspect for label spelling and visual defects. The PDF is the
+paper-facing wrapper used by LaTeX/submission packages. This PDF is still a
+raster illustration, not a vectorized reconstruction; if the figure must be
+editable/vector, route it to schematic or plot instead.
 
 Do not leave a planned picture blank. If the user does not provide an external
 picture API, the current executing agent must draw the picture from the Picture
@@ -183,7 +192,7 @@ Use this file shape:
 ## Direct Image Prompt
 <A single clean paragraph describing the scene, with the exact label strings woven
 in naturally and a request for clean, legible, correctly spelled sans-serif text.
-No rubric headers.>
+No rubric headers. Include the visual style requirements below.>
 
 ## Label Verification Plan
 - Exact labels that must appear, spelled correctly: ...
@@ -198,6 +207,7 @@ No rubric headers.>
 - Preferred renderer:
 - Renderer status:
 - Output path:
+- PDF output path:
 - API prompt source: use the exact `Direct Image Prompt` block above
 - Review notes:
 ```
@@ -214,25 +224,34 @@ labels that should appear, spelled correctly. Quality guardrails:
   by clean arrows. **Do not ask for "rounded rectangles", "boxes in a row", or a
   "flat box-and-arrow flowchart"**; that is exactly the look the user rejected.
 - **Academic aesthetic**: flat vector illustration, clean lines, minimalist,
-  generous but balanced whitespace (no large empty bands; fill the canvas evenly).
-- **Restrained color**: soft professional tones, a small consistent palette; no
+  generous but balanced whitespace (no large empty bands; fill the canvas evenly),
+  similar in restraint and clarity to figures in DeepMind or OpenAI papers.
+- **Layout**: use an organized flow suited to the content — left-to-right,
+  top-to-bottom, circular, or another clear structure — and group related
+  components logically.
+- **Restrained color**: professional pastel tones on a white background; no
   oversaturated colors.
 - **Text in the image**: name the exact labels to render and ask for *"clean,
   legible, correctly spelled sans-serif labels"*. Keep labels few and short (a word
   or two each) — short strings are far less likely to be misspelled than sentences.
+  Render only the exact strings in the allowed label list, with identical spelling
+  and capitalization. Do not draw example words, aliases, or near-spellings. Key
+  method labels or equations mentioned in the methodology (for example, "Encoder",
+  "Loss", or "Transformer") must appear only when they are exact allowed labels.
   After rendering, verify every word (see the Review Gate). If a label keeps coming
   out garbled, generate that region text-free and add the label with the overlay
   fallback.
 - **Avoid**: photorealism, messy sketch lines, heavy drop shadows, rainbow
-  gradients, 3D bevels, glow effects, and long sentences baked into the image.
+  gradients, 3D bevels, 3D shading artifacts, glow effects, unreadable text, and
+  long sentences baked into the image.
 
 The rest — palette, exact layout, icon choice — is decided per figure from the
 Evidence Boundary and Visual Plan. Do not copy a fixed style string into every
 prompt.
 
-### Example Direct Image Prompt (pipeline, illustrative, with labels)
+### Example Direct Image Prompt (illustrative method banner, with labels)
 
-> A clean flat vector academic illustration of a left-to-right process for
+> A clean flat vector academic illustration of a left-to-right method story for
 > building a mobile-app safety benchmark. Six evenly spaced circular icon
 > medallions in a single horizontal row, equal spacing, connected by thin clean
 > right-pointing arrows: a checklist clipboard, a smartphone showing an app
@@ -240,24 +259,25 @@ prompt.
 > stack of Android emulator phone frames, and a padlocked archive box. Below each
 > medallion place one short, correctly spelled sans-serif caption, in order:
 > "MobileWorld", "Injection", "Taxonomy", "Evaluation", "ASR / TCR". Soft
-> professional palette of blue, teal, amber, and slate on a white background,
+> professional pastel palette of blue, teal, amber, and slate on a white background,
 > minimalist. Compose as a wide, short banner (roughly 3:1) that fills the entire
 > frame edge to edge, with no empty top or bottom bands and no wide blank margins.
-> Render only these five short labels — clean and legible — and no other text.
+> Render only these five short labels — clean and legible — and no other text. No
+> photorealistic photos, messy sketches, unreadable text, or 3D shading artifacts.
 
 ## Image Renderer Preference
 
 Resolve the picture renderer at the beginning of the workflow or as soon as the
 user provides the preference:
 
-1. If the user explicitly configures `GPT-image2`, use that picture API after
-   the Picture Brief is written.
-2. If the user explicitly configures `Gemini`, use the Gemini-compatible image
-   API after the Picture Brief is written.
-3. If the user configures another image renderer, use that renderer only for
-   picture figures.
-4. If the user does not provide a picture API, the current executing agent draws
-   the picture from the brief.
+1. If `GEMINI_API_KEY` is present in the process environment, record a Gemini-compatible route.
+2. Otherwise, if `OPENAI_API_KEY` is present, record a GPT-image-compatible route.
+3. If a local Codex image bridge or another renderer is explicitly available, record that route.
+4. If no picture renderer is available, use the current-agent fallback.
+
+Use standard provider environment variables only. Do not introduce project-specific picture env
+prefixes. If an environment variable is exported after the MCP host starts, restart the host before
+expecting route detection to change.
 
 This preference applies only to non-data pictures. Bar charts, line charts,
 radar charts, heatmaps, scatter plots, and tables are generated directly by the
@@ -265,10 +285,61 @@ current agent from data.
 
 ## Renderer Route
 
-After writing the Picture Brief, generate the picture. For every renderer, use
-the exact `Direct Image Prompt` block as the image prompt. Do not rewrite,
-shorten, translate, or embellish it for the API call unless the user explicitly
-asks for a different image language or renderer-specific syntax.
+After writing the Picture Brief, render the picture outside `paper-figure`.
+`paper-figure` only writes the brief and records the route; it does not call
+Gemini, OpenAI, Codex image bridge, or any other image API. Prefer the bundled
+`scripts/render_picture_api.py` for Gemini/OpenAI-compatible APIs:
+
+```bash
+python3 skills/academic-figure/scripts/render_picture_api.py \
+  --brief paper/figures/prompts/<figure-id>.md \
+  --out paper/figures/<figure-id>.png
+```
+
+This writes `paper/figures/<figure-id>.png` and, by default, a sibling
+`paper/figures/<figure-id>.pdf`. Use `--pdf-out <path>` to choose another PDF
+path or `--no-pdf` only when the caller explicitly wants PNG-only output.
+
+For a teaser, overview, or method-illustration banner where the model returns a
+square canvas or excessive whitespace, render with lightweight postprocessing:
+
+```bash
+python3 skills/academic-figure/scripts/render_picture_api.py \
+  --brief paper/figures/prompts/<figure-id>.md \
+  --out paper/figures/<figure-id>.png \
+  --trim-whitespace \
+  --pad-aspect 3:1
+```
+
+Use `--pad-aspect 1.8:1` or `--pad-aspect 2:1` for a single-column picture when
+the content is not meant to be a wide double-column banner.
+
+If the picture is visually good but the image model misspells a short label, do
+not accept the raster text. For a simple horizontal banner, re-render with exact
+deterministic label overlay from the Picture Brief:
+
+```bash
+python3 skills/academic-figure/scripts/render_picture_api.py \
+  --brief paper/figures/prompts/<figure-id>.md \
+  --out paper/figures/<figure-id>.png \
+  --trim-whitespace \
+  --pad-aspect 3:1 \
+  --overlay-labels-from-brief \
+  --overlay-layout horizontal-bottom
+```
+
+This leaves the API responsible for the illustration style and uses local text
+rendering only to enforce exact paper terminology. For non-horizontal layouts,
+use the TikZ overlay fallback plan instead of guessing label positions.
+
+If a custom relay is blocked by the host's global HTTP proxy, set
+`IMAGE_API_NO_PROXY=1` for this script invocation so the renderer connects
+directly to `GEMINI_BASE_URL` / `OPENAI_BASE_URL`.
+
+For every renderer, use the exact `Direct Image Prompt` block as the image
+prompt. Do not rewrite, shorten, translate, or embellish it for the API call
+unless the user explicitly asks for a different image language or
+renderer-specific syntax.
 
 ### Gemini API
 
@@ -314,11 +385,17 @@ curl -s -X POST "$URL" \
 # Response: data[0].b64_json or data[0].url
 ```
 
+### Codex Image Bridge
+
+Detected only when the host has a local Codex image bridge registered. This route uses the signed-in
+Codex app/server path rather than `GEMINI_API_KEY` or `OPENAI_API_KEY`. Pass the exact Direct Image
+Prompt to the bridge and poll its status tool until an output path is returned.
+
 ### Current Agent Fallback
 
-If neither `GEMINI_API_KEY` nor `OPENAI_API_KEY` is set, the current executing
-agent draws the picture from the Direct Image Prompt. A lower-fidelity but
-accurate paper-safe picture is better than an empty figure slot.
+If no Gemini/OpenAI/Codex-bridge renderer is available, the current executing agent draws the
+picture from the Direct Image Prompt. A lower-fidelity but accurate paper-safe picture is better
+than an empty figure slot.
 
 ## Review Gate
 

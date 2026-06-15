@@ -11,9 +11,15 @@ load the venue-specific sizing file:
 - Conference: `references/figures/conference/figure-sizing.md`
 - Journal: `references/figures/journal/figure-sizing.md`
 
+For chart-family selection across bar, grouped bar, stacked bar, line, scatter, Pareto, radar,
+heatmap, box, histogram, violin, density, pie, and donut plots, load
+`references/figures/chart-taxonomy.md` before writing plotting code. This file keeps the core style
+rules; the taxonomy decides which visual form, palette preset, label strategy, and statistics note
+fit the claim.
+
 ## Backend Gate
 
-Python is the default plotting backend. Python (matplotlib/seaborn) is the default plotting backend. If the user prefers
+Python (matplotlib/seaborn) is the default plotting backend. If the user prefers
 R (ggplot2/patchwork), they must explicitly request it before any plot is
 generated. Once a backend is selected, use it exclusively for all plotting,
 previewing, and exporting. Do not cross-render with the other language. If the
@@ -49,6 +55,14 @@ DPI guide (PNG only): 300 standard, 600 for dense bar panels with many methods.
 Do not create shared style modules, scripts directories, derived data folders, or
 audit files by default. Create extra reproducibility packaging only when the user
 requests it or when a complex result figure cannot be regenerated otherwise.
+
+### Final-Inclusion Legibility
+
+The venue sizing file decides column span and `figsize`, but the final included
+artifact must still be readable at its LaTeX width. No text element may render
+below 6 pt after insertion; labels below 7 pt are allowed only for secondary
+tick labels or crowded legends. When in doubt, inspect the PNG/PDF at the final
+paper scale, not at an enlarged viewer zoom.
 
 ## Python Style Contract
 
@@ -487,48 +501,3 @@ Each chart generation pass must:
 4. fail loudly if expected columns or metrics are missing,
 5. avoid network calls and experiment execution unless the user explicitly asks,
 6. insert the chart into the LaTeX section selected by the Paper Framework.
-
-## Table Contract
-
-For result tables, prefer LaTeX `booktabs` style. Record metric direction,
-consistent precision, grouping logic, and the target layout width. Do not
-convert a table into a plot unless the visual comparison adds real value.
-
-### LaTeX Table Toolbox
-
-When a generated paper contains tables beyond a tiny 2-3 column numeric table,
-ensure the LaTeX preamble includes:
-
-```tex
-\usepackage{array}
-\usepackage{tabularx}
-\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
-\newcolumntype{Z}{>{\centering\arraybackslash}X}
-```
-
-Use `tabularx` for long labels, prose columns, or mixed numeric/text tables:
-
-```tex
-\begin{tabularx}{\linewidth}{@{}lccY@{}}
-```
-
-For double-column tables, use `table*` and `\textwidth`:
-
-```tex
-\begin{table*}[t]
-\centering
-\small
-\begin{tabularx}{\textwidth}{@{}lccccY@{}}
-...
-\end{tabularx}
-\end{table*}
-```
-
-Do not place a prose-heavy table in plain `tabular` with only `l`, `c`, or `r`
-columns. LaTeX will not wrap those cells, and the table can cross margins or
-neighboring columns without a useful compile error.
-
-Use `\resizebox{\linewidth}{!}{...}` only for numeric tables with short cell
-contents after confirming the scaled text remains readable. Prefer splitting a
-table, using `table*`, or moving complete matrices to supplementary material
-over shrinking prose-heavy tables.

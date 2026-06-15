@@ -69,7 +69,9 @@ This includes clarification questions, checkpoint summaries, status updates, pol
 rationale, self-review notes, and warnings. If the user writes in Chinese (with or
 without English technical terms), the agent MUST respond in Chinese. File paths,
 LaTeX commands, BibTeX keys, and code remain in their original language. Paper prose
-remains English by default. This rule is not overridden by any other policy.
+remains English by default. Terminal-facing checkpoint summaries follow the user's
+interaction language even when the saved Writing Policy / Paper Framework artifact is
+English by default. This rule is not overridden by any other policy.
 
 ## ⚠️ Bundled Venue Templates — Local First, Do Not Web-Fetch
 

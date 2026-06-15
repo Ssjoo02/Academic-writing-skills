@@ -10,7 +10,7 @@ those claims, and what must stay bounded.
 determined from the workspace evidence, the agent MUST stop and ask the user. Guessing paper
 identity, core story, claims, key terminology, disclosure boundary, or venue produces false
 contracts that cascade into wrong drafts. When in doubt: **stop, ask, wait for explicit user
-response, then proceed.** The full rule is in `static/core/gates.md`.
+response, then proceed.** The full rule is in `_shared/core/gates.md`.
 
 ## The Seven-Point Contract
 

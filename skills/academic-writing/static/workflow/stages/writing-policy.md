@@ -38,7 +38,10 @@ File format:
    source traces for facts used in the paper contract.
 2. **Paper Identity**: venue kind, target venue, paper type, manifest-mapped paper type profile
    path when available, intended reader, core research question, and venue/template constraints if
-   already known.
+   already known. Do not encode numeric page counts in `Target venue`; `EMNLP long paper`, `ICLR
+   submission`, or `journal-generic / target journal TBD` are venue identities, while `8 pages`, `9
+   pages`, `camera-ready`, and other length/stage choices are physical-format inputs for the Paper
+   Framework.
 3. **Core Story**: problem, failure case or motivating gap, technical challenge, insight,
    proposed method/benchmark/system/study, one-sentence contribution, and final takeaway.
 4. **Audit Findings**: the result of the Workspace Logic And Evidence Audit — a compact table with
@@ -64,6 +67,9 @@ File format:
    `audit_draft.py` disclosure check reads — see that script's header in the `academic-review` skill)
    so the static gate can enforce them mechanically.
 8. **Assets And Constraints**: only visible assets or constraints that affect drafting.
+   If the user mentions a page count or draft stage, record it here only as a Framework input with
+   status `submission / camera-ready / custom / unresolved`; do not convert it into a venue fact or a
+   confirmed page budget in the Writing Policy.
 9. **Open Decisions**: only unresolved decisions that can change the paper identity, central claim,
    evidence boundary, key terminology, disclosure/naming boundary, figure/table plan, or
    venue/template choice. **Do NOT raise page/length budgets, per-section length, section page
@@ -130,6 +136,7 @@ gate.** Do not skip a field by leaving it blank.
 9. Did I keep all physical-structure decisions out of the Writing Policy — no page/length budget,
    per-section length, section page allocation, figure/table count, or display-item budget in the
    Open Decisions, the checkpoint summary, or the confirmation question? (These belong to Paper
-   Framework.)
+   Framework.) Did I also keep `Target venue` free of numeric page counts, and if the user supplied a
+   page count, did I mark it only as a `submission / camera-ready / custom` Framework input?
 
 Gate: the user must confirm the Writing Policy before Paper Framework generation.

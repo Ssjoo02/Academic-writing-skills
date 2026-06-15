@@ -35,11 +35,11 @@ things:
 - It changes which length/format/process fields matter (page limits and anonymity for conferences;
   manuscript-type length, blinding, revision cycle, and supplementary handling for journals).
 - It selects the paper-type family. When `Venue Kind` is `journal`, choose the paper type from the
-  journal set under `references/paper-types/journal/` (manifest `paper_type` values prefixed
+  journal set under `_shared/paper-types/journal/` (manifest `paper_type` values prefixed
   `journal-`). When it is `conference`, use the conference paper-type files at the top level of
-  `references/paper-types/`.
+  `_shared/paper-types/`.
 
-For journals, also load `references/venues/journal-vs-conference.md` for the drafting-posture
+For journals, also load `_shared/venues/journal-vs-conference.md` for the drafting-posture
 differences (complete story, more thorough evaluation, written to survive multi-round review,
 non-anonymous self-citation, supplementary material). Do not apply a conference page budget to a
 journal draft.
@@ -127,4 +127,6 @@ write `not verified`.
 |---|---|---|
 | JMLR | `jmlr.md` | machine learning journal articles (theory, method, application) and OSS/MLOSS tool papers; single column, no hard page limit |
 | IEEE TPAMI | `ieee-tpami.md` | pattern analysis, machine intelligence, computer vision; double column, Regular/Survey/Short types |
+| Nature | `nature.md` | Nature or close Nature-family broad-interest research articles; verify current caps and reporting rules before submission |
+| Nature Communications | `nature-communications.md` | Nature Communications Articles / Brief Communications; Methods-in-cap and display-item planning are early blockers |
 | Generic journal | `journal-generic.md` | any journal not individually modeled (TMLR, IEEE TNNLS/TIP/TMM, ACM TODS/TOIS, Elsevier/Springer/Wiley); confirm all fields against the target journal |

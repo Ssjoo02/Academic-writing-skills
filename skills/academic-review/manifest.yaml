@@ -34,6 +34,10 @@ references:
       path: references/checks/submission-readiness.md
     - condition: "Venue Kind is journal: mandatory statements, display-item caps/tiers, methods placement, word/length budget"
       path: references/checks/journal-submission-elements.md
+    - condition: "Venue Kind is journal and the manuscript has data/code/source-data/reproducibility availability obligations"
+      path: references/checks/data-code-availability.md
+    - condition: "Nature-family, Science-family, Cell-family, or other broad-audience high-impact journal target"
+      path: references/checks/high-impact-journal-review.md
     - condition: "claim-evidence audit or high-risk central claim (shared rubric)"
       path: ../../_shared/checks/claim-evidence.md
     - condition: "metric design audit for experiments (shared rubric)"

@@ -1,12 +1,11 @@
 ---
-name: academic-writing
-version: 3.0.0
+name: academic-writing-skills
 description: Use when planning, drafting, revising, or reviewing a research paper with venue, paper type, metric, claim-evidence, citation, reviewer-risk, or style constraints. Also trigger on general paper-writing requests even without these terms, such as writing a paper from scratch, drafting or restructuring a section, building a paper outline/framework, polishing or compressing prose, making a paper figure or table, finding or auditing citations, or a pre-submission review — and Chinese phrasings like 学术写作、科研写作、论文写作、写论文、写paper、帮我写论文、搭论文框架、起草论文、润色论文、改论文、写引言/摘要/方法/实验/相关工作/结论、论文配图、画图、表格排版、查引文、补引用、审稿、投稿前自检. This collection writes and revises the paper only; it does not run experiments or conduct research.
 ---
 
-# Academic Writing — Entry Router
+# Academic-Writing-Skills — Entry Router
 
-This is the **entry point** of the academic-writing skill collection. It does no writing
+This is the **entry point** of the Academic-Writing-Skills collection. It does no writing
 work itself. Its only job is to read the user's request and hand off to exactly one of the
 four sub-skills under `skills/`, then **read and follow that sub-skill's `SKILL.md`**.
 

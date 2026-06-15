@@ -95,11 +95,17 @@ Before creating LaTeX files:
    themselves just to add helper packages.
 6. Create `paper/sections/` files matching the confirmed section list.
 7. Update `paper/main.tex` input calls to match the confirmed section files.
-8. Assemble post-main material according to the Venue Assembly Plan. **Start the appendix on a fresh
+8. Materialize the confirmed Appendix / Supplement Plan before writing appendix content. If the plan
+   lists appendix items, create `paper/appendix-plan.md` with the exact fields `Item ID`, `Type`,
+   `Claim backed`, `Source availability`, `Fill status`, `Main-text anchor`, and `Fallback`, and create
+   `paper/sections/A_appendix.tex` (or the venue-specific appendix file named by the plan). If the
+   confirmed plan is `none`, delete the template appendix hook (`\appendix` and its appendix `\input`)
+   and remove stale appendix files rather than shipping an empty appendix.
+9. Assemble post-main material according to the Venue Assembly Plan. **Start the appendix on a fresh
    page**: place `\clearpage` immediately before `\appendix` (most venues, including ACL, do not do
    this automatically). Keep the venue's required order for Limitations / Ethics / References /
    Appendix, and do not let the appendix run on the same page as the references or main body.
-9. Remove stale section files not referenced by the updated `paper/main.tex`.
+10. Remove stale section files not referenced by the updated `paper/main.tex`.
 
 Once the project skeleton exists, proceed to `stages/section-drafting.md` for the per-section
 drafting loop, and invoke the **`academic-figure`** skill for figure and table handling (project

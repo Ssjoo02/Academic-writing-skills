@@ -18,10 +18,12 @@ ENTRY_RE = re.compile(r"@(\w+)\s*\{\s*([^,\s]+)\s*,", re.I)
 FIELD_RE = re.compile(r"(?m)^\s*([A-Za-z][A-Za-z0-9_-]*)\s*=\s*[{'\"]")
 MARKER_RE = re.compile(r"%\s*(CITATION_NEEDED|EVIDENCE_NEEDED)\b")
 PLACEHOLDER_AUTHOR_RE = re.compile(r"\band\s+others\b|\bet\s+al\.?\b", re.I)
+RENDERED_PLACEHOLDER_AUTHOR_RE = re.compile(r"\band\s+\d+\s+others\b|\b\d+\s+others\b", re.I)
 ARXIV_RE = re.compile(r"\b\d{4}\.\d{4,5}(?:v\d+)?\b|[a-z-]+/\d{7}(?:v\d+)?", re.I)
 DOI_RE = re.compile(r"10\.\d{4,9}/\S+")
 URL_RE = re.compile(r"https?://|www\.", re.I)
 KEY_YEAR_RE = re.compile(r"(?:19|20)\d{2}")
+BBL_ITEM_RE = re.compile(r"\\bibitem(?:\s*\[[^\]]*\])?\s*\{([^}]*)\}", re.S)
 
 
 def strip_comments(text: str) -> str:
@@ -125,6 +127,10 @@ def has_stable_identifier(fields: dict[str, str]) -> bool:
     return bool(ARXIV_RE.search(joined) or "doi.org/" in joined.lower() or URL_RE.search(joined))
 
 
+def has_visible_identifier(text: str) -> bool:
+    return bool(DOI_RE.search(text) or ARXIV_RE.search(text) or URL_RE.search(text) or "\\href" in text)
+
+
 def year_value(fields: dict[str, str]) -> int | None:
     match = re.search(r"\d{4}", fields.get("year", ""))
     return int(match.group(0)) if match else None
@@ -135,6 +141,34 @@ def key_years(key: str) -> set[int]:
     # publication range so identifiers such as ``imagenet1000`` or ``iso27001``
     # are not misread as years.
     return {int(m.group(0)) for m in KEY_YEAR_RE.finditer(key) if 1900 <= int(m.group(0)) <= 2099}
+
+
+def parse_bbl_items(path: Path) -> list[tuple[str, str]]:
+    text = path.read_text(encoding="utf-8", errors="ignore")
+    matches = list(BBL_ITEM_RE.finditer(text))
+    items: list[tuple[str, str]] = []
+    for i, match in enumerate(matches):
+        end = matches[i + 1].start() if i + 1 < len(matches) else len(text)
+        items.append((match.group(1).strip(), text[match.start():end]))
+    return items
+
+
+def audit_rendered_bibliography(paper_dir: Path, errors: list[str]) -> None:
+    for bbl_path in sorted(paper_dir.glob("*.bbl")):
+        for key, block in parse_bbl_items(bbl_path):
+            if RENDERED_PLACEHOLDER_AUTHOR_RE.search(block):
+                errors.append(
+                    f"rendered bibliography placeholder author: {bbl_path}: {key}: "
+                    "BibTeX output contains `and N others`; fix the author field and rerun BibTeX"
+                )
+
+            years = [int(m.group(0)) for m in KEY_YEAR_RE.finditer(block)]
+            year = min((y for y in years if 1900 <= y <= 2099), default=None)
+            if year and year >= 2000 and not has_visible_identifier(block):
+                errors.append(
+                    f"rendered bibliography lacks visible DOI/URL/arXiv: {bbl_path}: {key}: "
+                    "modern bibliography item renders without a traceable source link"
+                )
 
 
 def audit(paper_dir: Path, min_citations: int = 0) -> tuple[list[str], list[str]]:
@@ -156,12 +190,11 @@ def audit(paper_dir: Path, min_citations: int = 0) -> tuple[list[str], list[str]
     used = set(used_keys)
     bib_keys = set(entries)
 
-    # Citation coverage floor. References do not count toward page limits, so an implausibly
-    # small bibliography usually means Related Work / Introduction under-cite prior work or that
-    # named models/datasets/baselines were left uncited. This is a smell, not a hard failure;
-    # the paper-type-aware caller (review / submission-readiness) sets the threshold.
+    # Citation coverage floor. When the caller supplies a paper-type floor, treat it as an
+    # explicit gate rather than a style smell: benchmark/survey/method papers with too few cited
+    # works are usually missing prior benchmarks, datasets, models, or security baselines.
     if min_citations and len(used) < min_citations:
-        warnings.append(
+        errors.append(
             f"low citation coverage: {len(used)} distinct cited works (< {min_citations} expected "
             f"for this paper type); check that Related Work and Introduction cite prior work and "
             f"that every named model/dataset/baseline/framework is cited"
@@ -209,6 +242,8 @@ def audit(paper_dir: Path, min_citations: int = 0) -> tuple[list[str], list[str]
         if ("technical report" in venue or "arxiv preprint" in venue) and not has_stable_identifier(fields):
             errors.append(f"vague source label without stable identifier: {key}")
 
+    audit_rendered_bibliography(paper_dir, errors)
+
     return errors, warnings
 
 
@@ -219,7 +254,7 @@ def main() -> int:
         "--min-citations",
         type=int,
         default=0,
-        help="Warn if the draft cites fewer than this many distinct works (0 disables; set per "
+        help="Fail if the draft cites fewer than this many distinct works (0 disables; set per "
         "paper type, e.g. benchmark/survey/method papers expect a fuller bibliography).",
     )
     args = parser.parse_args()

@@ -24,7 +24,7 @@ Framework checkpoint; silent structural deviation is a workflow violation.
 This is a journal survey and is long by nature. Take absolute length from the venue card (e.g.,
 TPAMI survey ~20 double-column pages; JMLR concise but complete). Plan sections as proportions first.
 The taxonomy/synthesis is the bulk; do not let the introduction or background dominate. Also load
-`references/venues/journal-vs-conference.md`.
+`_shared/venues/journal-vs-conference.md`.
 
 ## Priority Contract
 

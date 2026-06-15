@@ -23,7 +23,7 @@ Framework checkpoint; silent structural deviation is a workflow violation.
 
 This is a journal paper. Take absolute length from the venue card (TPAMI: double-column type limits;
 JMLR: concise and complete). Plan sections as proportions first. Move full per-model result tables
-and protocol details to supplemental material. Also load `references/venues/journal-vs-conference.md`.
+and protocol details to supplemental material. Also load `_shared/venues/journal-vs-conference.md`.
 
 ## Priority Contract
 

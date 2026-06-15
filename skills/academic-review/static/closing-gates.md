@@ -67,20 +67,27 @@ project's `paper/` directory.
 
 **The content page budget is a blocking gate, not an optional extra.** Whenever the venue has a
 content page limit (every modeled venue does; the conference fallback is a soft 8-page upper bound),
-run the page-budget audit with the limit bound in the confirmed Paper Framework, and run the citation
-audit with the paper-type citation floor:
+run the page-budget audit with the limit bound in the confirmed Paper Framework. When the Framework
+also records a content-page target (strict page-limited full papers normally target the full body
+budget), run the minimum-page gate too. Then run the citation audit with the paper-type citation
+floor:
 
 ```bash
 python3 "<path-to-academic-review>/scripts/audit_draft.py" paper --framework writing-policies/<paper-slug>-paper-framework.md --max-content-pages <limit>
+python3 "<path-to-academic-review>/scripts/audit_draft.py" paper --framework writing-policies/<paper-slug>-paper-framework.md --max-content-pages <limit> --min-content-pages <target>
 python3 "<path-to-academic-citation>/scripts/audit_citations.py" paper --min-citations <floor>
 ```
 
 `<limit>` is the confirmed venue content-page limit (ACL long 8 / short 4; generic fallback 8). The
 audit is venue-aware: it stops counting at the first post-matter heading (References, or a
 venue-excluded section such as Limitations / Acknowledgments / Ethics), so a correctly placed
-`\section{Limitations}` is not counted against the limit. `<floor>` is a paper-type expectation
-(benchmark / survey / method papers cite broadly — use ~25–30; otherwise ~12–15); the floor raises a
-warning, not a hard block, because references do not consume page budget.
+`\section{Limitations}` is not counted against the limit. `<target>` is the confirmed body-page
+utilization target from the Paper Framework; if supplied, ending several pages early is a blocking
+underfilled-draft defect, not a successful concise draft. Expand with supported core analysis before
+padding. `<floor>` is a paper-type expectation
+(benchmark / survey / method papers cite broadly — use ~25–30; otherwise ~12–15); when supplied, the
+floor is a hard citation-coverage gate, because an under-cited benchmark/method paper is usually
+missing prior-work support rather than saving page budget.
 
 **If the page budget is exceeded, do not return the draft — compress, then recompile and re-audit.**
 Apply the compression ladder in order, cheapest first:
@@ -108,6 +115,12 @@ Apply the compression ladder in order, cheapest first:
 Overflow is a blocking defect even when the Paper Framework's planned arithmetic was within the
 limit — the compiled PDF is authoritative.
 
+**If the page budget is underfilled, do not return the draft as done.** Expand the primary-core and
+evidence-core sections first: explain the benchmark construction protocol, taxonomy rationale,
+evaluation pipeline, denominator/metric semantics, per-category result patterns, and reviewer-facing
+limitations that are supported by workspace evidence. Do not pad with background, copied prose,
+citation dumps, or unsupported speculation.
+
 **How to handle audit failures:**
 
 - `audit_citations.py` reports errors → **fix every error in `references.bib`** (missing
@@ -134,19 +147,31 @@ limit — the compiled PDF is authoritative.
   is incomplete. Fix, re-run, pass, then return.
 - Paste the audit result lines into the internal check log so the user can verify.
 
-**What `audit_draft.py` checks:** mechanical writing rules — footnotes, file/code artifacts, local
-paths, subsection budget, duplicate labels, input consistency, unresolved rendered references,
-undefined references/citations, invalid LaTeX section environments, leftover markers,
-Limitations placement (no Limitations-titled subsection/paragraph/`\textbf` run-in inside a body
-section; at most one dedicated `\section{Limitations}`), Limitations length, venue-aware
-content-page budget (counting stops at the first post-matter heading, so a dedicated
-Limitations/Ethics section is excluded), and
-Framework alignment when `--framework` is provided (planned display items from the confirmed Paper
-Framework must materialize as artifacts and section insertions; picture figures must have prompt
-briefs plus rendered output; incomplete registry comments are errors), and
-the disclosure check (internal identifiers and do-not-disclose entities listed in
-`paper/.disclosure.yaml`, plus a heuristic warning for internal-looking identifier tokens even when
-no list is present).
+**What `audit_draft.py` checks:** mechanical writing rules that should not depend on reviewer taste:
+markers, footnotes, file/path artifacts, duplicate labels, unresolved rendered references, undefined
+references/citations, invalid LaTeX section environments, subsection budget, Limitations placement
+and length, venue-aware content-page budget, table/layout hazards, appendix plan/substance, Framework
+display-item alignment, and disclosure leaks. Treat script output as the source of truth instead of
+restating the full rule set here.
+
+## Gate Receipt
+
+For every full `paper/` closing run, write or update `paper/closing-gate-log.md` as a compact durable
+receipt. Do not put the full raw review table there unless the user requested a review report; this
+file records gate evidence, not prose critique. Include:
+
+- paper path, active venue or `generic / venue TBD`, paper type, content-page limit/target, and
+  compile availability;
+- Round 1 and Round 2 review status, including whether Round 2 used an independent subagent or the
+  fresh self-pass fallback;
+- each audit command run and its result line, including the citation audit and draft audit with
+  `--framework`, `--max-content-pages`, and `--min-content-pages` when applicable;
+- Submission Readiness verdict: `PASS / BLOCKED / OPEN_DECISION`;
+- remaining blockers, open decisions, and whether a separate `paper/review-report.md` was written.
+
+If the current task is a bounded review without a complete local `paper/` directory, do not create
+this receipt; return the bounded review summary with the missing materials and readiness boundary
+instead.
 
 ## Before Returning
 
@@ -181,7 +206,7 @@ This check is MANDATORY and cannot be skipped.
 1. Did I run `audit_citations.py` and does it report `PASS`?  (Paste result. **If any error,
    fix every one in `references.bib` and re-run. Do not proceed past this item while errors
    remain. A draft with citation audit failures is not complete.**)
-2. Did I run `audit_draft.py --framework <confirmed-framework>` (with `--max-content-pages <limit>` when a page limit exists)
+2. Did I run `audit_draft.py --framework <confirmed-framework>` (with `--max-content-pages <limit>` when a page limit exists, and `--min-content-pages <target>` when the Framework records a target)
    and does it report `PASS`?  (Paste result. **If any error, fix and re-run. Do not proceed
    while errors remain.**)
 
@@ -203,8 +228,8 @@ This check is MANDATORY and cannot be skipped.
    provides ...` pointer); floats appear **in section order** under their heading (no bare `[h]`
    placement that defers and reorders across the separate figure/table queues); no wide single-column
    float overflows into the next column; and no `see supplementary material` stub stands in for
-   content that exists? (Apply the `academic-figure` skill's Table Handling rule 11 /
-   `figures-and-tables.md` "The appendix has the opposite failure".)
+   content that exists? (Apply the `academic-figure` skill's `references/tables/table-placement.md`
+   appendix ordering, overflow, and sparse-content rules.)
 
 **Load receipt:** in the internal check, list which mandatory references were loaded
 (`paper-review.md`, the `academic-figure` figure-planning reference, `submission-readiness.md`,

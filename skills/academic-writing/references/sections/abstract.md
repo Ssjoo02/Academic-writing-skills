@@ -8,12 +8,6 @@ Write a strong abstract by doing three things repeatedly:
 2. Follow one template (Version 1/2/3 below).
 3. Revise the abstract many times.
 
-## Section Role
-
-The Abstract gives reviewers the first complete version of the paper's technical problem,
-contribution, evidence, and boundary. It must obey the claim-evidence contract: every important
-claim must be technically correct and supported by available evidence.
-
 ## Pre-Writing Questions (Important)
 
 Answer these before writing:
@@ -22,7 +16,6 @@ Answer these before writing:
 2. What is the technical contribution?
 3. Why does the contribution work in essence?
 4. What technical advantage or new insight should reviewers remember?
-5. Which experimental evidence can be safely stated in the Abstract?
 
 ## Version 1: Challenge -> Contribution
 
@@ -108,13 +101,6 @@ pattern is needed. Reuse sentence logic and structure, not exact wording, task n
 metrics, or citation framing.
 
 1. `references/sections/examples/abstract-examples.md` (index)
-
-## Required Output
-
-For Full Draft Workflow, write the English abstract into the corresponding LaTeX section file.
-Keep a compact `Section Plan`, sentence-level `Paragraph Plan`, and `Evidence And Risk Notes`
-internally unless the user asks to see them. Do not create a Chinese parallel abstract during Full
-Draft Workflow. Run reverse outlining and claim-evidence mapping internally before returning.
 
 ## Quality Checklist
 

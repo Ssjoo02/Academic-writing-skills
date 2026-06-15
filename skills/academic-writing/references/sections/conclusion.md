@@ -71,14 +71,6 @@ Select one conclusion mode:
 Choose the conclusion mode internally based on the Writing Policy and evidence boundary. Do not
 expose template-selection notes unless the user asks for reasoning.
 
-## Required Output
-
-For Full Draft Workflow, write English LaTeX prose into the corresponding section file. Keep a
-compact `Section Plan`, `Paragraph Plan`, and `Evidence And Risk Notes` internally unless the user
-asks to see them. The limitation paragraph must state whether the limit comes from task goal or task
-setting, and whether it affects existing important metrics. Run reverse outlining and claim-evidence
-mapping internally before returning.
-
 ## Self-Check
 
 - Does the conclusion reinforce the Writing Policy's final takeaway?

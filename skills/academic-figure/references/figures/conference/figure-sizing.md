@@ -24,9 +24,9 @@ slightly narrower — reduce the width by ~0.2 in.
 
 ### LaTeX Inclusion
 
-Prefer `width=\columnwidth` or `width=\linewidth`; do not use absolute
-`\textwidth` in a two-column context (it overflows the column). For cross-column
-figures in a two-column template, use `figure*` with `width=\textwidth`.
+Apply the Display Width Contract from `figure-planning.md`. Conference templates usually insert
+single-column figures with `width=\columnwidth` / `width=\linewidth`; reserve
+`figure*` + `width=\textwidth` for the cross-column cases in the matrix below.
 
 ### Column-Span Quick Rule (see `figure-planning.md` for the full decision)
 
@@ -43,14 +43,49 @@ A pipeline/framework diagram squeezed into one narrow column is the most common 
 single-column floats. In one-column venues (NeurIPS, ICLR) there is no `figure*`; size by fraction of
 `\linewidth` instead.
 
+### Span Decision Matrix
+
+Use this as the deterministic insertion rule after the Figure Plan has recorded the chart family,
+panel count, and evidence role.
+
+| Venue/template mode | Figure role / width need | LaTeX insertion | Plot/export target |
+|---|---|---|---|
+| ACL / EMNLP two-column | compact single-message plot, <=1 panel, <=5 short labels, no shared legend needed | `figure` + `width=\columnwidth` | ~3.0--3.3 in wide; base font 9--10 pt |
+| ACL / EMNLP two-column | grouped comparison, heatmap, radar, Pareto/scatter pair, distribution family, pipeline/framework, or >=2 panels that need a shared legend | `figure*` + `width=0.90--1.00\textwidth` | ~6.4--6.8 in wide; base font 9--11 pt |
+| Other two-column conference | same compact criteria as above | `figure` + `width=\columnwidth` | ~3.25--3.5 in wide; check final rendered text >=7 pt |
+| Other two-column conference | wide comparison, dense result matrix, architecture, or multi-panel evidence | `figure*` + `width=0.90--1.00\textwidth` | ~6.5--7.0 in wide; keep height below half a page when possible |
+| One-column template | compact story/teaser, secondary plot, or small qualitative example | `figure` + `width=0.55--0.75\linewidth` | no `figure*`; center the image |
+| One-column template | pipeline/framework, multi-panel comparison, dense heatmap/table-like plot, or load-bearing result figure | `figure` + `width=0.90--1.00\linewidth` | no `figure*`; use the full line when legibility depends on width |
+
+Overall, a one-column template always uses `figure` + `width=0.55--1.00\linewidth`; choose the
+smaller or larger end of the range from role and legibility.
+
+If the proposed insertion would require text below 7 pt, rotated labels beyond ~30 degrees, or a
+legend that consumes more than one-third of the plot area, promote the figure to the next wider
+layout or split the evidence into a table/appendix figure.
+
+### Single-column paper quick rule
+
+For one-column conference templates and single-column journal drafts, `figure*` is unavailable and
+should not appear in generated LaTeX. Use a regular `figure` and choose width by role:
+
+- `0.55--0.75\linewidth` for a compact story/teaser figure, secondary single plot, or small example
+  panel;
+- `0.90--1.00\linewidth` for a pipeline, framework, architecture, multi-panel comparison, or dense
+  result figure;
+- combine paired analyses into one multi-panel figure with one shared legend instead of stacking
+  several small floats.
+
 ### Height Budget
 
 At `\textwidth` a 16:9 image is ~9–10 cm tall — too tall for a teaser or
-pipeline banner. For concept / banner figures target aspect ~3:1 to 4:1
-(~4.5–6 cm tall at double-column width). See `picture-generation.md` for the
-height and trim mechanics. For data figures, a useful starting ratio is width ≈
-1.5–2× height for comparison plots, 1:1 for radar/scatter, and width ≈ 3–4×
-height for bar panels with many categories.
+picture-style banner. For picture banners target aspect ~3:1 to 4:1
+(~4.5–6 cm tall at double-column width); see `picture-generation.md` for height
+and trim mechanics. For deterministic framework/pipeline schematics, size the
+canvas from node count and reading path; see `schematic-design.md`. For data
+figures, a useful starting ratio is width ≈ 1.5–2× height for comparison plots,
+1:1 for radar/scatter, and width ≈ 3–4× height for bar panels with many
+categories.
 
 ## Font Size Hierarchy
 
@@ -77,10 +112,8 @@ Two-column venues (ICML, CVPR, AAAI, ACL, IJCAI) have narrow single columns
 figure is placed in `figure*` spanning both columns of a two-column venue, use
 the "hero / teaser" font row.
 
-**Minimum legibility rule**: No text element may render below 6pt at final column
-width. Labels below 7pt should be rare and only for secondary information (tick
-labels, legend entries for 5+ methods). When in doubt, render the PNG and check
-readability at 100% zoom — the figure will be printed at roughly the same size.
+Use the shared legibility floor in `plot-style.md`. For conference figures, treat any non-secondary
+label under 7 pt at final insertion size as a blocking readability defect.
 
 ## QA Notes
 
@@ -99,6 +132,7 @@ readability at 100% zoom — the figure will be printed at roughly the same size
 - `plot-style.md` — rcParams, colors, per-chart-type rules, legend rules,
   multi-panel architecture (load first)
 - `chart-patterns.md` — reusable Python plotting helpers
+- `schematic-design.md` — deterministic framework, pipeline, architecture, workflow, and taxonomy diagrams
 - `picture-generation.md` — AI-generated picture workflow
 - `figure-planning.md` — Display Item Contract, Display Review Gate, generation
   routes

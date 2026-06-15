@@ -87,8 +87,9 @@ Mandatory gate behavior:
 - Do not "compress", "batch", "assume", or "silently satisfy" the Writing Policy or Paper
   Framework confirmation gates.
 - After writing the Writing Policy, return only the concise policy summary, stage ledger, and the
-  required user action. **STOP HERE and wait for user response.** Do not load paper type, venue,
-  section, figure, template, example, or check references until the user
+  required user action. **STOP HERE and wait for user response.** Do not load venue cards, specific
+  paper-type profiles, templates, section guides, figure/table references, citation references,
+  style references, example references, or review references until the user
   confirms the Writing Policy. Ask exactly for confirmation or corrections to the Writing Policy
   before moving to Paper Framework.
 - After writing the Paper Framework, return only the concise framework summary, stage ledger, and

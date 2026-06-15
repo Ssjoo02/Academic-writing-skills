@@ -13,13 +13,16 @@ English are preserved.
 - File paths, shell commands, LaTeX commands, BibTeX keys, citation keys, template names,
   schema fields, and machine-parsed markers stay in their original language.
 - Paper prose is English academic prose by default, regardless of interaction language.
+- Terminal-facing checkpoint summaries mirror the user's interaction language, including Writing
+  Policy and Paper Framework overviews, section summaries, Figure Plan summaries, risks, and user
+  action requests. Do not use the artifact language as the terminal interaction language.
 - Full Draft Workflow outputs a venue-formatted English LaTeX paper project when a target venue is
   confirmed; otherwise it outputs a non-submission generic English LaTeX draft. Do not generate a
   Chinese or Chinese-English parallel paper unless the user explicitly requests it.
-- Writing Policy and Paper Framework artifacts are English by default. Before each stage, ask about
-  additional full-language artifact versions only when the question can be batched with another
-  required clarification; otherwise default to English only. If the user asks for another language,
-  create a complete same-content translated sibling artifact such as
+- Saved Writing Policy and Paper Framework artifacts stay English by default. Before each stage,
+  ask about additional full-language artifact versions only when the question can be batched with
+  another required clarification; otherwise default to English only. If the user asks for another
+  language, create a complete same-content translated sibling artifact such as
   `writing-policies/<paper-slug>-writing-policy.zh-CN.md` or
   `writing-policies/<paper-slug>-paper-framework.zh-CN.md`. The translated artifact must preserve
   the same sections, tables, claims, page budgets, figure plans, and open decisions; only the natural
@@ -50,7 +53,7 @@ submission-ready format. Treat non-decisive uncertainty as an assumption, defaul
 or drafting note.
 
 When figures or tables are needed, use the Figure Plan in the Paper Framework and the
-figure-specific rules in `references/figures/figure-planning.md`. The Figure Plan must declare the
+`academic-figure` skill's `references/figures/figure-planning.md`. The Figure Plan must declare the
 layout target for each figure or table (`single-column`, `double-column`, `appendix`, or
 `supplement`) before drafting. Use a configured paper-figure MCP only for figure classification,
 FigureSpec skeletons, validation, rendering, or figure metadata; do not let figure tooling invent
@@ -94,8 +97,9 @@ are repeated in the workflow fragments, but they hold even if a fragment is not 
 - **Paper-type profile is the default structure** (Full Draft): match its section list and count;
   surface and justify every deviation at the Framework checkpoint.
 - **Subsection budget:** 0 subsections for short sections, at most 4 per main section.
-- **Run the static gates before declaring a draft clean:** `scripts/audit_citations.py` and
-  `scripts/audit_draft.py` must both report `PASS`.
+- **Run the static gates before declaring a draft clean:** the `academic-citation` skill's
+  `scripts/audit_citations.py` and the `academic-review` skill's `scripts/audit_draft.py` must both
+  report `PASS`.
 
 ## Integrity Rules
 

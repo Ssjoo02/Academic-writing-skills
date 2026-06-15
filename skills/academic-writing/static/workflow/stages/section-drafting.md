@@ -14,8 +14,8 @@ Load section references when drafting each section:
 | Related Work | `references/sections/related-work.md`, `references/sections/paragraph-flow.md`; invoke the `academic-citation` skill when citation support matters |
 | Method / System | `references/sections/method.md`, `references/sections/paragraph-flow.md`; invoke the `academic-figure` skill when figures or tables are used |
 | Experiments / Evaluation | `references/sections/experiments.md`, `references/sections/paragraph-flow.md`; load `_shared/checks/metric-design.md` and invoke the `academic-figure` skill when figures or tables are used |
-| Demo / Application | `references/sections/demo-application.md`, `references/sections/paragraph-flow.md` |
 | Conclusion / Limitations | `references/sections/conclusion.md`, `references/sections/paragraph-flow.md` |
+| Appendix / Supplement | `references/sections/appendix.md`, `references/sections/paragraph-flow.md`; invoke the `academic-figure` skill for appendix figures/tables |
 
 **Journal section overlays (only when `venue_kind=journal`).** After loading each base section guide
 above, also load the matching overlay and apply it on top of the base (it states only the journal
@@ -28,7 +28,8 @@ deltas; see `references/sections/journal/index.md`):
 | Method / System | `references/sections/method.md` | `references/sections/journal/method.md` |
 | Conclusion / Discussion | `references/sections/conclusion.md` | `references/sections/journal/discussion.md` |
 
-Sections without an overlay (Related Work, Experiments, Demo/Application) use the base guide alone.
+Sections without an overlay (Related Work, Experiments, and Appendix / Supplement) use the base guide
+alone.
 When `venue_kind=conference`, do **not** load any file under `references/sections/journal/`.
 
 Load a local example only when the section guide explicitly points to one, the section structure is
@@ -58,14 +59,20 @@ For each section, follow this drafting loop:
    move means the section is not done — revise until resolved or record it as an explicit risk.
    Minimum required moves per section:
    - **Method** (`references/sections/method.md`): every module subsection has motivation, design,
-     and technical advantage; an overview/section-map opens the section; terms defined before use.
+     technical advantage, and evidence hook; an overview/section-map opens the section; terms defined
+     before use.
    - **Experiments** (`references/sections/experiments.md`): setup (datasets/metrics/baselines/
      protocol) stated; each contribution claim has a matching experiment; metric direction and scope
      explicit. **No Limitations block lives here** — limitations do not belong in a numbered body
      section; route them to the dedicated Limitations section below.
-   - **Introduction / Abstract**: problem -> challenge/gap -> insight/contribution -> advantage -> evidence
+   - **Abstract**: problem -> challenge/gap -> insight/contribution -> advantage -> evidence
      chain present; contribution sentences state purpose or advantage, not only a component list;
-     central claims map to available evidence; contributions preview maps to later sections.
+     central claims map to available evidence.
+   - **Introduction**: Introduction chain: task/application or setting -> target goal ->
+     prior/current-practice failure -> root technical issue -> contribution/pipeline -> why it
+     works -> contribution bullets -> optional evidence preview; no separate experiment paragraph;
+     contribution sentences state purpose or advantage, not only a component list; central claims
+     map to available evidence; contributions preview maps to later sections.
    - **Related Work**: organized by topic group with a stated distinction per group, not a citation
      list. **Every named prior method, benchmark, dataset, model, or framework carries a `\cite`**;
      proactively run the targeted citation search (see Citation Search Trigger) rather than leaving
@@ -78,6 +85,11 @@ For each section, follow this drafting loop:
      `\section{Limitations}` after Conclusion holds all limitations, ~120–180 words, 3–4 material
      points; it is the only home for limitations in the paper (do not also enumerate them in
      Experiments or Conclusion).
+   - **Appendix / Supplement** (`references/sections/appendix.md`): every item appears in
+     `paper/appendix-plan.md` with `Claim backed`, `Source availability`, `Fill status`,
+     `Main-text anchor`, and `Fallback`; every subsection has a real lead paragraph; no central
+     evidence is hidden outside the main reading path; no "see supplementary" stub remains when the
+     source exists.
    - **All sections**: one paragraph one message; first sentence states the paragraph role and
      leads with the point (not buried); stable terminology; **no taxonomy/inventory/per-category
      enumeration in the body** — such lists are mentioned in one stroke and the full list lives in a
@@ -90,18 +102,14 @@ For each section, follow this drafting loop:
 
 **Non-negotiables while drafting (these hold here, not only in the rules file):** no `\footnote{}`;
 no `\texttt{*.json/*.py/*.csv}` or code identifiers or local paths in prose; subsection budget (0 for
-short sections, ≤4 per main section); do not add sections/subsections beyond the confirmed Framework;
-**no body-text enumeration of a taxonomy/inventory/per-category counts (each `V1…Vn` / `H1…Hn` /
-per-app count on its own line) — compress to one stroke in the body and move the full list to a
-table or appendix; no `itemize` / `enumerate` taxonomy glossary in a body section; lead every
-paragraph with its point.** This ban includes the **disguised form**: a run of `\textbf{V1 (...)}.` /
-`\textbf{H1 (...)}.` bold lead-in paragraphs that define each coded member one by one is a glossary
-list with the `\item` markers removed — it is forbidden in the body. **When a taxonomy table already
-lists the members, do not also re-define every member in prose.** Instead: give the table a short
-`Description` column (use a `tabularx` wrapping column), and in the body explain only the design
-rationale, the category boundaries, and the two or three most salient/novel members in one
-argumentative stroke. Put the full per-member definitions in a dedicated **appendix** subsection
-(with a real lead paragraph), not in the body.
+short sections, ≤4 per main section); do not add sections/subsections beyond the confirmed Framework.
+For taxonomies, inventories, and per-category counts, follow the Salience And Compression rule once:
+the body gives the dimension, total, and salient/novel members; the full definitions/counts go to a
+table or appendix. The ban includes the **disguised form**: a run of `\textbf{V1 (...)}.` /
+`\textbf{H1 (...)}.` bold lead-in paragraphs that define each coded member one by one is a
+glossary-style taxonomy subsection with the `\item` markers removed. **When a taxonomy table already
+lists the members, do not also re-define every member in prose.** Put the full per-member definitions
+in a dedicated appendix subsection with a real lead paragraph.
 
 **During drafting, do not use `\footnote{...}` anywhere.** Move footnote content into the main
 body, convert it to inline parenthetical text, or delete it. **Do not write file names, script

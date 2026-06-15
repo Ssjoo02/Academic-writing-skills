@@ -1,8 +1,20 @@
 # Citation And Bibliography Workflow
 
 Execution rules for searching, writing, and verifying every citation in a paper draft, and for the
-blocking bibliography audit. The deep reference lives at `references/checks/citation-integrity.md`;
-the mechanical gate is `scripts/audit_citations.py`.
+blocking bibliography audit. Source selection lives at `references/search/source-routing.md`; claim
+support lives at `references/checks/citation-integrity.md`; the mechanical gate is
+`scripts/audit_citations.py`.
+
+## Workflow Selection
+
+Use the `workflow` axis from `manifest.yaml`:
+
+- `search`: find verified support for a concrete claim or missing citation. Load
+  `references/search/source-routing.md` and `references/checks/citation-integrity.md`.
+- `verify`: check existing citation metadata or claim support. Load
+  `references/checks/citation-integrity.md`; add `source-routing.md` if live lookup is needed.
+- `audit`: run the static bibliography audit. Use `scripts/audit_citations.py`; do not treat its
+  `PASS` as proof that every citation supports its surrounding sentence.
 
 ## When To Search
 
@@ -22,18 +34,33 @@ Citation coverage is paper-type-scaled. Benchmark, survey, and method papers cit
 bibliography for such a paper is a smell. The final audit is run with a paper-type `--min-citations`
 floor (see below).
 
-When searching, load `references/checks/citation-integrity.md` and run a targeted live lookup before
-writing a final citation. If live search adds or changes a citation, record the source, DOI/URL, and
-support judgment in `paper/citation-evidence.md`. If reliable support is not found, weaken/remove the
-claim or leave `% CITATION_NEEDED: <short reason>` rather than inventing a source. References do not
-count toward the page limit, so breadth is cheap — never fabricate to hit a count.
+When searching, load `references/search/source-routing.md` first, then
+`references/checks/citation-integrity.md`. Run targeted live lookup before writing a final citation.
+If reliable support is not found, weaken/remove the claim or leave `% CITATION_NEEDED: <short reason>`
+rather than inventing a source. References do not count toward the page limit, so breadth is cheap —
+never fabricate to hit a count.
+
+## Citation Evidence Ledger
+
+Every citation added or changed through live lookup must add a compact row to
+`paper/citation-evidence.md`. No ledger row means the citation is not verified.
+
+Use this table:
+
+| Claim ID | Claim text / clause | Citation key | Source | metadata source | support grade | evidence basis | Action |
+|---|---|---|---|---|---|---|---|
+| C-001 | sentence or clause supported | `key2026` | title, first author/year, DOI/URL/arXiv | DBLP/CrossRef/arXiv/etc. | verified / not verified / partially supports / does not support | abstract / publisher page / full text / metadata-only candidate | insert / weaken / mark `% CITATION_NEEDED` / remove |
+
+Keep one row per distinct claim-citation relationship. If a grouped citation supports a shared
+background claim, one row may list multiple keys only when all cited sources share that same role.
 
 ## Citation And Bibliography Rules
 
-**Every cited source must be verified, complete, and traceable.** A draft with placeholder
-authors, missing identifiers, or unverified entries is not complete. The citation audit
-(`scripts/audit_citations.py`) enforces these rules mechanically — it must pass before the
-draft leaves the agent's hands.
+**Every cited source must be verified, complete, traceable, and clean in the rendered
+bibliography.** A draft with placeholder authors, missing identifiers, unverified entries, or a
+generated `main.bbl` that prints `and N others` / omits visible DOI-URL-arXiv markers for modern
+sources is not complete. The citation audit (`scripts/audit_citations.py`) enforces these rules
+mechanically — it must pass before the draft leaves the agent's hands.
 
 - Prefer existing workspace `.bib` files when available.
 - Do not generate BibTeX from memory. Every entry must come from a trusted source (DBLP,
@@ -54,12 +81,25 @@ draft leaves the agent's hands.
 - Mark unverified citations as `not verified`.
 - Use `\citep{}` / `\citet{}` for natbib venues; use numeric `\cite{}` for IEEE templates.
 - Keep `paper/references.bib` limited to entries actually cited. Remove uncited entries.
+- After BibTeX runs, inspect the generated `paper/*.bbl` through `audit_citations.py`: the rendered
+  bibliography must not contain `and N others`, and every cited source from 2000 onward must render
+  a visible DOI, URL, or arXiv marker. If the `.bib` file has a stable identifier but the `.bbl`
+  omits it, adjust the entry fields or template-compatible URL/DOI fields and rerun BibTeX.
 
-**If any entry in `references.bib` violates these rules, the citation audit will fail.
+**If any entry in `references.bib` or generated `*.bbl` violates these rules, the citation audit will fail.
 Fix every error before returning the draft — the audit is a BLOCKING gate, not a
 diagnostic.**
 
 ## Citation Audit (blocking)
+
+### Static audit boundary
+
+`audit_citations.py` checks local bibliography integrity. It catches unresolved cite keys, uncited
+entries, missing fields, placeholder authors, missing stable identifiers, malformed year/key
+signals, unresolved `% CITATION_NEEDED` markers, low coverage when `--min-citations` is set, and
+rendered `.bbl` defects. It **does not prove claim support**: a `PASS` means the bibliography is
+structurally clean, not that every cited paper supports every surrounding sentence. Claim support is
+verified through the search/verify workflow and the Citation Evidence Ledger above.
 
 Run from the paper project directory (the script is path-agnostic; pass the `paper/` directory):
 
@@ -70,14 +110,20 @@ python3 "<path-to-academic-citation>/scripts/audit_citations.py" paper --min-cit
 ```
 
 `<floor>` is a paper-type expectation (benchmark / survey / method papers cite broadly — use ~25–30;
-otherwise ~12–15); the floor raises a warning, not a hard block, because references do not consume
-page budget.
+otherwise ~12–15). When the caller passes `--min-citations`, the floor is a hard gate: a draft below
+that count is under-cited for the declared paper type and must add verified, actually used sources or
+weaken/remove unsupported prior-work claims. When `paper/*.bbl` exists, the same audit also checks the rendered bibliography for
+placeholder authors and missing visible identifiers, because those are the defects readers see in
+the compiled PDF.
 
 **What `audit_citations.py` checks:** bibliography integrity — placeholder authors, missing required
-BibTeX fields, missing DOI/URL/arXiv on modern entries, vague source labels, year-key mismatch,
-uncited entries, unresolved `% CITATION_NEEDED` markers, and (with `--min-citations`) a
-low-citation-coverage warning when the bibliography is thinner than the paper type expects.
+BibTeX fields, missing DOI/URL/arXiv on modern entries, rendered `and N others` in generated `.bbl`
+files, rendered modern items without a visible DOI/URL/arXiv marker, vague source labels, year-key
+mismatch, uncited entries, unresolved `% CITATION_NEEDED` markers, and (with `--min-citations`) a
+blocking low-citation-coverage error when the bibliography is thinner than the paper type expects.
 
-**On failure:** fix every error in `references.bib` (missing authors, placeholder `and others`,
-missing DOI/URL/arXiv, year-key mismatch, malformed entries, uncited entries), then **re-run the
-audit**. Repeat until `PASS`. Do not return the draft while any error remains.
+**On failure:** fix every error in `references.bib` and the generated bibliography path (missing
+authors, placeholder `and others`, rendered `and N others`, missing DOI/URL/arXiv, missing visible
+DOI/URL/arXiv in `.bbl`, year-key mismatch, malformed entries, uncited entries), rerun BibTeX when
+needed, then **re-run the audit**. Repeat until `PASS`. Do not return the draft while any error
+remains.

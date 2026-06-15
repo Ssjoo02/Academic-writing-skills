@@ -1,6 +1,6 @@
-# Academic Writing
+# Academic-Writing-Skills
 
-**Academic Writing** is a skill collection focused on academic paper writing. It is designed to generate complete manuscript drafts that follow the format requirements of specific conferences or journals, and can be used in local skill environments such as Claude Code and Codex.
+**Academic-Writing-Skills** is a skill collection focused on academic paper writing. It is designed to generate complete manuscript drafts that follow the format requirements of specific conferences or journals, and can be used in local skill environments such as Claude Code and Codex.
 
 中文: [README.md](README.md)
 
@@ -9,7 +9,7 @@
 This repository is one **hub skill** plus three independently invokable **sub-skills**, with cross-skill content kept at the repository root under `_shared/`. The repository-root `SKILL.md` is the **entry router**: it is the first file the host environment discovers and loads, and it dispatches each request to the right sub-skill.
 
 ```text
-academic-writing/                  ← repository root = collection root
+Academic-Writing-Skills/           ← repository root = collection root
 ├── SKILL.md                       ← entry router (discovered first; dispatches to a sub-skill below)
 ├── _shared/                       ← cross-skill: core stance/gates/contract, venue templates,
 │   ├── core/  templates/  paper-types/  venues/  checks/
@@ -20,7 +20,7 @@ academic-writing/                  ← repository root = collection root
     └── academic-review/           ← pre-submission review + static audits + readiness (standalone: just review)
 ```
 
-On install the whole repository is copied to `.../skills/academic-writing/`, and the host discovers and starts the collection from the **repository-root `SKILL.md`**. The hub **delegates** to the matching sub-skill when figures/citations/review are needed, with zero rule duplication. Each sub-skill ships its own `SKILL.md`, so "just make one figure", "just check citations", or "just run one review" can also be dispatched directly by the entry router without going through the full writing flow.
+On install the whole repository is synced to `.../skills/academic-writing/`, and the host discovers and starts the collection from the **repository-root `SKILL.md`**. The hub **delegates** to the matching sub-skill when figures/citations/review are needed, with zero rule duplication. Each sub-skill ships its own `SKILL.md`, so "just make one figure", "just check citations", or "just run one review" can also be dispatched directly by the entry router without going through the full writing flow.
 
 ## Use Cases
 
@@ -112,7 +112,9 @@ This conservative routing prevents the system from mistakenly organizing a paper
 
 ## Installation
 
-Please copy the entire directory instead of copying only `SKILL.md`, because this skill depends on `manifest.yaml`, `static/`, `references/`, `templates/`, and supporting scripts.
+Sync the entire repository, including `skills/` and the root `_shared/` layer. Do not copy only `SKILL.md` or a single sub-skill directory, because the sibling skills depend on `_shared/` through relative paths.
+
+Do not ship local maintenance material: `_local/` and `SKILL-FLOW.md` are maintainer-only files. `.gitignore` keeps them out of Git, but `cp -R` does not honor `.gitignore`; use the `rsync --exclude` commands below.
 
 **Clone the repo**
 
@@ -126,8 +128,13 @@ cd Academic-writing-skills
 Copy the skill to `$CODEX_HOME/skills/`:
 
 ```bash
-mkdir -p "$CODEX_HOME/skills"
-cp -R Academic-writing-skills "$CODEX_HOME/skills/academic-writing"
+CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
+mkdir -p "$CODEX_HOME/skills/academic-writing"
+rsync -a --delete --delete-excluded \
+  --exclude '.git/' \
+  --exclude '_local/' \
+  --exclude 'SKILL-FLOW.md' \
+  ./ "$CODEX_HOME/skills/academic-writing/"
 ```
 
 Example usage:
@@ -143,15 +150,23 @@ Both global installation and project-level installation are supported.
 Global installation:
 
 ```bash
-mkdir -p "$HOME/.claude/skills"
-cp -R Academic-writing-skills "$HOME/.claude/skills/academic-writing"
+mkdir -p "$HOME/.claude/skills/academic-writing"
+rsync -a --delete --delete-excluded \
+  --exclude '.git/' \
+  --exclude '_local/' \
+  --exclude 'SKILL-FLOW.md' \
+  ./ "$HOME/.claude/skills/academic-writing/"
 ```
 
 Project-level installation:
 
 ```bash
-mkdir -p .claude/skills
-cp -R Academic-writing-skills .claude/skills/academic-writing
+mkdir -p .claude/skills/academic-writing
+rsync -a --delete --delete-excluded \
+  --exclude '.git/' \
+  --exclude '_local/' \
+  --exclude 'SKILL-FLOW.md' \
+  ./ .claude/skills/academic-writing/
 ```
 
 After installation, restart Claude Code and explicitly mention this skill in your prompt, for example:

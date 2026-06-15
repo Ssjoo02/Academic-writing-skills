@@ -36,9 +36,9 @@ without shrinking.
 
 ### LaTeX Inclusion
 
-Prefer `width=\columnwidth` or `width=\linewidth`; do not use absolute
-`\textwidth` in a two-column context (it overflows the column). For cross-column
-figures in a two-column template, use `figure*` with `width=\textwidth`.
+Apply the Display Width Contract from `figure-planning.md`. Journal layouts may be single-column,
+two-column, or full-page; choose `\linewidth`, `\columnwidth`, or `figure*` + `\textwidth` from the
+verified template rather than assuming one universal insertion form.
 
 ### Height Budget
 
@@ -61,10 +61,9 @@ base font sizes than conferences:
 | Dense multi-panel (journal full-page) | 8–9 | Slightly more room than conference equivalent |
 | Hero / teaser (journal full-page) | 11–13 | Wider canvas allows larger text |
 
-**Minimum legibility rule**: No text element may render below 6pt at final column
-width. Labels below 7pt should be rare and only for secondary information (tick
-labels, legend entries for 5+ methods). When in doubt, render the PNG and check
-readability at 100% zoom.
+Use the shared legibility floor in `plot-style.md`. Journal figures should normally sit above that
+floor because wider columns leave room for 9--12 pt base text; dense secondary labels are the only
+routine exception.
 
 ## Display-Item Caps
 

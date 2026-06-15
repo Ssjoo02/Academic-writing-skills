@@ -1,9 +1,8 @@
 # Journal Overlay: Introduction
 
 Apply on top of `references/sections/introduction.md`. Keep the base logic map,
-the five-block Section Skeleton, the Task/Challenge/Pipeline template versions, the
-compact contribution-bullet rule, and the quality checklist. Adjust for journals as
-follows.
+the base Section Skeleton, the Task/Challenge/Pipeline template versions, the compact
+contribution-bullet rule, and the quality checklist. Adjust for journals as follows.
 
 ## Non-Anonymous: Build On Your Own Work Directly
 
@@ -47,9 +46,9 @@ and boundary in the prose blocks, not by inflating every bullet.
 
 The base (conference) Introduction has no roadmap paragraph. Journal articles are
 longer, so a short roadmap is a journal-specific addition that is often warranted
-here. When used, append it as a sixth block after the contributions, keep it to 3-5
-sentences, and say what each section contributes to the argument; do not just list
-section numbers.
+here. When used, append it after the contributions and any evidence preview, keep it
+to 3-5 sentences, and say what each section contributes to the argument; do not just
+list section numbers.
 
 Sentence skeleton:
 

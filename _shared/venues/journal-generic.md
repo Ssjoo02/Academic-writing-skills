@@ -23,7 +23,7 @@
 - References count: `not verified` — confirm whether references count toward any limit.
 - Abstract limit: `not verified` — confirm word/character cap and whether it is structured or unstructured.
 - Supplementary material count: `not verified` — confirm whether supplementary material is separate and uncapped.
-- Word budget: `not verified` — confirm whether the cap is by words or pages and, critically, **whether the word cap includes Methods** (the Methods-in-cap trap). If word-capped, propose a per-section budget before drafting. See `references/checks/journal-submission-elements.md` (Length And Word Budget).
+- Word budget: `not verified` — confirm whether the cap is by words or pages and, critically, **whether the word cap includes Methods** (the Methods-in-cap trap). If word-capped, propose a per-section budget before drafting. See the `academic-review` skill's `references/checks/journal-submission-elements.md` (Length And Word Budget).
 
 ## Blinding
 

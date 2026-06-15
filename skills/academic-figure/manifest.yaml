@@ -11,12 +11,16 @@ always_load:
 axes:
   display_item:
     detect: |
-      Decide which execution fragment to load from the request. figure for any
-      data-driven plot or concept/teaser/pipeline illustration; table for any
-      LaTeX table. A request with both loads both fragments.
+      Decide which execution fragment to load from the request. plot for any
+      data-driven chart; schematic for deterministic pipeline/framework/
+      architecture/workflow/taxonomy diagrams; picture for teaser/concept/
+      raster illustration or qualitative composite; table for any LaTeX table.
+      A request with multiple display items loads each matching fragment.
     values:
-      figure: static/figure-handling.md
-      table: static/table-handling.md
+      plot: workflows/plot.md
+      schematic: workflows/schematic.md
+      picture: workflows/picture.md
+      table: workflows/table.md
     multi: true
 
   venue_kind:
@@ -33,7 +37,11 @@ references:
   on_demand:
     - condition: "data-driven plots — venue-agnostic shared rules (rcParams, colors, per-chart-type rules, legend rules, multi-panel architecture); load before the venue-specific sizing file"
       path: references/figures/plot-style.md
-    - condition: "non-data picture figure (teaser, illustration, conceptual picture, pipeline, architecture)"
+    - condition: "data-driven plots need chart-family selection, palette presets, label strategy, statistics contract, or coverage for bar/grouped/stacked/line/scatter/Pareto/radar/heatmap/distribution/pie/donut patterns"
+      path: references/figures/chart-taxonomy.md
+    - condition: "deterministic schematic diagrams — pipeline, framework, architecture, workflow, taxonomy, benchmark construction, system overview"
+      path: references/figures/schematic-design.md
+    - condition: "picture-style figure — teaser, conceptual method illustration, raster overview, qualitative composite, or image-model-generated picture"
       path: references/figures/picture-generation.md
     - condition: "data-driven plots require reusable code patterns (grouped bars, trend lines, heatmaps, radar, save helpers)"
       path: references/figures/chart-patterns.md
@@ -49,5 +57,13 @@ references:
       path: references/figures/qa-contract.md
     - condition: "table span decisions, LaTeX patterns, or table QA gate is needed"
       path: references/tables/table-design.md
-    - condition: "how figures and tables sit in the prose and appendix (placement, captions, appendix float discipline)"
-      path: references/sections/figures-and-tables.md
+    - condition: "table body-vs-appendix decision, span/width contract, overflow ladder, appendix float discipline, or supplement routing is needed"
+      path: references/tables/table-placement.md
+    - condition: "how figures and tables sit in the prose and captions"
+      path: references/prose/display-in-prose.md
+
+scripts:
+  - condition: "data-backed LaTeX table tasks need schema inspection before table classification or width decisions"
+    path: scripts/inspect_table_data.py
+  - condition: "picture-style figures have a Picture Brief and a Gemini/OpenAI-compatible image API should render the Direct Image Prompt"
+    path: scripts/render_picture_api.py

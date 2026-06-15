@@ -24,7 +24,7 @@ Framework checkpoint; silent structural deviation is a workflow violation.
 This is a journal paper. Do NOT use a conference soft page budget. Take absolute length from the
 venue card and plan sections as proportions first. The defining feature of this type is a LARGE
 experimental matrix; protect enough room for it and push secondary tables to supplement/appendix.
-Also load `references/venues/journal-vs-conference.md`.
+Also load `_shared/venues/journal-vs-conference.md`.
 
 ## Priority Contract
 

@@ -32,7 +32,7 @@
 - Abstract limit: one paragraph, 150-250 words, no citations, no numbered equations.
 - Index Terms: required, alphabetical, immediately after the abstract.
 - Supplementary material count: separate files only (must not be in the main PDF); no page limit on supplemental files.
-- Word budget: TPAMI is page-capped (not word-capped), and references and author biographies count toward the page limit. Budget by manuscript type and weigh overlength against MOPC. See `references/checks/journal-submission-elements.md` (Length And Word Budget → Page-based venues).
+- Word budget: TPAMI is page-capped (not word-capped), and references and author biographies count toward the page limit. Budget by manuscript type and weigh overlength against MOPC. See the `academic-review` skill's `references/checks/journal-submission-elements.md` (Length And Word Budget -> Page-based venues).
 
 ## Blinding
 

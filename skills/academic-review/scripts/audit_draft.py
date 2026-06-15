@@ -20,7 +20,8 @@ Checks (errors block; warnings inform):
 - limitations placement: no Limitations-titled subsection/paragraph/\\textbf run-in inside a
   body section, and at most one dedicated \\section{Limitations}
 - content-page budget is venue-aware: the count ends at the first post-matter heading
-  (References, or a venue-excluded section such as Limitations / Acknowledgments / Ethics)
+  (References, or a venue-excluded section such as Limitations / Acknowledgments / Ethics);
+  when a minimum is supplied, underfilled page-limited drafts are also blocking.
 - subsection budget: at most 4 \\subsection per main section
 - table hygiene: no \\hline in tables (use booktabs); booktabs loaded when any
   table exists; warn on vertical rules and \\textsc{lowercase} names
@@ -47,8 +48,10 @@ Checks (errors block; warnings inform):
 - \\input/\\include consistency between main.tex and section files
 - Framework alignment when `--framework` is provided: every main-paper figure planned in the
   Paper Framework Figure Plan must materialize in `paper/`; planned picture/teaser figures must
-  have both a Picture Brief and an output image, and registry comments such as "not yet generated"
-  are blocking errors.
+  have both a Picture Brief and an output image, registry comments such as "not yet generated"
+  are blocking errors, and framework prose must not reference unplanned Fig./Tab. IDs.
+- appendix planning: if the draft has appendix content, `paper/appendix-plan.md` must record the
+  planned appendix items, source availability, fill status, and fallback for missing evidence.
 - compile-log signals when main.log exists (undefined refs/citations, multiply
   defined labels, rendered Table ?? / Figure ?? / Section ?? references; a large overfull hbox —
   content past the margin / "出界" — is a blocking error, minor overfulls are warnings)
@@ -168,6 +171,16 @@ FULL_WIDTH_TABLE_PLAN_RE = re.compile(
     r"model\s*[x×]\s*dataset|matrix|full matrix|aggregate results?)\b",
     re.I,
 )
+LOAD_BEARING_RESULTS_TABLE_RE = re.compile(
+    r"\b(?:main results?|headline|overall results?|scorecard|leaderboard|"
+    r"aggregate results?)\b",
+    re.I,
+)
+COMPARISON_TABLE_READER_TASK_RE = re.compile(
+    r"\b(?:per-model|per-method|model|method|baseline|system|agent|agents|"
+    r"evaluated|comparison|compare|leaderboard)\b",
+    re.I,
+)
 SINGLE_COLUMN_TABLE_PLAN_RE = re.compile(
     r"\b(?:taxonomy|definition|terminology|compact ablation|mini-ablation|"
     r"qualitative examples?|setup|protocol|notation|inventory|list)\b",
@@ -212,10 +225,18 @@ FLOAT_ENV_RE = re.compile(r"\\begin\{(table\*?|figure\*?)\}(.*?)\\end\{\1\}", re
 # a float environment with its placement spec, e.g. \begin{table}[h] or \begin{figure*}[!htbp]
 FLOAT_PLACEMENT_RE = re.compile(r"\\begin\{(table|figure)(\*?)\}\s*\[([^\]]*)\]")
 FIGURE_ENV_RE = re.compile(r"\\begin\{figure\*?\}(.*?)\\end\{figure\*?\}", re.S)
+FIGURE_ENV_WITH_STAR_RE = re.compile(r"\\begin\{figure(\*?)\}(.*?)\\end\{figure\1\}", re.S)
 FRAMEWORK_FIGURE_PLAN_RE = re.compile(r"^#+\s*\d*\.?\s*Figure Plan\b", re.I)
 FRAMEWORK_NEXT_SECTION_RE = re.compile(r"^#+\s+")
 FRAMEWORK_SEPARATOR_RE = re.compile(r"^\s*\|?\s*:?-{3,}:?\s*(?:\|\s*:?-{3,}:?\s*)+\|?\s*$")
 FIG_ID_RE = re.compile(r"\bfig(?:ure)?\.?\s*(\d+)\b", re.I)
+DISPLAY_REF_RE = re.compile(r"\b(Fig(?:ure)?|Tab(?:le)?)\.?\s*(\d+)\b", re.I)
+APPENDIX_PLAN_REQUIRED_TOKENS = (
+    "Claim backed",
+    "Source availability",
+    "Fill status",
+    "Fallback",
+)
 PICTURE_ROUTE_RE = re.compile(
     r"\b(?:picture|ai illustration|teaser|pipeline|overview|architecture|workflow)\b",
     re.I,
@@ -225,6 +246,12 @@ GRAPHICS_WIDTH_RE = re.compile(r"\bwidth\s*=\s*([^,\]]+)")
 RELATIVE_WIDTH_RE = re.compile(r"^\s*(?:(\d+(?:\.\d+)?)\s*)?\\(?:line|text|column)width\s*$")
 COMPACT_SINGLE_COLUMN_WIDTH_MAX = 0.70
 COMPACT_FIGURE_RE = re.compile(r"\b(?:heatmap|coverage|matrix)\b", re.I)
+STORY_TEASER_RE = re.compile(r"\b(?:story|teaser|overview|introductory|first\s+concept)\b", re.I)
+WIDE_FIGURE_ROLE_RE = re.compile(
+    r"\b(?:pipeline|framework|architecture|system|workflow|construction|multi-panel|"
+    r"small[- ]multiples|grouped\s+bar|radar|heatmap|matrix)\b",
+    re.I,
+)
 
 
 def count_columns(colspec: str) -> int:
@@ -299,6 +326,14 @@ def framework_item_number(item_id: str) -> str | None:
     return match.group(1) if match else None
 
 
+def framework_display_key(item_id: str) -> str | None:
+    match = DISPLAY_REF_RE.search(item_id)
+    if not match:
+        return None
+    kind = "fig" if match.group(1).lower().startswith("fig") else "tab"
+    return f"{kind}.{match.group(2)}"
+
+
 def main_text_tex_files(paper_dir: Path) -> list[Path]:
     files = []
     for path in prose_tex_files(paper_dir):
@@ -341,6 +376,18 @@ def table_plan_should_stay_single_column(item: dict[str, str]) -> bool:
     return bool(SINGLE_COLUMN_TABLE_PLAN_RE.search(table_plan_text(item)))
 
 
+def table_plan_is_load_bearing_results(item: dict[str, str]) -> bool:
+    text = table_plan_text(item)
+    return bool(LOAD_BEARING_RESULTS_TABLE_RE.search(text) and COMPARISON_TABLE_READER_TASK_RE.search(text))
+
+
+def framework_declares_one_column(framework_text: str) -> bool:
+    lowered = framework_text.lower()
+    if "two-column" in lowered or "double-column" in lowered:
+        return False
+    return bool(re.search(r"\b(?:one-column|single-column)\s+(?:venue|paper|template|journal)\b", lowered))
+
+
 def check_framework_alignment(
     paper_dir: Path,
     framework_path: Path | None,
@@ -358,6 +405,17 @@ def check_framework_alignment(
     if not items:
         warnings.append(f"framework alignment: no Figure Plan display items parsed from {framework_path}")
         return
+    planned_display_keys = {key for item in items if (key := framework_display_key(item.get("id", "")))}
+    framework_text = framework_path.read_text(encoding="utf-8", errors="ignore")
+    for match in DISPLAY_REF_RE.finditer(strip_comments(framework_text)):
+        key = ("fig" if match.group(1).lower().startswith("fig") else "tab") + f".{match.group(2)}"
+        if key not in planned_display_keys:
+            line = framework_text.count("\n", 0, match.start()) + 1
+            errors.append(
+                f"framework alignment: unplanned display reference in framework: "
+                f"{rel(framework_path, paper_dir.parent)}:{line}: {match.group(0)} is referenced "
+                f"but not listed in the Figure Plan"
+            )
 
     raw_text_by_file: dict[Path, str] = {
         path: path.read_text(encoding="utf-8", errors="ignore")
@@ -381,11 +439,21 @@ def check_framework_alignment(
     planned_tables = [
         item for item in items if item.get("id", "").strip().lower().startswith(("tab", "table"))
     ]
+    one_column_framework = framework_declares_one_column(framework_text)
+    for item in planned_tables:
+        layout = item.get("layout", "").lower()
+        if "single-column" in layout and not one_column_framework and table_plan_is_load_bearing_results(item):
+            errors.append(
+                f"framework alignment: load-bearing main-results table {item.get('id', '').strip()} "
+                f"is planned as single-column; in a two-column paper, the central results scorecard "
+                f"should normally be double-column/full-width and use the span for grouped metrics, "
+                f"counts, or other comparison cues rather than a narrow centered table"
+            )
     main_text = "\n".join(
         path.read_text(encoding="utf-8", errors="ignore")
         for path in main_text_tex_files(paper_dir)
     )
-    actual_figures = FIGURE_ENV_RE.findall(strip_comments(main_text))
+    actual_figures = FIGURE_ENV_WITH_STAR_RE.findall(strip_comments(main_text))
     actual_tables = TABLE_ENV_RE.findall(strip_comments(main_text))
     if len(actual_figures) < len(planned_figures):
         errors.append(
@@ -434,13 +502,37 @@ def check_framework_alignment(
                 f"does not fill \\textwidth; use tabular*{{\\textwidth}} or "
                 f"tabularx{{\\textwidth}}"
             )
+    planned_double_figures = [
+        item for item in planned_figures if "double-column" in item.get("layout", "").lower()
+    ]
+    for item in planned_double_figures:
+        item_blob = " ".join(item.get(key, "") for key in ("id", "type", "section", "message", "generation_route"))
+        if (
+            framework_item_number(item.get("id", "")) == "1"
+            and STORY_TEASER_RE.search(item_blob)
+            and not WIDE_FIGURE_ROLE_RE.search(item_blob)
+        ):
+            errors.append(
+                f"framework alignment: story/teaser figure should default to single-column for "
+                f"{item.get('id', '').strip()}; reserve double-column for pipeline, framework, "
+                f"architecture, system-overview, multi-panel, or genuinely wide comparison figures"
+            )
+    actual_wide_figures = [body for starred, body in actual_figures if starred == "*"]
+    if planned_double_figures and len(actual_wide_figures) < len(planned_double_figures):
+        ids = ", ".join(item.get("id", "").strip() for item in planned_double_figures)
+        errors.append(
+            f"framework alignment: planned double-column figure(s) {ids} must use figure* "
+            f"and be bounded by \\textwidth in a two-column template; regular figure environments "
+            f"are single-column and will squeeze or overflow wide displays"
+        )
+
     for item in planned_figures:
         item_blob = " ".join(item.get(key, "") for key in ("id", "type", "layout", "message"))
         if "single-column" not in item.get("layout", "").lower():
             continue
         if not COMPACT_FIGURE_RE.search(item_blob):
             continue
-        matching_bodies = [body for body in actual_figures if COMPACT_FIGURE_RE.search(body)]
+        matching_bodies = [body for _starred, body in actual_figures if COMPACT_FIGURE_RE.search(body)]
         if not matching_bodies:
             continue
         for figure_body in matching_bodies:
@@ -850,6 +942,33 @@ def check_appendix_substance(paper_dir: Path, warnings: list[str]) -> None:
         )
 
 
+def check_appendix_plan(paper_dir: Path, errors: list[str]) -> None:
+    """Require a lightweight source-aware appendix plan before appendix material is pasted."""
+    segments = appendix_segments(paper_dir)
+    substantive = [
+        (name, text)
+        for name, text in segments
+        if _prose_word_count(text) > 0 or FLOAT_ENV_RE.search(text)
+    ]
+    if not substantive:
+        return
+    plan = paper_dir / "appendix-plan.md"
+    if not plan.exists():
+        errors.append(
+            "missing appendix plan: paper/appendix-plan.md must list appendix items before "
+            "appendix content is included, with claim backed, source availability, fill status, "
+            "and fallback for missing evidence"
+        )
+        return
+    text = plan.read_text(encoding="utf-8", errors="ignore")
+    missing = [token for token in APPENDIX_PLAN_REQUIRED_TOKENS if token not in text]
+    if missing:
+        errors.append(
+            "incomplete appendix plan: paper/appendix-plan.md is missing required field(s): "
+            + ", ".join(missing)
+        )
+
+
 def check_enumeration(path: Path, base: Path, errors: list[str]) -> None:
     """Heuristic: flag taxonomy/inventory enumeration and per-category count dumps in body prose.
 
@@ -1242,8 +1361,12 @@ def content_pages_before_references(text_pages: list[str]) -> int:
     """
 
     for index, page_text in enumerate(text_pages, 1):
-        if POSTMATTER_HEADING_RE.search(page_text):
-            return index
+        match = POSTMATTER_HEADING_RE.search(page_text)
+        if match:
+            before_heading = page_text[: match.start()]
+            if _prose_word_count(before_heading) > 0:
+                return index
+            return max(1, index - 1)
     return len(text_pages)
 
 
@@ -1289,14 +1412,15 @@ def pdf_text_pages(pdf_path: Path, page_count: int) -> list[str] | None:
 def check_page_budget(
     paper_dir: Path,
     max_content_pages: int | None,
+    min_content_pages: int | None,
     errors: list[str],
     warnings: list[str],
 ) -> None:
-    if max_content_pages is None:
+    if max_content_pages is None and min_content_pages is None:
         return
     pdf_path = paper_dir / "main.pdf"
     if not pdf_path.exists():
-        errors.append("--max-content-pages was set, but paper/main.pdf is missing")
+        errors.append("content-page budget was set, but paper/main.pdf is missing")
         return
     page_count = pdf_page_count(pdf_path)
     if page_count is None:
@@ -1306,19 +1430,44 @@ def check_page_budget(
     if pages is None:
         errors.append("cannot check content-page budget because pdftotext is unavailable or failed")
         return
-    content_pages = content_pages_before_references(pages)
-    if content_pages > max_content_pages:
+    check_content_page_bounds_from_pages(
+        pages,
+        max_content_pages=max_content_pages,
+        min_content_pages=min_content_pages,
+        errors=errors,
+        warnings=warnings,
+    )
+
+
+def check_content_page_bounds_from_pages(
+    text_pages: list[str],
+    max_content_pages: int | None,
+    min_content_pages: int | None,
+    errors: list[str],
+    warnings: list[str],
+) -> None:
+    content_pages = content_pages_before_references(text_pages)
+    start_errors = len(errors)
+    if max_content_pages is not None and content_pages > max_content_pages:
         errors.append(
             f"content-page budget exceeded: main text reaches page {content_pages} "
             f"(limit {max_content_pages}; references page counts if main text reaches it)"
         )
-    else:
-        warnings.append(f"content-page budget ok: main text reaches page {content_pages}/{max_content_pages}")
+    if min_content_pages is not None and content_pages < min_content_pages:
+        errors.append(
+            f"content-page budget underfilled: main text reaches page {content_pages} "
+            f"(target {min_content_pages}; page-limited drafts should use the confirmed body-page "
+            f"budget with substantive content, not stop early)"
+        )
+    if len(errors) == start_errors:
+        target = max_content_pages if max_content_pages is not None else min_content_pages
+        warnings.append(f"content-page budget ok: main text reaches page {content_pages}/{target}")
 
 
 def audit(
     paper_dir: Path,
     max_content_pages: int | None = None,
+    min_content_pages: int | None = None,
     framework_path: Path | None = None,
 ) -> tuple[list[str], list[str]]:
     errors: list[str] = []
@@ -1350,6 +1499,7 @@ def audit(
     check_limitations(paper_dir, errors, warnings)
     check_booktabs_loaded(paper_dir, files, errors)
     check_appendix_page(paper_dir, warnings)
+    check_appendix_plan(paper_dir, errors)
     check_appendix_substance(paper_dir, warnings)
     check_limitations_placement(files, paper_dir, errors)
     check_invalid_latex_environments(files, paper_dir, errors)
@@ -1359,7 +1509,7 @@ def audit(
     check_framework_alignment(paper_dir, framework_path, errors, warnings)
     check_log(paper_dir, errors, warnings)
     check_rendered_pdf_refs(paper_dir, errors)
-    check_page_budget(paper_dir, max_content_pages, errors, warnings)
+    check_page_budget(paper_dir, max_content_pages, min_content_pages, errors, warnings)
     return errors, warnings
 
 
@@ -1373,6 +1523,12 @@ def main() -> int:
         help="Fail if compiled main text reaches beyond this page before references.",
     )
     parser.add_argument(
+        "--min-content-pages",
+        type=int,
+        default=None,
+        help="Fail if compiled main text ends before this page before references.",
+    )
+    parser.add_argument(
         "--framework",
         type=Path,
         default=None,
@@ -1384,6 +1540,7 @@ def main() -> int:
     errors, warnings = audit(
         paper_dir,
         max_content_pages=args.max_content_pages,
+        min_content_pages=args.min_content_pages,
         framework_path=args.framework.resolve() if args.framework else None,
     )
 

@@ -3,6 +3,9 @@
 Journal-wide requirements that are not tied to a single section. Load this when
 `Venue Kind: journal`, both at the **planning** stage (so the artifacts are
 planned early, not bolted on after drafting) and at the final readiness check.
+For empirical availability obligations, also load `data-code-availability.md`;
+this file decides that the statement is required, while that workflow inventories
+the artifacts and identifiers.
 
 This file holds the journal deltas; the authoritative per-journal facts (caps,
 abstract rules, post-main order) live in the active venue card. Do not invent a
@@ -15,6 +18,11 @@ Most journals require statements that conferences do not. Decide which apply fro
 the venue card and author guidelines, and reserve a place for each at planning
 time. Common set:
 
+### Data/Code Availability
+
+Use `data-code-availability.md` for the artifact inventory, access-route ledger,
+repository identifiers, and unresolved availability blockers.
+
 | Statement | When required | Planning note |
 |---|---|---|
 | Data Availability | almost always for empirical work | name the repository, accession number, or DOI; **invalid or pre-publication accessions block production**, so plan real, resolvable links |
@@ -24,12 +32,16 @@ time. Common set:
 | Funding / Acknowledgments | when applicable | JMLR uses `\acks{}` (Acknowledgments and Disclosure of Funding) before appendices |
 | Ethics / IRB / consent | human-subjects, data-collection, dual-use work | confirm the journal's required wording |
 | Reporting Summary / checklist | life-sciences and some venues | filled with manuscript-level rigor; reviewers see it |
+| Cover letter / editorial summary | many journals, especially high-impact targets | plan the significance, scope, and difference from prior versions without overselling |
+| Graphical abstract / highlights / key points | some publishers | confirm required format, word limits, and whether they are uploaded separately |
 
 Rules:
 
 - Surface these at the planning stage, not after drafting.
 - A reproducibility claim in Method or Abstract that has no backing Data/Code
   statement is a reviewer risk; pair the claim with the statement.
+- Use `data-code-availability.md` before drafting availability text when data,
+  code, source data, checkpoints, or repository identifiers are involved.
 - For `journal-generic`, confirm the exact required set from the target journal's
   author guidelines before declaring readiness.
 

@@ -25,7 +25,7 @@ This is a journal paper. Do NOT use a conference soft page budget. Take the abso
 venue card (JMLR: no hard limit, concise and complete; TPAMI: manuscript-type page limits). Plan the
 sections as proportions of main text first, then fit them to the venue's absolute budget. Long, full
 proofs go to the appendix (JMLR) or supplemental material (TPAMI), outside the main argument budget.
-Also load `references/venues/journal-vs-conference.md`.
+Also load `_shared/venues/journal-vs-conference.md`.
 
 ## Priority Contract
 

@@ -16,6 +16,7 @@ regenerate) in `figure-planning.md`.
 | Core conclusion | Every figure has a one-sentence claim; every panel maps to it |
 | Evidence chain | Every panel traces to a concrete workspace result file or confirmed paper fact |
 | Display type | Figure is classified (quantitative comparison / pipeline-architecture / teaser-composite / qualitative-grid / latex-table) and the generation route matches |
+| Chart taxonomy | Every data plot records its chart family, source file, statistic/interval, palette preset, label strategy, and layout target before code is written |
 | Layout target | Single-column / double-column is declared and matches the venue template |
 | Height budget | No figure exceeds its role's height budget; banners ~4.5–6 cm at `\textwidth`; no empty top/bottom bands |
 | No margin overflow | Zero `Overfull \hbox` for figures in `main.log`; `audit_draft.py` passes |
@@ -105,11 +106,14 @@ assert mpl.rcParams["pdf.fonttype"] == 42,    "PDF text may not be selectable"
 ## Cross-Reference
 
 - `plot-style.md` — rcParams, colors, per-chart-type rules, legend rules, multi-panel architecture
+- `chart-taxonomy.md` — chart-family selection, palette presets, label/statistics/layout strategy
 - `chart-patterns.md` — reusable Python plotting helpers
 - `figure-planning.md` — Display Review Gate with failure signatures, generation routes
+- `schematic-design.md` — deterministic framework, pipeline, architecture, workflow, and taxonomy diagrams
 - `picture-generation.md` — AI-generated picture workflow, label verification, overlay fallback
 - `conference/figure-sizing.md` — conference column widths, figsize, font hierarchy, height budget, QA notes
 - `journal/figure-sizing.md` — journal column widths, figsize, font hierarchy, display-item caps, QA notes
 - `journal/figure-contract.md` — journal figure archetypes, panel logic, aesthetic integration, reviewer-risk
 - `table-design.md` — analogous QA Gate for LaTeX tables
-- `references/sections/figures-and-tables.md` — section-level insertion rules and width contract
+- `references/prose/display-in-prose.md` — section-level insertion and caption rules
+- `references/tables/table-placement.md` — table width contract, appendix, and supplement routing

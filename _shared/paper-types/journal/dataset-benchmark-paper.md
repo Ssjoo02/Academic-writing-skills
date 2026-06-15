@@ -23,7 +23,7 @@ Framework checkpoint; silent structural deviation is a workflow violation.
 
 This is a journal paper. Take absolute length from the venue card and plan sections as proportions
 first. Move full datasheets, annotation guides, and per-method tables to supplemental material. Also
-load `references/venues/journal-vs-conference.md`.
+load `_shared/venues/journal-vs-conference.md`.
 
 ## Priority Contract
 

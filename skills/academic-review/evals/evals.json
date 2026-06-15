@@ -41,6 +41,17 @@
         {"name": "returns_revised_draft", "description": "The returned artifact is the reviewed-and-revised draft, not an unreviewed first pass."}
       ],
       "files": []
+    },
+    {
+      "id": "bounded-review-no-pass",
+      "prompt": "Review this abstract and two result paragraphs for submission readiness. I do not have the full paper/ project yet.",
+      "expected_output": "The assistant runs a bounded review, states the input scope and missing materials, reports risks with location/evidence/boundary/action fields where possible, and does not produce a PASS submission-readiness verdict.",
+      "assertions": [
+        {"name": "bounded_scope_reported", "description": "The response labels the review as bounded because a complete local paper/ draft is unavailable."},
+        {"name": "no_submission_pass", "description": "The assistant refuses to declare PASS or submission-ready from partial materials."},
+        {"name": "findings_have_evidence_schema", "description": "Material findings include location, evidence basis, assessment boundary, risk level, action type, and required revision."}
+      ],
+      "files": []
     }
   ]
 }

@@ -1,6 +1,6 @@
 # Experiments Principles And Templates
 
-## Section Role
+## Goal
 
 Experiments provide evidence for the paper's claims. They should answer research questions, not
 only report numbers.
@@ -31,8 +31,7 @@ For empirical method-style papers, check whether the section includes:
 
 1. comparison experiments against strong and relevant baselines,
 2. ablation studies for key modules or design choices,
-3. applications or demos when practical value, robustness, or realism is claimed,
-4. stress tests, failure analysis, or limitations when safety/generalization is claimed.
+3. stress tests, failure analysis, or limitations when safety/generalization is claimed.
 
 For benchmark or analysis papers, adapt the package to coverage, reliability, evaluation protocol,
 taxonomy validity, and insight quality.
@@ -42,7 +41,7 @@ taxonomy validity, and insight quality.
 Standard method evaluation: setup → main comparison → ablation → analysis → failure cases.
 Benchmark evaluation: benchmark statistics → model evaluation → breakdown → controls → limits.
 Analysis paper: research questions → findings → supporting experiments → caveats.
-New-task setting: protocol → adapted baselines/variants → diagnostics → demos.
+New-task setting: protocol → adapted baselines/variants → diagnostics → realistic-scenario checks.
 
 These flows are **content blocks and paragraph roles, not mandatory numbered subsections**. Prefer
 flowing prose; turn a block into a `\subsection` only when it spans multiple paragraphs or owns a
@@ -84,9 +83,12 @@ Template:
 
 A strong ablation package usually has two levels:
 
-1. A main ablation table for core contributions and major components.
-2. Smaller focused ablations for module-level design choices, sensitivity, input quality, or
-   protocol variants.
+1. A main ablation table and matching visualization that compare how the paper's core contributions
+   and major components affect method performance.
+2. Several focused ablation tables and matching visualizations. Each small table should isolate the
+   design choices within one pipeline module and show their effect on method performance, such as
+   hyperparameter sensitivity, input-quality sensitivity, or the performance impact of removing a
+   design choice.
 
 Each ablation should state:
 
@@ -96,47 +98,12 @@ Each ablation should state:
 - observed effect,
 - whether the claim remains supported.
 
-## Applications Or Demos
+## Display Evidence Role
 
-Use applications or demos to show practical value, difficult settings, or the work's upper bound.
-They are especially important when the paper claims real-world usefulness, generality, safety, or
-impact beyond a standard benchmark.
-
-## Figure And Table Rules
-
-Good tables and figures are part of experiment communication quality, not decoration.
-
-### Hard Rules
-
-1. Put caption above the table.
-2. Avoid vertical lines (`|`) in tabular columns.
-3. Do not use double rules or dense `\hline` stacks.
-4. Use `booktabs` style (`\toprule`, `\midrule`, `\bottomrule`) for clean structure.
-5. Use as few horizontal rules as possible; lines separate groups, not every row.
-6. Highlight key numbers (best/second-best or target rows) with subtle color emphasis.
-
-### Readability Rules
-
-1. Label metric direction in column headers (e.g., `PSNR ↑`, `LPIPS ↓`).
-2. Add units when needed so values are interpretable without guessing.
-3. Align text columns left; keep numeric columns consistently aligned.
-4. Keep numeric precision consistent (same decimal places within a metric column).
-5. Group multi-dataset or multi-setting results using `\multicolumn` + `\cmidrule`, not vertical
-   separators.
-6. One table or figure should carry one message; do not mix unrelated results in a single table.
-7. If rows represent different attributes/ablations, encode that explicitly in row names or
-   attribute columns.
-8. Keep caption focused on setting/protocol/notation, not long discussion.
-9. If there is little detail to explain, use one concise sentence to summarize the main result.
-10. For single-column figures/tables in two-column papers, prefer placing them in the right column
-    when layout allows, so readers can enter the page from left-top text without breaking flow.
-
-### Caption Rules
-
-- State experimental setting and notation.
-- Explain metric direction and units when needed.
-- State the main takeaway, not just a visual description.
-- Keep discussion concise; do not duplicate the main text.
+The Experiments section only owns the evidence role of display items: decide which claims need a
+table or figure, what comparison or ablation each display carries, and what each display item
+proves. All display design and implementation details -- caption, span, booktabs, overflow, and QA
+-- belong to `academic-figure`.
 
 ## Template Selection
 
@@ -145,18 +112,11 @@ Select an experiment organization before writing:
 1. Standard method evaluation: setup → main comparison → ablation → analysis → failure cases.
 2. Benchmark evaluation: benchmark statistics → model evaluation → breakdown → controls → limits.
 3. Analysis paper: research questions → findings → supporting experiments → caveats.
-4. New-task setting: protocol → adapted baselines/variants → diagnostics → demos.
+4. New-task setting: protocol → adapted baselines/variants → diagnostics → realistic-scenario
+   checks.
 
 Choose the organization internally based on paper type, available evidence, and reviewer risk.
 Do not expose template-selection notes unless the user asks for reasoning.
-
-## Required Output
-
-For Full Draft Workflow, write English LaTeX prose into the corresponding section file. Keep a
-compact `Section Plan`, `Paragraph Plan`, and `Evidence And Risk Notes` internally unless the user
-asks to see them. Each result claim must identify metric, denominator, source artifact, and whether
-the evidence is raw evidence or derived evidence. Run reverse outlining and claim-evidence mapping
-internally before returning.
 
 ## Rigor Checklist
 

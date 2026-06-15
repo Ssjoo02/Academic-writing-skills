@@ -63,7 +63,6 @@ For empirical method papers, the default evidence package is:
 
 - comparison experiments,
 - ablation studies,
-- applications or demos,
 - stress tests or failure analysis when robustness/safety/generalization is claimed.
 
 Other paper-types can adapt the package, but every central claim still needs aligned evidence.

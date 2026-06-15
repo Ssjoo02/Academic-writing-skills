@@ -24,7 +24,7 @@ Framework checkpoint; silent structural deviation is a workflow violation.
 This is a journal paper. The JMLR OSS/MLOSS track is SHORT (~8 pages); a tool paper in a longer
 journal can be fuller. Take absolute length from the venue card and keep the writing compact and
 concrete. Move exhaustive API listings and tutorials to the documentation/appendix. Also load
-`references/venues/journal-vs-conference.md`.
+`_shared/venues/journal-vs-conference.md`.
 
 ## Priority Contract
 
