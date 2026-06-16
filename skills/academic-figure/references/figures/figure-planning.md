@@ -289,8 +289,15 @@ When this table is shown in a terminal-facing Paper Framework checkpoint, it fol
 interaction language. The saved framework artifact may keep the English schema, but the terminal
 heading and human-facing column labels must be localized; for Chinese, use `图表计划` with columns
 `ID`, `类型`, `图形形式`, `版式`, `位置章节`, `信息点`, `来源`, and `生成路径`. Keep figure/table IDs,
-layout enum values, chart-form enum values such as `donut`, file paths, and generation route
-identifiers unchanged.
+layout enum values, file paths, and generation route identifiers unchanged. Chinese terminal chart-form values must be localized, while the saved framework artifact keeps canonical English
+chart-form values. Use at least this mapping when applicable: `schematic -> 示意图`,
+`donut -> 环形图`, `pie -> 饼图`, `bar -> 柱状图`, `grouped bar -> 分组柱状图`,
+`stacked bar -> 堆叠柱状图`, `horizontal bar -> 横向条形图`, `heatmap -> 热力图`,
+`line -> 折线图`, `scatter -> 散点图`, `radar -> 雷达图`, `distribution -> 分布图`,
+and `table -> 表格`.
+
+Figure Plan must be rendered as a Markdown table in the terminal checkpoint. Do not replace it with a prose list such as `图表计划包含`; a short prose overview may appear before the table, but the table
+itself must still be shown.
 
 ```markdown
 | ID | Type | Chart form | Layout | Section | Message | Source | Generation route |

@@ -19,7 +19,9 @@ English are preserved.
 - Treat the framework overview, Section Plan, Figure Plan, Display-Item Page Budget, Appendix /
   Supplement Plan, decisions, blockers, and confirmation request shown in the terminal as
   conversation output: localize their labels and natural-language cells to the user's interaction
-  language while preserving paths, IDs, code, LaTeX, BibTeX keys, and manifest values.
+  language while preserving paths, IDs, code, LaTeX, BibTeX keys, and manifest values. For terminal
+  Figure Plan tables, chart-form cells are human-facing and should be localized to the interaction
+  language; the saved artifact may keep canonical English chart-form values.
 - Full Draft Workflow outputs a venue-formatted English LaTeX paper project when a target venue is
   confirmed; otherwise it outputs a non-submission generic English LaTeX draft. Do not generate a
   Chinese or Chinese-English parallel paper unless the user explicitly requests it.

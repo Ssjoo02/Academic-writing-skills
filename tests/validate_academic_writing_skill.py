@@ -451,9 +451,39 @@ def validate_hub(root: Path) -> None:
         "Language routing invariant" in paper_framework
         and "Do not paste the English schema labels into a Chinese terminal checkpoint" in paper_framework_flat
         and "框架概览" in paper_framework
+        and "章节计划" in paper_framework
         and "图表计划" in paper_framework
         and "请确认或修改" in paper_framework,
         "Paper Framework stage must include concrete interaction-language checkpoint labels for Chinese terminal output",
+    )
+    require(
+        "Terminal checkpoints must include the Section Plan table" in paper_framework
+        and "do not replace it with overview bullets" in paper_framework
+        and "Section Plan is mandatory terminal output" in paper_framework,
+        "Paper Framework terminal checkpoint must always show a concise Section Plan table",
+    )
+    require(
+        "render `章节计划` as a Markdown table" in paper_framework
+        and "| # | 章节 | 角色 | 主要内容 | 主文预算 | 底线 | 压缩规则 |" in paper_framework
+        and "Do not write `章节为`" in paper_framework
+        and "as a substitute for the table" in paper_framework,
+        "Paper Framework terminal Section Plan must be a localized Markdown table, not prose",
+    )
+    require(
+        "render `图表计划` as a Markdown table" in paper_framework
+        and "| ID | 类型 | 图形形式 | 版式 | 位置章节 | 信息点 |" in paper_framework
+        and "Do not write `图表计划包含`" in paper_framework
+        and "as a substitute for the table" in paper_framework,
+        "Paper Framework terminal Figure Plan must be a localized Markdown table, not prose",
+    )
+    require(
+        "Chinese terminal chart-form values must be localized" in paper_framework
+        and "schematic -> 示意图" in paper_framework
+        and "donut -> 环形图" in paper_framework
+        and "heatmap -> 热力图" in paper_framework
+        and "table -> 表格" in paper_framework
+        and "saved framework artifact keeps canonical English chart-form values" in paper_framework,
+        "Paper Framework must localize terminal chart-form cell values while keeping saved artifacts canonical",
     )
     require(
         "Do not compress a primary-core section below its floor" in paper_framework
@@ -924,6 +954,19 @@ def validate_figure_skill(root: Path) -> None:
         and "`类型`" in figure_planning
         and "`生成路径`" in figure_planning,
         "figure-planning must localize terminal Figure Plan labels while preserving the saved artifact schema",
+    )
+    require(
+        "Chinese terminal chart-form values must be localized" in figure_planning
+        and "schematic -> 示意图" in figure_planning
+        and "donut -> 环形图" in figure_planning
+        and "heatmap -> 热力图" in figure_planning
+        and "table -> 表格" in figure_planning,
+        "figure-planning must localize terminal chart-form cell values",
+    )
+    require(
+        "Figure Plan must be rendered as a Markdown table" in figure_planning
+        and "Do not replace it with a prose list such as `图表计划包含`" in figure_planning,
+        "figure-planning must forbid prose-only Figure Plan summaries",
     )
     require(
         "Chart Form Diversity Gate" in figure_planning

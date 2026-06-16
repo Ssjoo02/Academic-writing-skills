@@ -271,12 +271,36 @@ checkpoint must use at least these labels:
 | `Unresolved blockers` | `未解决阻塞项` |
 | `User action required` | `请确认或修改` |
 
+Terminal checkpoints must include the Section Plan table (`章节计划` in Chinese) after the framework
+overview. Section Plan is mandatory terminal output; do not replace it with overview bullets. Keep it
+brief by showing each section's role, one-line Main Content, prose budget, floor, and compression
+rule. For Chinese terminal output, render `章节计划` as a Markdown table with this localized header:
+
+```markdown
+| # | 章节 | 角色 | 主要内容 | 主文预算 | 底线 | 压缩规则 |
+|---:|---|---|---|---:|---:|---|
+```
+
+Do not write `章节为` plus a slash-separated section list, or any prose-only section summary, as a substitute for the table.
+
 For Chinese terminal Figure Plan tables, localize human-facing headers such as `Type`, `Chart form`,
 `Layout`, `Section`, `Message`, `Source`, and `Generation route` to `类型`, `图形形式`, `版式`,
 `位置章节`, `信息点`, `来源`, and `生成路径`; keep `ID`, `Fig. 1`, `Tab. 1`, `single-column`,
-`double-column`, `appendix`, `supplement`, and chart-form enum values such as `donut` unchanged. The
-final user action line should be Chinese, e.g.,
+`double-column`, `appendix`, and `supplement` unchanged. Chinese terminal chart-form values must be localized, while the saved framework artifact keeps canonical English chart-form values. Use this
+minimum mapping when applicable: `schematic -> 示意图`, `donut -> 环形图`, `pie -> 饼图`,
+`bar -> 柱状图`, `grouped bar -> 分组柱状图`, `stacked bar -> 堆叠柱状图`, `horizontal bar -> 横向条形图`,
+`heatmap -> 热力图`, `line -> 折线图`, `scatter -> 散点图`, `radar -> 雷达图`,
+`distribution -> 分布图`, and `table -> 表格`. The final user action line should be Chinese, e.g.,
 `请确认是否继续创建 paper/，或告诉我需要修改的内容。`
+
+For Chinese terminal output, render `图表计划` as a Markdown table with this localized header:
+
+```markdown
+| ID | 类型 | 图形形式 | 版式 | 位置章节 | 信息点 |
+|---|---|---|---|---|---|
+```
+
+Do not write `图表计划包含` plus a prose list of figures/tables, or any prose-only figure summary, as a substitute for the table.
 
 Show the framework to the user for confirmation using this semantic structure. Do not use a generic
 dimension/content table or any other structure. The English labels below are the saved-artifact
