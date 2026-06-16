@@ -26,7 +26,9 @@ slightly narrower — reduce the width by ~0.2 in.
 
 Apply the Display Width Contract from `figure-planning.md`. Conference templates usually insert
 single-column figures with `width=\columnwidth` / `width=\linewidth`; reserve
-`figure*` + `width=\textwidth` for the cross-column cases in the matrix below.
+`figure*` + a `\textwidth` fraction for the cross-column cases in the matrix below. Cross-column
+placement gives the figure more room, but moderate single-panel charts should still be centered at a
+sub-full width instead of being stretched.
 
 ### Column-Span Quick Rule (see `figure-planning.md` for the full decision)
 
@@ -36,7 +38,8 @@ In a two-column venue, decide span by role and width need, not figure number:
   single small plot, a narrow taxonomy/setup table.
 - **Cross-column** (`figure*` + `\textwidth`, top/bottom of page): pipeline / framework / architecture
   / system-overview diagrams; multi-panel figures (e.g. two radars side by side); wide grouped-bar /
-  heatmap / radar comparisons or wide result tables that go illegible at column width.
+  heatmap / radar comparisons or wide result tables that go illegible at column width. A small
+  single-panel radar or 4x6 heatmap should be tried as a normal one-column `figure` before promotion.
 
 A pipeline/framework diagram squeezed into one narrow column is the most common span mistake — give it
 `figure*`. Two related comparison charts go in one `figure*` multi-panel with a shared legend, not two
@@ -51,14 +54,24 @@ panel count, and evidence role.
 | Venue/template mode | Figure role / width need | LaTeX insertion | Plot/export target |
 |---|---|---|---|
 | ACL / EMNLP two-column | compact single-message plot, <=1 panel, <=5 short labels, no shared legend needed | `figure` + `width=\columnwidth` | ~3.0--3.3 in wide; base font 9--10 pt |
-| ACL / EMNLP two-column | grouped comparison, heatmap, radar, Pareto/scatter pair, distribution family, pipeline/framework, or >=2 panels that need a shared legend | `figure*` + `width=0.90--1.00\textwidth` | ~6.4--6.8 in wide; base font 9--11 pt |
+| ACL / EMNLP two-column | moderate single-panel radar/heatmap with short labels and readable text | `figure` + `width=\columnwidth` | keep native column-size export; promote only after rendered QA fails |
+| ACL / EMNLP two-column | grouped comparison, dense heatmap, dense radar, Pareto/scatter pair, distribution family, pipeline/framework, or >=2 panels that need a shared legend | `figure*` + `width=0.90--1.00\textwidth` | ~6.4--6.8 in wide; base font 9--11 pt |
 | Other two-column conference | same compact criteria as above | `figure` + `width=\columnwidth` | ~3.25--3.5 in wide; check final rendered text >=7 pt |
+| Other two-column conference | moderate single-panel radar/heatmap with short labels and readable text | `figure` + `width=\columnwidth` | native column-size export; do not use `figure*` just because the chart is polar or matrix-shaped |
 | Other two-column conference | wide comparison, dense result matrix, architecture, or multi-panel evidence | `figure*` + `width=0.90--1.00\textwidth` | ~6.5--7.0 in wide; keep height below half a page when possible |
-| One-column template | compact story/teaser, secondary plot, or small qualitative example | `figure` + `width=0.55--0.75\linewidth` | no `figure*`; center the image |
+| One-column template | low-density plot, compact story/teaser, secondary plot, or small qualitative example | `figure` + `width=0.45--0.70\linewidth` | no `figure*`; center the image |
 | One-column template | pipeline/framework, multi-panel comparison, dense heatmap/table-like plot, or load-bearing result figure | `figure` + `width=0.90--1.00\linewidth` | no `figure*`; use the full line when legibility depends on width |
 
-Overall, a one-column template always uses `figure` + `width=0.55--1.00\linewidth`; choose the
-smaller or larger end of the range from role and legibility.
+Overall, a one-column template always uses `figure` + `width=0.45--1.00\linewidth`; choose the
+smaller or larger end of the range from content density, role, and legibility.
+
+For two-column `figure*` plots, use sub-full width for moderate density:
+
+- `width=0.65--0.78\textwidth` for a single radar chart, a small heatmap, or a grouped comparison that
+  only needs to escape a narrow column;
+- `width=0.80--0.90\textwidth` for wider labels, longer legends, or dense annotations;
+- `width=0.90--1.00\textwidth` for dense multi-panel figures, framework/pipeline diagrams, or the
+  main result figure.
 
 If the proposed insertion would require text below 7 pt, rotated labels beyond ~30 degrees, or a
 legend that consumes more than one-third of the plot area, promote the figure to the next wider
@@ -69,7 +82,9 @@ layout or split the evidence into a table/appendix figure.
 For one-column conference templates and single-column journal drafts, `figure*` is unavailable and
 should not appear in generated LaTeX. Use a regular `figure` and choose width by role:
 
-- `0.55--0.75\linewidth` for a compact story/teaser figure, secondary single plot, or small example
+- `0.45--0.65\linewidth` for a low-density single plot such as a small bar, simple horizontal
+  ablation, pie/donut composition snapshot, or simple secondary scatter;
+- `0.55--0.75\linewidth` for a compact story/teaser figure, medium-density secondary plot, or small example
   panel;
 - `0.90--1.00\linewidth` for a pipeline, framework, architecture, multi-panel comparison, or dense
   result figure;

@@ -181,13 +181,18 @@ PEER_MARKERS = ['o', 's', '^', 'D', 'v', 'P', 'X', '*']  # pair 1:1 with colors
 - Cap at **6–8 categories**. Beyond that, group/aggregate or use small multiples; do not
   keep adding hues. **Reduce saturation before adding categories.**
 - For a **2–3 series** comparison where every series matters (e.g. two metrics like
-  ASR vs. TCR across models), pick from the **nature-figure palette** so the colors stay
+  ASR vs. TCR across models), pick from the local publication palette so the colors stay
   consistent across the paper — `#0F4D92` deep blue paired with `#B64342` brick red
   (default), or `#42949E` teal, or `#8BCF8B` soft green. Do **not** ship the matplotlib
   default orange/blue (`#1f77b4`/`#ff7f0e`) and do **not** hand-mix off-palette hues like a
   brown/clay — those read muddy. When the two series have opposite valence (e.g. ASR =
   risk/bad, TCR = capability), put the warmer/red hue on the "risk" series. Do not paint one
   series grey; keep the legend frameless (`frameon=False`).
+- For a **journal grouped bar with 4 methods/series**, do not use a loud four-hue set unless the
+  paper needs equal-status categorical separation. Prefer a restrained family palette such as
+  `["#C7D7EA", "#8FB3D1", "#5F8FB8", "#D07A68"]`: three related blues plus one warm focus color.
+  Use thin black outlines and, only when grayscale is a real requirement, subtle hatches rather
+  than heavy pattern fills.
 
 #### Ordered → Single-hue sequential ramp
 
@@ -214,10 +219,9 @@ zero/center.
 #### Emphasis → Hero-baseline (one focus entity)
 
 When the paper proposes a method, make the hero the **only saturated color**; baselines are
-**pale and recede**. This is the pattern published Nature/NMI comparison bars use: a row of
-soft, low-saturation baselines and one deep hero, with the **hero placed last** so the eye
-lands on it. Misapplying this to a peer comparison of equal methods invents a hierarchy that
-is not there.
+**pale and recede**. Use a row of soft, low-saturation baselines and one deeper hero, with
+the **hero placed last** so the eye lands on it. Misapplying this to a peer comparison of
+equal methods invents a hierarchy that is not there.
 
 ```python
 HERO_BLUE = "#3775BA"   # proposed method — the one advancing color (deepen to #0F4D92 for more pop)
@@ -359,8 +363,8 @@ for bar, hatch in zip(bars, hatches):
 
 ### Heatmap Rules
 
-For publication heatmaps, prefer `ax.pcolormesh` with white gridlines — this is
-the nature-journal standard. It gives clean cell separation and high readability.
+For publication heatmaps, prefer `ax.pcolormesh` with white gridlines. It gives clean cell
+separation and high readability without relying on heavy borders.
 
 **Mandatory rules:**
 - White gridlines between every cell: `edgecolors='white', linewidths=1`.

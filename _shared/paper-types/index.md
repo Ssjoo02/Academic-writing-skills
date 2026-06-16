@@ -12,6 +12,23 @@ Paper type profiles are section and page-budget references only. They help the a
 sections a paper probably needs and how much main-text space each section may require. They are not
 fixed templates, and they must be adapted to the actual paper, venue, evidence, and user request.
 
+## Framework Main Content Contract
+
+During Paper Framework, the `Main Content` cell is a **one-sentence phrase** that carries the
+section's **argument movement**. Use the selected profile's `Section role` cell as the source, then
+compress it into a short planning cue, **not a component checklist**.
+
+- **Abstract**: preserve `problem/challenge -> gap -> contribution/insight -> advantage -> evidence`.
+  Name only the central object and strongest evidence; avoid inventories like "task count, protocol,
+  result range".
+- **Introduction**: preserve `problem/gap -> contribution -> evidence preview`. State why the paper
+  exists and what the evidence will support.
+- **Body sections**: name the section job plus the evidence or display anchor, e.g., "construction
+  pipeline and quality-control evidence", not paragraphs or subsection lists.
+
+Keep Framework content brief. Detailed paragraph flow belongs to section drafting and the section
+guides, not to the Paper Framework artifact.
+
 ## Conference vs Journal: Pick The Family First
 
 Paper types are split by `Venue Kind` (see `_shared/venues/index.md`):

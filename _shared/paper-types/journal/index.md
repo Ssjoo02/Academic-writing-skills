@@ -16,6 +16,23 @@ Journal paper-type profiles set section structure and a PROPORTIONAL budget. Abs
 from the venue card (e.g., JMLR has no hard page limit; TPAMI uses double-column manuscript-type
 limits). Also load `_shared/venues/journal-vs-conference.md` for the journal drafting posture.
 
+## Framework Main Content Contract
+
+During Paper Framework, the `Main Content` cell is a **one-sentence phrase** that carries the
+section's **argument movement**. Use the selected profile's `Section role` cell as the source, then
+compress it into a short planning cue, **not a component checklist**.
+
+- **Abstract**: preserve `problem/challenge -> gap -> contribution/insight -> advantage -> evidence`.
+  Name only the central object and strongest evidence; avoid inventories like "task count, protocol,
+  result range".
+- **Introduction**: preserve `problem/gap -> contribution -> evidence preview`. State why the paper
+  exists and what the evidence will support.
+- **Body sections**: name the section job plus the evidence or display anchor, e.g., "dataset
+  construction and benchmark evidence", not paragraphs or subsection lists.
+
+Keep Framework content brief. Detailed paragraph flow belongs to section drafting and the section
+guides, not to the Paper Framework artifact.
+
 ## Journal Type Selection Map
 
 | Journal Paper Type | Profile | Story center | Representative shape |

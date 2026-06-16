@@ -69,6 +69,13 @@ HERO_BLUE = "#3775BA"
 BASELINE_PALETTE = [
     "#CFCECE", "#DDF3DE", "#FBDFE2", "#D9B9D4", "#DAA87C", "#B4C0E4",
 ]
+JOURNAL_GROUPED_BAR_PALETTE = [
+    "#C7D7EA", "#8FB3D1", "#5F8FB8", "#D07A68",
+]
+SHARED_LEGEND_RADAR_PALETTE = [
+    "#5E9BC9", "#59AE8B", "#E0AF45", "#CF7968", "#8E78BE", "#9A9A9A",
+]
+SHARED_LEGEND_RADAR_MARKERS = ['s', '^', 'D', 'o', 'v', 'P']
 
 # ── Delta markers (directional only, never entity identity) ──
 DELTA_UP   = "#2E9E44"
@@ -135,7 +142,8 @@ def grouped_bars(ax, categories, series, labels, colors=None,
     categories : list[str]       — x-axis category names (length K)
     series : list[array]         — one array per group (each length K)
     labels : list[str]           — legend label per group
-    colors : list[str] | None    — defaults to PEER_PALETTE for equal-weight comparison
+    colors : list[str] | None    — defaults to PEER_PALETTE for equal-weight comparison; for
+                                   journal grouped bars, prefer JOURNAL_GROUPED_BAR_PALETTE
     ylabel : str
     annotate : bool              — print value above each bar
     bar_width : float            — total width for all bars in one category
@@ -252,7 +260,7 @@ def trend_lines(ax, x, y_series, labels, colors=None,
             fmt='{:.0f}', fontsize=10, vmin=0, vmax=100):
     """
     Publication heatmap with clean white gridlines. Uses pcolormesh
-    (nature-journal standard) for professional cell separation.
+    for professional cell separation.
 
     Parameters
     ----------
@@ -316,11 +324,16 @@ differences spread out instead of clustering near the center (the most common ca
 of an unreadable radar). Without per-spoke normalization, a metric where every
 method scores 20–60% on a 0–100 axis collapses into a tiny central blob.
 
+For the common paper case of two related radar panels, use
+`draw_shared_legend_radar()` below. It uses the same visual grammar as `radar_chart()`
+but removes per-panel legends and adds one shared legend below the full figure.
+
 ```python
 def radar_chart(ax, categories, values_dict, colors=None,
                 fill_alpha=0.06, lw=1.8, markersize=5,
                 per_spoke_norm=True, display_lo=20, display_hi=95,
-                value_range=(0, 100), markers=None):
+                value_range=(0, 100), markers=None, linestyles=None,
+                show_legend=True, radial_ticks=None, title=None):
     """
     Multi-method radar / polar chart — publication style.
 
@@ -337,14 +350,18 @@ def radar_chart(ax, categories, values_dict, colors=None,
                                            so differences are visible (recommended)
     display_lo, display_hi : float       — radial display band
     value_range : (lo, hi)               — used only when per_spoke_norm=False
+    show_legend : bool                   — use False for shared-legend multi-panel radars
+    radial_ticks : list[float] | None    — raw radial tick labels for shared-scale radars
     """
     names = list(values_dict.keys())
     if colors is None:
-        colors = list(PEER_PALETTE[:len(names)])
+        colors = list(SHARED_LEGEND_RADAR_PALETTE[:len(names)])
     # Distinct marker per series: with many overlapping traces, shape (not just
     # color) tells methods apart at crossings, in grayscale, and for CVD readers.
     if markers is None:
-        markers = list(PEER_MARKERS[:len(names)])
+        markers = list(SHARED_LEGEND_RADAR_MARKERS[:len(names)])
+    if linestyles is None:
+        linestyles = ['-'] * len(names)
     n_methods, n_spokes = len(names), len(categories)
     if n_methods > 6:
         raise ValueError(f"{n_methods} methods on one radar is unreadable; use small multiples.")
@@ -370,6 +387,8 @@ def radar_chart(ax, categories, values_dict, colors=None,
     ax.set_yticklabels([])
     ax.set_xticks([])
     ax.set_ylim(0, display_hi + 6)
+    if title:
+        ax.set_title(title, fontsize=13, fontweight='bold', color='#303030', pad=22)
 
     # Light contour rings + spokes (never a heavy black boundary).
     for frac in (0.25, 0.5, 0.75, 1.0):
@@ -378,15 +397,22 @@ def radar_chart(ax, categories, values_dict, colors=None,
                 color='#CFCECE', lw=0.6, zorder=1)
     for a in angles:
         ax.plot([a, a], [0, display_hi], color='#CFCECE', lw=0.5, zorder=1)
+    if radial_ticks and not per_spoke_norm:
+        vlo, vhi = value_range
+        label_angle = np.deg2rad(18)
+        for tick in radial_ticks:
+            r = display_lo + (display_hi - display_lo) * (tick - vlo) / (vhi - vlo)
+            ax.text(label_angle, r, f'{tick:g}', color='#9A9A9A',
+                    fontsize=8, ha='left', va='center')
 
     fill = fill_alpha if n_methods <= 4 else 0.0
     if n_methods > 4:
         print(f"[radar] {n_methods} methods (>4): fills dropped; prefer small multiples.")
-    for i, (name, color, mk) in enumerate(zip(names, colors, markers)):
+    for i, (name, color, mk, ls) in enumerate(zip(names, colors, markers, linestyles)):
         ring = np.append(disp[i], disp[i][0])
-        ax.plot(angles_closed, ring, '-', lw=lw, color=color, label=name, zorder=3)
-        ax.scatter(angles, disp[i], s=markersize**2, color=color, marker=mk,
-                   zorder=4, edgecolors='white', linewidths=0.4)
+        ax.plot(angles_closed, ring, ls, lw=lw, color=color, label=name, zorder=3)
+        ax.scatter(angles, disp[i], s=markersize**2, facecolors='white',
+                   edgecolors=color, marker=mk, zorder=4, linewidths=1.0)
         if fill:
             ax.fill(angles_closed, ring, color=color, alpha=fill)
 
@@ -395,17 +421,97 @@ def radar_chart(ax, categories, values_dict, colors=None,
         ax.text(a, display_hi + 11, cat, ha='center', va='center', fontsize=9)
 
     from matplotlib.lines import Line2D
-    handles = [Line2D([0], [0], color=c, marker=m, lw=lw, markersize=markersize,
-                      markeredgecolor='white', markeredgewidth=0.4, label=n)
-               for n, c, m in zip(names, colors, markers)]
-    ax.legend(handles=handles, loc='upper center', bbox_to_anchor=(0.5, -0.08),
-              ncol=min(4, n_methods), fontsize=8, frameon=False)
+    handles = [Line2D([0], [0], color=c, marker=m, linestyle=ls, lw=lw,
+                      markerfacecolor='white', markersize=markersize,
+                      markeredgecolor=c, markeredgewidth=1.0, label=n)
+               for n, c, m, ls in zip(names, colors, markers, linestyles)]
+    if show_legend:
+        ax.legend(handles=handles, loc='upper center', bbox_to_anchor=(0.5, -0.08),
+                  ncol=min(4, n_methods), fontsize=8, frameon=False)
+    return handles
 ```
 
 When `per_spoke_norm=True`, raw value scales are no longer readable from the rings,
 so state the per-spoke ranges in the caption or a small note (e.g. "each spoke
 normalized to its own min–max across methods"). For a true shared 0–100 scale with
 few methods, pass `per_spoke_norm=False`.
+
+---
+
+## Pattern: draw_shared_legend_radar(panel_specs, ...)
+
+Use this for the **Preset: shared-legend radar**: two polar panels, no filled polygons,
+consistent method encodings, light rings/spokes, and one shared legend below the figure.
+
+```python
+def draw_shared_legend_radar(panel_specs, colors=None, markers=None, linestyles=None,
+                             figsize=(10.5, 4.4), shared_scale=True,
+                             value_range=(0, 100), radial_ticks=(20, 40, 60, 80)):
+    """
+    Shared-legend multi-panel radar.
+
+    panel_specs: list[dict] with keys:
+      title      — panel title, e.g. '(a) ASR by Attack Vector'
+      categories — spoke labels
+      values     — dict[method_name, list[float]]
+
+    Use shared_scale=True when all panels use the same unit, such as ASR (%).
+    """
+    if len(panel_specs) < 2:
+        raise ValueError("shared-legend radar expects at least two panels")
+    methods = list(panel_specs[0]["values"].keys())
+    if any(list(spec["values"].keys()) != methods for spec in panel_specs):
+        raise ValueError("all radar panels must use the same method order")
+    if colors is None:
+        colors = list(SHARED_LEGEND_RADAR_PALETTE[:len(methods)])
+    if markers is None:
+        markers = list(SHARED_LEGEND_RADAR_MARKERS[:len(methods)])
+    if linestyles is None:
+        linestyles = ['-', '-', '--', '--', '--', '--'][:len(methods)]
+
+    fig, axes = plt.subplots(
+        1, len(panel_specs), figsize=figsize,
+        subplot_kw={"projection": "polar"}
+    )
+    if len(panel_specs) == 1:
+        axes = [axes]
+
+    shared_handles = None
+    for ax, spec in zip(axes, panel_specs):
+        shared_handles = radar_chart(
+            ax,
+            categories=spec["categories"],
+            values_dict=spec["values"],
+            colors=colors,
+            markers=markers,
+            linestyles=linestyles,
+            fill_alpha=0.0,
+            lw=1.7,
+            markersize=4.8,
+            per_spoke_norm=not shared_scale,
+            display_lo=0 if shared_scale else 20,
+            display_hi=90 if shared_scale else 95,
+            value_range=value_range,
+            radial_ticks=radial_ticks if shared_scale else None,
+            show_legend=False,
+            title=spec["title"],
+        )
+
+    labels = [h.get_label() for h in shared_handles]
+    fig.legend(
+        handles=shared_handles,
+        labels=labels,
+        loc="lower center",
+        bbox_to_anchor=(0.5, -0.02),
+        ncol=min(6, len(labels)),
+        frameon=False,
+        fontsize=10,
+        handlelength=2.2,
+        columnspacing=1.3,
+    )
+    fig.subplots_adjust(left=0.04, right=0.98, top=0.80, bottom=0.18, wspace=0.28)
+    return fig, axes
+```
 
 ---
 
@@ -651,6 +757,119 @@ def pie_or_donut(ax, labels, values, colors=None, donut=True,
         ax.text(0, 0, center_label, ha='center', va='center', fontsize=9, fontweight='bold')
     ax.set_aspect('equal')
 ```
+
+For paper-ready taxonomy coverage or harm-type coverage, prefer the named preset below over
+`pie_or_donut()`.
+
+---
+
+## Pattern: draw_compact_labeled_donut(ax, codes, values, ...)
+
+Use this for the **Preset: compact labeled donut**: a thick ring, white wedge separators,
+outside code-percentage labels, grey leader lines, and a bottom legend that maps short codes
+to full category labels. Keep long labels out of wedges.
+
+```python
+from matplotlib.patches import Patch
+
+COMPOSITION_DONUT_PALETTE = [
+    "#4F90C2", "#6BA5D0", "#8DBBDA", "#E8AD68",
+    "#DF8A72", "#7DBE9B", "#A996C7",
+]
+
+def draw_compact_labeled_donut(ax, codes, values, full_labels=None, colors=None,
+                               title=None, startangle=90, legend_ncol=3,
+                               show_total_in_center=False, body_compact=False):
+    """
+    Compact labeled donut for 5-7 whole-part categories.
+
+    codes: short labels shown around the ring, e.g. ['H1', 'H2', ...]
+    values: counts or shares; percentages are computed from these values
+    full_labels: optional long labels for the bottom legend
+    body_compact: omit long legend text for supporting main-text figures
+    """
+    values = np.asarray(values, dtype=float)
+    if len(codes) != len(values):
+        raise ValueError("codes and values must have the same length")
+    if len(values) > 7:
+        raise ValueError("compact labeled donut supports at most 7 categories")
+    total = values.sum()
+    if total <= 0:
+        raise ValueError("donut values must sum to a positive total")
+    if colors is None:
+        colors = COMPOSITION_DONUT_PALETTE[:len(values)]
+
+    wedges, _ = ax.pie(
+        values,
+        startangle=startangle,
+        counterclock=False,
+        colors=colors,
+        radius=1.0,
+        # white wedge separators are part of this preset, not decoration.
+        wedgeprops={"width": 0.58 if body_compact else 0.62,
+                    "edgecolor": "white",
+                    "linewidth": 2.2 if body_compact else 3.0},
+    )
+    ax.set(aspect="equal")
+    if title:
+        ax.set_title(title, fontsize=9 if body_compact else 15,
+                     fontweight="bold", color="#333333", pad=6 if body_compact else 20)
+
+    for wedge, code, value in zip(wedges, codes, values):
+        pct = 100 * value / total
+        angle = np.deg2rad((wedge.theta1 + wedge.theta2) / 2.0)
+        x, y = np.cos(angle), np.sin(angle)
+        ha = "left" if x >= 0 else "right"
+        ax.annotate(
+            f"{code} ({pct:.1f}%)",
+            xy=(0.72 * x, 0.72 * y),
+            xytext=((1.12 if body_compact else 1.26) * x,
+                    (1.12 if body_compact else 1.26) * y),
+            ha=ha,
+            va="center",
+            fontsize=6.8 if body_compact else 10,
+            fontweight="bold",
+            color="#3A3A3A",
+            arrowprops={
+                "arrowstyle": "-",
+                "color": "#B8B8B8",
+                "lw": 0.75 if body_compact else 0.9,
+                "shrinkA": 0,
+                "shrinkB": 0,
+            },
+        )
+
+    if show_total_in_center:
+        ax.text(0, 0, f"n={total:.0f}", ha="center", va="center",
+                fontsize=10, fontweight="bold", color="#3A3A3A")
+
+    # In body_compact mode, the legend should be omitted because long labels make a
+    # supporting coverage figure visually dominate the page. Put definitions in the
+    # caption, appendix, or an adjacent taxonomy table instead.
+    if body_compact:
+        return wedges
+
+    if full_labels:
+        handles = [
+            Patch(facecolor=color, edgecolor="none", label=f"{code}: {label}")
+            for code, label, color in zip(codes, full_labels, colors)
+        ]
+        ax.legend(
+            handles=handles,
+            loc="lower center",
+            bbox_to_anchor=(0.5, -0.22),
+            ncol=legend_ncol,
+            frameon=False,
+            fontsize=9,
+            handlelength=1.4,
+            columnspacing=1.2,
+        )
+    return wedges
+```
+
+For a main-text two-panel coverage figure, start with `figsize=(5.6, 2.15)` and include the rendered
+PDF at about `0.58--0.72\textwidth`. Use the full legend variant only when the composition figure is
+the central evidence item or when no appendix/table defines the short codes.
 
 ---
 

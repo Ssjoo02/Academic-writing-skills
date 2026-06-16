@@ -75,8 +75,9 @@ Load only the references needed to resolve paper structure and physical format:
 
 - Template selection: `_shared/templates/index.md`,
 - Venue framework constraints: `_shared/venues/<venue>.md` when a target venue is confirmed,
-- Paper type section/page-budget reference: the manifest-mapped paper type profile path under
-  `_shared/paper-types/`,
+- Paper type family index and profile: load `_shared/paper-types/index.md` or
+  `_shared/paper-types/journal/index.md` for the **Framework Main Content Contract**, then load the
+  manifest-mapped paper type profile path under `_shared/paper-types/`,
 - Figure/table planning: load the **`academic-figure`** skill (its figure-planning reference); for
   table span decisions also use its table-design reference,
 - Journal-only (when `venue_kind=journal`): `_shared/venues/journal-vs-conference.md` for drafting
@@ -131,7 +132,9 @@ Build the framework in this order:
    paper type profile's candidate sections, order, and naming **as the structure**. Reproduce its
    section count and granularity unless an adaptation is genuinely required (see Profile Structure
    Adherence above). Do not silently split, merge, rename, add, or reorder sections, and do not
-   inflate the profile's section count for convenience.
+   inflate the profile's section count for convenience. For each `Main Content` cell, apply the
+   paper-type family index's Framework Main Content Contract: compress the profile's section role
+   into a brief argument movement, not a component checklist.
 3. **Writing Policy last**: keep only sections and claims supported by available evidence.
 
 #### Draft-stage page budget
@@ -185,12 +188,19 @@ File format:
 4. **Section Framework**: ordered section list with section name, role
    (`primary-core` / `evidence-core` / `support` / `compress-first`), main content, Prose budget,
    Minimum floor, Compression rule, key evidence or figure/table, and writing cautions. Keep this at
-   section level. List subsections only when a section genuinely needs them, and respect the
-   Subsection Granularity budget (0, or at most 2–4 per section); do not enumerate every paragraph as
-   a numbered subsection.
-5. **Figure Plan**: a short table with `ID`, `type`, `layout`, `section`, `message`, `source`, and
-   `generation route`. Keep only likely main-paper figures and tables. The `layout` value must be
-   `single-column`, `double-column`, `appendix`, or `supplement`.
+   section level. The `Main Content` cell is a one-sentence phrase from the paper-type contract: it
+   should preserve the section's argument movement and evidence/display anchor, not a component
+   checklist or mini-outline. Abstract and Introduction rows preserve the paper-type Main Content
+   movement, not component inventories. List subsections only when a section genuinely needs them,
+   and respect the Subsection Granularity budget (0, or at most 2–4 per section); do not enumerate
+   every paragraph as a numbered subsection.
+5. **Figure Plan**: a short table with `ID`, `type`, `chart form`, `layout`, `section`, `message`,
+   `source`, and `generation route`. Keep only likely main-paper figures and tables. The `layout`
+   value must be `single-column`, `double-column`, `appendix`, or `supplement`; the `chart form`
+   records the actual visual encoding (`schematic`, `grouped bar`, `donut`, `heatmap`, `table`,
+   etc.). Run a cross-figure visual variety check for all numeric plots: do not let every numeric
+   result figure default to bar charts when the evidence includes composition, coverage, trend,
+   matrix, or tradeoff claims better served by another chart form.
 6. **Venue Assembly Plan**: post-main order, required statements or checklists, optional appendices,
    and `not verified` venue fields. Record that the appendix begins on a fresh page (`\clearpage`
    before `\appendix`). When the venue requires a Limitations section (ACL family), plan it as a
@@ -238,6 +248,36 @@ LaTeX commands, BibTeX/citation keys, manifest values, figure/table IDs, and mac
 in their original form; the saved framework artifact remains English by default unless the user
 requested a translated sibling artifact.
 
+**Language routing invariant:** the saved framework artifact may keep the English schema below, but
+the checkpoint displayed in the terminal is the interaction-language version. Do not paste the
+English schema labels into a Chinese terminal checkpoint. For Chinese conversations, the terminal
+checkpoint must use at least these labels:
+
+| English saved-artifact label | Chinese terminal label |
+|---|---|
+| `Checkpoint: Paper Framework` | `检查点：Paper Framework` |
+| `Stage result` | `阶段结果` |
+| `Output` | `输出文件` |
+| `Summary` / framework overview | `框架概览` |
+| `Paper Title` | `论文标题` |
+| `Section Plan` | `章节计划` |
+| `Core Section Budget` | `核心章节预算` |
+| `Figure Plan` | `图表计划` |
+| `Display-Item Page Budget` | `图表页面预算` |
+| `Journal Submission Package Plan` | `期刊投稿材料计划` |
+| `Appendix / Supplement Plan` | `附录 / 补充材料计划` |
+| `Structure vs paper-type profile` | `结构与 paper type profile 对齐` |
+| `Decisions to confirm` | `待确认决策` |
+| `Unresolved blockers` | `未解决阻塞项` |
+| `User action required` | `请确认或修改` |
+
+For Chinese terminal Figure Plan tables, localize human-facing headers such as `Type`, `Chart form`,
+`Layout`, `Section`, `Message`, `Source`, and `Generation route` to `类型`, `图形形式`, `版式`,
+`位置章节`, `信息点`, `来源`, and `生成路径`; keep `ID`, `Fig. 1`, `Tab. 1`, `single-column`,
+`double-column`, `appendix`, `supplement`, and chart-form enum values such as `donut` unchanged. The
+final user action line should be Chinese, e.g.,
+`请确认是否继续创建 paper/，或告诉我需要修改的内容。`
+
 Show the framework to the user for confirmation using this semantic structure. Do not use a generic
 dimension/content table or any other structure. The English labels below are the saved-artifact
 schema; terminal-facing labels and natural-language cell content must be translated to the user's
@@ -257,9 +297,10 @@ Section Plan:
 | 2 | Introduction | support | <main content, one sentence> | <pages> | n/a | <compress / keep> |
 | ... | ... | ... | ... | ... | ... | ... |
 
-Keep `Main Content` as a one-sentence phrase or a few content blocks. Do not list a numbered
-subsection breakdown (no `3.1 … 3.6`) here; subsections, if any, follow the Subsection Granularity
-budget and are decided at drafting time.
+Keep `Main Content` as a one-sentence phrase or a few content blocks from the paper-type contract.
+It should name the section's argument movement and evidence/display anchor in passing, not expand
+into a paragraph plan. Do not list a numbered subsection breakdown (no `3.1 … 3.6`) here;
+subsections, if any, follow the Subsection Granularity budget and are decided at drafting time.
 
 Core Section Budget:
 - Primary core section: <section + minimum floor + reason>
@@ -269,11 +310,11 @@ Core Section Budget:
 
 Figure Plan:
 
-| ID | Type | Layout | Section | Message |
-|---|---|---|---|---|
-| Fig. 1 | <teaser/pipeline/bar/...> | <single-column/double-column> | Introduction | <what the figure shows> |
-| Tab. 1 | <taxonomy/result/...> | <single-column/double-column/supplement> | Method | <what the table shows> |
-| ... | ... | ... | ... | ... |
+| ID | Type | Chart form | Layout | Section | Message |
+|---|---|---|---|---|---|
+| Fig. 1 | <teaser/pipeline/result/...> | <schematic/donut/grouped bar/heatmap/...> | <single-column/double-column> | Introduction | <what the figure shows> |
+| Tab. 1 | <taxonomy/result/...> | <table> | <single-column/double-column/supplement> | Method | <what the table shows> |
+| ... | ... | ... | ... | ... | ... |
 
 Display-Item Page Budget:
 
@@ -310,7 +351,7 @@ Decisions to confirm:
 Unresolved blockers: <none or concise list>
 User action required: Please confirm whether to proceed to paper/, or what to change. If any
 structural deviation or core-section floor tradeoff is listed, confirm it explicitly before paper/ is
-created.
+created. In Chinese terminal output, render this as: 请确认是否继续创建 paper/，或告诉我需要修改的内容；如果上面列出了结构偏离或核心章节底线权衡，请明确确认后再创建 paper/。
 ```
 
 Do not output a separate `Content snapshot` bullet list.
@@ -331,13 +372,19 @@ gate.**
    draft?
 4. Does the plan name the Primary core section, Evidence core section, Compress-first sections, and
    Minimum floor for each core section, and do all prose budgets respect those floors?
-5. Does the Figure Plan declare a `layout` for every figure/table, does the Display-Item Page Budget
-   estimate each item's main-paper page cost, and does each item map to a confirmed section?
+5. Does the Figure Plan declare both `layout` and `Chart form` for every figure/table, does the
+   Display-Item Page Budget estimate each item's main-paper page cost, and does each item map to a
+   confirmed section?
+5b. Did the framework run the cross-figure visual variety check: if two or more numeric result
+   figures are planned, are their chart forms justified by claim-to-chart fit rather than all
+   defaulting to bars?
 6. Does the Appendix / Supplement Plan either list every planned appendix item with `Claim backed`,
    `Source availability`, `Fill status`, `Main-text anchor`, and `Fallback`, or explicitly state
    `none`?
 7. For a strict page-limited conference venue, does the plan leave a practical compression margin
    rather than spending the whole limit on planned prose and floats?
 8. Are all checkpoint fields filled, including the "Structure vs paper-type profile" comparison?
+9. Do Abstract and Introduction rows preserve the paper-type Main Content movement, and are they
+   not component inventories?
 
 Gate: the user must confirm the Paper Framework before full-draft writing.

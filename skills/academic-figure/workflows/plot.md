@@ -11,6 +11,10 @@ radars, scatter/Pareto plots, distributions, pies/donuts, and multi-panel combin
    conclusion, evidence chain, display type, backend, export contract, and layout target.
 3. Load `references/figures/chart-taxonomy.md` before writing code. Record chart family, source
    file, statistic/interval, palette preset, label strategy, and export bundle for each panel.
+   For paper-level runs, also run a **cross-figure chart-form audit** before rendering: compare the
+   planned numeric display items and avoid defaulting every numeric plot to bars. Match the chart to
+   the claim first: composition / coverage snapshots may use donut, pie, stacked bar, or heatmap;
+   exact across-category comparisons may still use bars; trends use lines; matrices use heatmaps.
 4. Load `references/figures/plot-style.md`, then the venue sizing reference:
    - Conference: `references/figures/conference/figure-sizing.md`
    - Journal: `references/figures/journal/figure-sizing.md`

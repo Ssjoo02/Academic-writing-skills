@@ -63,6 +63,24 @@ Before assigning a generation route or writing code, establish:
    DPI, color space, and whether editable text is required. For data charts, PDF is the canonical
    output with PNG as raster fallback.
 
+### Chart Form Diversity Gate
+
+For a full paper or any Figure Plan with two or more numeric plots, run this gate before confirming
+the framework and again before rendering:
+
+1. List every numeric display item and its `Chart form` (`bar`, `grouped bar`, `line`, `heatmap`,
+   `radar`, `donut`, `pie`, `scatter`, `distribution`, `table`, etc.).
+2. Check whether the planned set uses the same chart form for every result plot. If yes, revise at
+   least one item unless the data semantics truly require the same encoding.
+3. **claim-to-chart fit beats visual novelty**: do not choose donut/pie/heatmap just to look varied.
+   Use a different form only when it better serves the conclusion.
+4. Use composition or coverage forms for single whole-part snapshots: `donut` or `pie` for <=5 main
+   slices plus total `n`, stacked bar for comparable shares, heatmap for matrix coverage. A taxonomy
+   or benchmark coverage plot often fits this class better than another bar chart.
+5. Keep bars for exact comparisons across models/categories, especially when the reader must compare
+   values precisely. The rule is that not every numeric display item should be a bar chart, not that
+   bar charts are disallowed.
+
 ### Display Width Contract
 
 Every planned figure or table must declare one layout target:
@@ -97,8 +115,26 @@ placed at the top or bottom of the page) when ANY of these hold:
   column and belong full-width;
 - it is a **multi-panel figure** (≥2 panels side by side — e.g. a per-vector and a per-harm radar, or
   grouped small-multiples);
-- it is a **wide comparison**: a grouped-bar/heatmap/radar with a legend, or a table that the
-  table-placement contract classifies as wide enough to need full width.
+- it is a **wide comparison**: a grouped-bar/heatmap/radar with enough labels, cells, or legend
+  complexity to become unreadable in one column, or a table that the table-placement contract
+  classifies as wide enough to need full width.
+
+Do not promote a radar/heatmap merely because of chart family. A single radar with 5--6 spokes and
+up to 4 methods, or a small heatmap such as 4x6 cells with short labels, should first be tested as a
+single-column figure at the venue's native column width. Promote only if the rendered text falls
+below the legibility floor or the legend consumes too much of the axes.
+
+For a `figure*`, still choose the actual `\textwidth` fraction by density. A cross-column float is a
+placement decision, not a command to fill the whole page width:
+
+- `0.65--0.78\textwidth`: moderate single-panel radar/heatmap/grouped comparison that needs more than
+  one narrow column but is not a central evidence figure;
+- `0.80--0.90\textwidth`: wide comparison with long labels, a shared legend, or dense annotations;
+- `0.90--1.00\textwidth`: dense multi-panel evidence, framework/pipeline diagrams, or the primary
+  quantitative result where readability depends on the full span.
+
+If a single-panel radar or a small 4x6 heatmap is inserted at `>0.85\textwidth`, treat that as a
+review point unless the Figure Plan explicitly marks it as load-bearing central evidence.
 
 **Keep single-column** when the item reads comfortably at ~3 in: the **teaser / first concept figure**
 that conveys the idea in a compact (often vertical) composition; a single small plot (one bar/line/
@@ -111,19 +147,33 @@ that exception in the Paper Framework instead of silently stretching the first i
 **One-column venues (NeurIPS, ICLR) and single-column journals.** There is no `figure*`/`table*`; the
 text block is one wide column (~5.5 in). Decide width as a fraction of `\linewidth` instead of span:
 
-- full `\linewidth` for pipelines, architectures, multi-panel figures, and wide comparisons;
-- a centered fraction (`0.6–0.8\linewidth`) or a `subfigure` row for a small/secondary single plot, so
-  it does not dominate the column;
+- full `\linewidth` only for pipelines, architectures, multi-panel figures, dense heatmaps, and wide
+  comparisons whose labels or legend become unreadable when narrower;
+- a centered fraction (`0.50--0.70\linewidth`) or a `subfigure` row for a small/secondary single plot,
+  so it does not dominate the column;
 - combine related small charts into one multi-panel figure rather than stacking many tiny floats.
 
 **Single-column papers have no cross-column float class.** Do not write `figure*` or `table*` in a
 single-column template. Instead, size by role as a fraction of `\linewidth`: story/teaser figures
 usually sit at `0.55--0.75\linewidth` when they are illustrative and compact; pipeline/framework/
 architecture figures and multi-panel evidence figures use `0.90--1.00\linewidth`; small secondary
-plots use `0.55--0.70\linewidth`; wide numeric comparisons use full `\linewidth` only when the
+plots use `0.50--0.70\linewidth`; wide numeric comparisons use full `\linewidth` only when the
 reader must compare many columns or panels at once. If two small related charts explain one claim,
 merge them into a single multi-panel figure with a shared legend instead of scattering them as
 separate floats.
+
+**Content-density sizing gate.** Do not equate available column width with needed figure width. In a
+one-column paper or single-column journal, size by evidence density after the layout target is set:
+
+- low-density single plots (one small bar chart, horizontal ablation with <=6 rows, pie/donut
+  composition snapshot, one simple scatter) usually sit at `0.45--0.65\linewidth`;
+- medium-density single plots (line, distribution, Pareto, 4-series grouped bar) usually sit at
+  `0.60--0.78\linewidth`;
+- dense matrices, multi-panel plots, long legends, framework/pipeline diagrams, and central result
+  figures may use `0.90--1.00\linewidth`.
+
+If a low-density plot needs more than `0.70\linewidth`, first check whether the labels, legend, or
+aspect ratio are the real problem. Widen only when the rendered page proves it is needed.
 
 Compact single-column heatmaps, coverage matrices, and secondary data grids should normally be
 inserted at `0.60--0.70\linewidth` in one-column templates. Treat `>0.70\linewidth` as a layout
@@ -235,16 +285,25 @@ draft can `\input` them and inclusion stays consistent.
 
 Use a compact table in the Paper Framework:
 
+When this table is shown in a terminal-facing Paper Framework checkpoint, it follows the user's
+interaction language. The saved framework artifact may keep the English schema, but the terminal
+heading and human-facing column labels must be localized; for Chinese, use `图表计划` with columns
+`ID`, `类型`, `图形形式`, `版式`, `位置章节`, `信息点`, `来源`, and `生成路径`. Keep figure/table IDs,
+layout enum values, chart-form enum values such as `donut`, file paths, and generation route
+identifiers unchanged.
+
 ```markdown
-| ID | Type | Layout | Section | Message | Source | Generation route |
-|---|---|---|---|---|---|---|
-| Fig. 1 | overview / pipeline | double-column | Introduction | Shows the paper's problem-setting-method-evidence arc. | Writing Policy + method notes | FigureSpec MCP or manual SVG |
-| Fig. 2 | main result plot | single-column | Experiments | Shows the primary comparison supporting C1. | `results/main.csv` | reproducible plot script |
-| Tab. 1 | taxonomy table | single-column | Method | Defines task categories with examples. | benchmark manifest | LaTeX `tabularx` |
+| ID | Type | Chart form | Layout | Section | Message | Source | Generation route |
+|---|---|---|---|---|---|---|---|
+| Fig. 1 | overview / pipeline | schematic | double-column | Introduction | Shows the paper's problem-setting-method-evidence arc. | Writing Policy + method notes | FigureSpec MCP or manual SVG |
+| Fig. 2 | main result plot | grouped bar | single-column | Experiments | Shows the primary comparison supporting C1. | `results/main.csv` | reproducible plot script |
+| Fig. 3 | benchmark coverage plot | donut | single-column | Method | Shows the composition of task categories with total n. | benchmark manifest | reproducible plot script |
+| Tab. 1 | taxonomy table | table | single-column | Method | Defines task categories with examples. | benchmark manifest | LaTeX `tabularx` |
 ```
 
 Keep only likely main-paper figures and tables. Put appendix-only or optional visuals in drafting
-notes, not the main framework.
+notes, not the main framework. The framework should show enough chart-form variety that result
+figures read as a designed evidence sequence rather than a row of default bars.
 
 ## What To Draw
 

@@ -16,6 +16,10 @@ English are preserved.
 - Terminal-facing checkpoint summaries mirror the user's interaction language, including Writing
   Policy and Paper Framework overviews, section summaries, Figure Plan summaries, risks, and user
   action requests. Do not use the artifact language as the terminal interaction language.
+- Treat the framework overview, Section Plan, Figure Plan, Display-Item Page Budget, Appendix /
+  Supplement Plan, decisions, blockers, and confirmation request shown in the terminal as
+  conversation output: localize their labels and natural-language cells to the user's interaction
+  language while preserving paths, IDs, code, LaTeX, BibTeX keys, and manifest values.
 - Full Draft Workflow outputs a venue-formatted English LaTeX paper project when a target venue is
   confirmed; otherwise it outputs a non-submission generic English LaTeX draft. Do not generate a
   Chinese or Chinese-English parallel paper unless the user explicitly requests it.

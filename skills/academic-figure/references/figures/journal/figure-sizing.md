@@ -10,9 +10,10 @@ per-chart-type rules, legend rules, multi-panel architecture) are in `plot-style
 The column width for a journal figure comes from the active venue card and the
 journal's template, not from any conference default.
 
-- **JMLR**: single-column, `\textwidth = 6.0 in` → figures fill the full text
-  block. Use `width=\textwidth` or `width=\linewidth`. No `figure*` needed
-  (single-column venue).
+- **JMLR**: single-column, `\textwidth = 6.0 in` → the full text block is the
+  maximum available width, not the default for every figure. Use a regular
+  `figure` and set `width` as a `\linewidth` fraction from the content-density
+  gate below. No `figure*` is needed.
 - **TPAMI**: IEEEtran two-column → single-column ≈ 3.5 in, full-page ≈ 7.0 in.
   Use `figure*` with `width=\textwidth` for cross-column figures. Same
   `\columnwidth` / `\textwidth` discipline as ICML/CVPR.
@@ -28,7 +29,8 @@ without shrinking.
 
 | Layout context | Example venues | `figsize` (width, height) | Notes |
 |---|---|---|---|
-| Single-column journal, full text width | JMLR | `(6.0, 3.5)` to `(6.5, 5.0)` | Wider than NeurIPS; can fit more bars or a full-width heatmap |
+| Single-column journal, low-density/supporting plot | JMLR, journal-generic one-column | `(3.8, 2.2)` to `(4.8, 3.0)` | Include at `0.45--0.70\linewidth`; do not let sparse plots dominate the page |
+| Single-column journal, dense/central evidence | JMLR | `(5.5, 3.0)` to `(6.5, 5.0)` | Wider than NeurIPS; use `0.80--1.00\linewidth` only when density or role justifies it |
 | Two-column journal, single column | TPAMI, other IEEE/ACM transactions | `(3.5, 2.5)` to `(4.0, 3.5)` | Slightly wider than conference single-column (~3.25 in); adjust per template |
 | Two-column journal, cross-column (`figure*`) | TPAMI, other IEEE/ACM transactions | `(7.0, 4.0)` to `(7.5, 6.0)` | Full page width; use only when content genuinely needs the span |
 | Square (radar, scatter matrix) | Any | `(5, 5)` to `(6, 6)` | Keep legend inside or directly below the axes |
@@ -39,6 +41,18 @@ without shrinking.
 Apply the Display Width Contract from `figure-planning.md`. Journal layouts may be single-column,
 two-column, or full-page; choose `\linewidth`, `\columnwidth`, or `figure*` + `\textwidth` from the
 verified template rather than assuming one universal insertion form.
+
+For single-column journals, decide the `\linewidth` fraction by content density:
+
+- `0.45--0.60\linewidth`: pie/donut composition snapshots, simple bars, short horizontal ablations,
+  and other supporting low-density plots;
+- `0.60--0.78\linewidth`: standard line/scatter/distribution/Pareto plots and moderate grouped bars;
+- `0.80--1.00\linewidth`: dense heatmaps, multi-panel evidence, framework/pipeline diagrams, or the
+  main quantitative figure when readability depends on width.
+
+If a supporting single-panel chart is wider than `0.70\linewidth`, treat that as a review point:
+verify on the compiled page that the extra width improves readability rather than just enlarging a
+sparse graphic.
 
 ### Height Budget
 
@@ -87,11 +101,12 @@ TIFF by default for CS journals (JMLR, TPAMI) unless asked.
 
 ## QA Notes
 
-- **JMLR (single-column, 6.0 in text block)**: figures fill the full text width;
-  no `figure*` needed. Base font 10–12pt. No hard page limit — let evidence set
-  the figure count, but every figure must carry unique evidence (anti-redundancy
-  checklist in `references/figures/journal/figure-contract.md`). Appendices in
-  the same PDF after acknowledgments.
+- **JMLR (single-column, 6.0 in text block)**: use the full text width only for
+  dense or central figures; low-density/supporting figures should be centered at
+  a fraction of `\linewidth`. No `figure*` needed. Base font 10–12pt. No hard page
+  limit — let evidence set the figure count, but every figure must carry unique
+  evidence (anti-redundancy checklist in `references/figures/journal/figure-contract.md`).
+  Appendices in the same PDF after acknowledgments.
 - **TPAMI (IEEEtran two-column)**: single-column ~3.5 in, cross-column ~7.0 in.
   Hard page limits by manuscript type (Regular 12–18pp, Survey 20pp, Short 8pp)
   — figures count toward the page budget. Move extra figures to separate

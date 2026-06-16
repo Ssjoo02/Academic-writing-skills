@@ -214,6 +214,11 @@ def validate_shared_layer(root: Path) -> None:
         "shared stance must separate terminal interaction language from saved artifact language",
     )
     require(
+        "framework overview, Section Plan, Figure Plan" in stance
+        and "localize their labels and natural-language cells" in stance,
+        "shared stance must classify framework and Figure Plan checkpoint content as terminal interaction output",
+    )
+    require(
         "Always localize user-facing checkpoint labels to the interaction language" in gates_flat
         and "when appropriate" not in gates,
         "shared gates must make checkpoint label localization mandatory, not optional",
@@ -230,6 +235,19 @@ def validate_shared_layer(root: Path) -> None:
         and "_shared/venues/journal-vs-conference.md" in paper_types_index,
         "paper-type index must use _shared paths",
     )
+    for label, text in (
+        ("conference paper-type index", paper_types_index),
+        ("journal paper-type index", journal_index),
+    ):
+        require(
+            "## Framework Main Content Contract" in text
+            and "argument movement" in text
+            and "one-sentence phrase" in text
+            and "not a component checklist" in text
+            and "problem/challenge -> gap -> contribution/insight -> advantage -> evidence" in text
+            and "problem/gap -> contribution -> evidence preview" in text,
+            f"{label} must define a concise Framework Main Content contract for section rows",
+        )
     require(
         "_shared/venues/index.md" in journal_index
         and "_shared/paper-types/" in journal_index
@@ -401,6 +419,20 @@ def validate_hub(root: Path) -> None:
         "Paper Framework must budget display items separately from prose pages",
     )
     require(
+        "Chart form" in paper_framework
+        and "cross-figure visual variety check" in paper_framework
+        and "do not let every numeric result figure default to bar charts" in paper_framework_flat,
+        "Paper Framework must expose chart-form planning and block all-bar numeric figure sets",
+    )
+    require(
+        "paper-type family index" in paper_framework
+        and "Framework Main Content Contract" in paper_framework
+        and "argument movement" in paper_framework
+        and "one-sentence phrase" in paper_framework
+        and "not a component checklist" in paper_framework,
+        "Paper Framework must load and apply the paper-type Main Content contract",
+    )
+    require(
         "Journal Submission Package Plan" in paper_framework
         and "| Item | Required? | Source/status | Owner/reference | Blocker? |" in paper_framework
         and "Data/Code Availability" in paper_framework
@@ -416,6 +448,14 @@ def validate_hub(root: Path) -> None:
         "Paper Framework checkpoint must mirror the user's interaction language while keeping the saved artifact English by default",
     )
     require(
+        "Language routing invariant" in paper_framework
+        and "Do not paste the English schema labels into a Chinese terminal checkpoint" in paper_framework_flat
+        and "框架概览" in paper_framework
+        and "图表计划" in paper_framework
+        and "请确认或修改" in paper_framework,
+        "Paper Framework stage must include concrete interaction-language checkpoint labels for Chinese terminal output",
+    )
+    require(
         "Do not compress a primary-core section below its floor" in paper_framework
         and "return to the Paper Framework checkpoint" in paper_framework,
         "Paper Framework stage must block compressing core sections below the confirmed floor",
@@ -427,6 +467,11 @@ def validate_hub(root: Path) -> None:
         and "Submission content-page limit" in paper_framework
         and "Camera-ready allowance" in paper_framework,
         "Paper Framework stage must distinguish submission limits, camera-ready allowances, and custom page targets",
+    )
+    require(
+        "Abstract and Introduction rows preserve the paper-type Main Content movement" in paper_framework
+        and "not component inventories" in paper_framework,
+        "Paper Framework self-check must block checklist-style Abstract/Introduction rows",
     )
 
     # Abstract / introduction logic chain (now in section-drafting stage)
@@ -873,6 +918,27 @@ def validate_figure_skill(root: Path) -> None:
         "figure-planning must define the column-span decision (teaser single, pipeline/multi-panel span)",
     )
     require(
+        "terminal-facing Paper Framework checkpoint" in figure_planning
+        and "saved framework artifact may keep the English schema" in figure_planning
+        and "`图表计划`" in figure_planning
+        and "`类型`" in figure_planning
+        and "`生成路径`" in figure_planning,
+        "figure-planning must localize terminal Figure Plan labels while preserving the saved artifact schema",
+    )
+    require(
+        "Chart Form Diversity Gate" in figure_planning
+        and "claim-to-chart fit beats visual novelty" in figure_planning
+        and "donut" in figure_planning
+        and "not every numeric display item should be a bar chart" in figure_planning,
+        "figure-planning must require semantics-first chart-form variety across a paper",
+    )
+    require(
+        "cross-figure chart-form audit" in plot_handling
+        and "composition / coverage" in plot_handling
+        and "avoid defaulting every numeric plot to bars" in plot_handling,
+        "plot workflow must audit chart-form diversity before rendering paper-level plot sets",
+    )
+    require(
         "Single-column papers have no cross-column float class" in figure_planning
         and "size by role as a fraction of `\\linewidth`" in figure_planning
         and "story/teaser" in figure_planning,
@@ -954,6 +1020,40 @@ def validate_figure_skill(root: Path) -> None:
         "chart-patterns must provide helpers for the expanded chart families",
     )
     require(
+        "Preset: shared-legend radar" in chart_taxonomy
+        and "two polar panels" in chart_taxonomy
+        and "one shared legend below the figure" in chart_taxonomy
+        and "no filled polygons" in chart_taxonomy,
+        "chart-taxonomy must define the shared-legend radar preset",
+    )
+    require(
+        "Preset: compact labeled donut" in chart_taxonomy
+        and "thick ring" in chart_taxonomy
+        and "outside code-percentage labels" in chart_taxonomy
+        and "bottom legend maps codes to full labels" in chart_taxonomy,
+        "chart-taxonomy must define the compact labeled donut preset",
+    )
+    require(
+        "Body compact mode" in chart_taxonomy
+        and "0.58--0.72\\textwidth" in chart_taxonomy
+        and "omit the bottom legend" in chart_taxonomy
+        and "full code definitions live in the caption, appendix, or nearby table" in chart_taxonomy,
+        "chart-taxonomy must define a body-compact donut mode for non-hero coverage figures",
+    )
+    require(
+        "draw_shared_legend_radar" in chart_patterns
+        and "draw_compact_labeled_donut" in chart_patterns
+        and "white wedge separators" in chart_patterns,
+        "chart-patterns must expose reusable shared-legend radar and compact labeled donut helpers",
+    )
+    require(
+        "body_compact=False" in chart_patterns
+        and "if body_compact:" in chart_patterns
+        and "legend should be omitted" in chart_patterns
+        and "figsize=(5.6, 2.15)" in chart_patterns,
+        "chart-patterns must support a body-compact labeled donut helper mode",
+    )
+    require(
         "Column-Span Quick Rule" in conf_sizing,
         "conference figure-sizing must carry the column-span quick rule",
     )
@@ -963,7 +1063,7 @@ def validate_figure_skill(root: Path) -> None:
         and "`figure` + `width=\\columnwidth`" in conf_sizing
         and "`figure*` + `width=0.90--1.00\\textwidth`" in conf_sizing
         and "One-column template" in conf_sizing
-        and "`figure` + `width=0.55--1.00\\linewidth`" in conf_sizing,
+        and "`figure` + `width=0.45--1.00\\linewidth`" in conf_sizing,
         "conference figure-sizing must provide a deterministic figure span decision matrix",
     )
     require(
