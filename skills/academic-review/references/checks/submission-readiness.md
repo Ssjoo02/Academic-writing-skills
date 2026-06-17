@@ -54,7 +54,7 @@ venue-aware: it stops counting at the first post-matter heading — `References`
 section such as `Limitations`, `Acknowledgments`, or `Ethics` — so a correctly placed dedicated
 Limitations/Ethics section does not consume the budget, but main text (or a limitations block left
 inside a body section) that reaches a page makes that page count. Over the limit is `BLOCKED`;
-under the confirmed target is also `BLOCKED` because the draft failed to use the available body
+under the confirmed target is `BLOCKED` because the draft failed to use the available body
 budget. If the venue rule is unconfirmed, report `OPEN_DECISION`. Do not rely on the Paper
 Framework's planned page arithmetic alone; compiled PDF page count is authoritative.
 

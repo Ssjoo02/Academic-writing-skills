@@ -19,6 +19,26 @@ Do not hide main evidence. If a result is needed to believe the Abstract, Introd
 Method claim, or headline experiment, keep the compact evidence in the main text and move only the
 full version to the appendix or supplement.
 
+## Benchmark / Dataset / Evaluation Appendix Evidence Package
+
+For benchmark, dataset, evaluation, or empirical-system papers, the appendix should normally be a
+source-backed evidence package rather than a short parking lot. Include every item for which the
+source exists and the body only has room for a compressed summary:
+
+- corpus or task inventory with counts and selection boundaries,
+- taxonomy or label protocol definitions with decision rules and edge cases,
+- denominator audit for every headline rate, including excluded or infrastructure-failed cases,
+- full result matrix or per-group result table that backs aggregate plots,
+- prompt, verifier, annotation, or adjudication details needed to reproduce the measurement,
+- representative success/failure examples when qualitative claims or failure modes appear in the
+  body,
+- reproducibility and artifact-boundary notes that distinguish generated assets, source data, and
+  claims not supported by available evidence.
+
+If one of these package slots is source-backed and directly supports a body claim, fill it rather
+than leaving a placeholder. If the source is missing, weaken or remove the body claim and record the
+item as omitted in `paper/appendix-plan.md`.
+
 ## Required Appendix Plan
 
 Before writing appendix content, create or update `paper/appendix-plan.md`. Each row records:
@@ -61,6 +81,22 @@ For figures and tables, use the `academic-figure` table placement and figure pla
 span, overflow, and float-order rules. Appendix placement is not permission to exceed the printable
 area.
 
+## Appendix Display Parity Gate
+
+Appendix figures and tables are not second-class displays. They must pass the same visual contract as
+body displays: clear evidence role, concrete source, explicit denominator or unit, readable labels,
+caption with the supported claim, width/span justification, and rendered-page inspection.
+
+Do not use `figure*` or `table*` just because the item is in the appendix. Compact protocol tables,
+small inventories, and glossary-like label references should stay single-column or natural-width.
+Small heatmaps and secondary matrices should use a moderate width unless legibility proves they need
+the full span. A cross-column appendix float must earn its width with dense labels, multiple panels,
+or a full result matrix that would be unreadable at column width.
+
+Before returning a draft, inspect the appendix pages, not only the main text. A large blank page,
+float-only page caused by sparse `table*` / `figure*`, oversized heatmap, unreadable table, or
+appendix float that looks visually rougher than the body is a revision defect.
+
 ## Self-Check
 
 - Is every appendix item listed in `paper/appendix-plan.md`?
@@ -68,3 +104,6 @@ area.
 - Does each item have a main-text anchor?
 - Does each subsection have a real lead paragraph?
 - Is no central evidence hidden outside the main reading path?
+- Does the appendix include the source-backed evidence package needed for this paper type, including
+  denominator audit and full matrix/protocol material when relevant?
+- Do appendix figures and tables pass the Appendix Display Parity Gate?

@@ -113,7 +113,7 @@ assert mpl.rcParams["pdf.fonttype"] == 42,    "PDF text may not be selectable"
 - `picture-generation.md` — AI-generated picture workflow, label verification, overlay fallback
 - `conference/figure-sizing.md` — conference column widths, figsize, font hierarchy, height budget, QA notes
 - `journal/figure-sizing.md` — journal column widths, figsize, font hierarchy, display-item caps, QA notes
-- `journal/figure-contract.md` — journal figure archetypes, panel logic, aesthetic integration, reviewer-risk
+- `journal/figure-contract.md` — journal figure composition patterns, panel logic, aesthetic integration, reviewer-risk
 - `table-design.md` — analogous QA Gate for LaTeX tables
 - `references/prose/display-in-prose.md` — section-level insertion and caption rules
 - `references/tables/table-placement.md` — table width contract, appendix, and supplement routing

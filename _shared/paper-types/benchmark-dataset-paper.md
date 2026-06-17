@@ -33,8 +33,8 @@ and treat 8 pages as an upper bound, not a venue limit.
 
 | Order | Candidate section | Typical budget | Section role |
 |---|---:|---:|---|
-| Front | Abstract | 0.15-0.25 page | Summarize the measurement/resource gap, constructed benchmark or dataset, main findings, and intended use. |
-| 1 | Introduction | 1.0-1.5 pages | Define the target task or capability, limitations of existing benchmarks/resources, research questions, design considerations, proposal, and contributions. |
+| Front | Abstract | 0.15-0.25 page | Move from the measurement/resource gap to the benchmark or dataset contribution, protocol advantage, and one bounded evidence sentence; do not list model-specific results or multiple percentages. |
+| 1 | Introduction | 1.0-1.5 pages | Define the target task or capability, why existing benchmarks/resources miss it, the root evaluation gap, the benchmark proposal, contribution bullets, and one high-level evidence preview. |
 | 2 | Related Work | 0.75-1.25 pages | Compare prior datasets, benchmarks, protocols, and metrics by coverage, construct, annotation, and evaluation assumptions. |
 | 3 | Benchmark / Dataset Construction | 1.75-2.75 pages | Explain data sources, preprocessing, synthesis or transformation pipeline, annotation/scoring rules, quality control, and validation. |
 | 4 | Experiments and Empirical Findings | 2.0-3.0 pages | Define evaluation protocol, metrics, baselines, prompting/training access, overall performance, fine-grained analysis, and case studies. |

@@ -81,6 +81,14 @@ The appendix has the opposite failure from the body: short floats can scatter ac
 Prevent table dumps:
 
 - Keep appendix tables that fit one column as single-column tables.
+- **Appendix display parity**: appendix tables must pass the same width, overflow, header,
+  wrapping, caption, and rendered-page checks as body tables.
+- Do not promote compact appendix protocol tables to `table*`; label definitions, small inventories,
+  and key-value reproducibility notes should stay single-column or natural-width unless rendered QA
+  proves they are unreadable.
+- Watch for appendix float scatter: sparse `table*` / `figure*` floats can create half-empty pages
+  even when each individual item compiles. Use single-column tables, tighter subsection prose,
+  `\FloatBarrier`, or deliberate ordering before widening the float.
 - Anchor every appendix subsection with a 2-4 sentence lead paragraph, not a one-line pointer.
 - Pin float order deliberately; never use bare `[h]`. Use `[H]` if the venue allows `float`, or
   `[ht]` / `[tbp]` plus `\FloatBarrier` or a deliberate `\clearpage` where needed.

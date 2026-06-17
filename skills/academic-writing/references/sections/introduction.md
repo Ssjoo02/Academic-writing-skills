@@ -51,6 +51,18 @@ Evidence preview is not a results paragraph. It is at most one sentence that tel
 kind of evidence will support the contribution. Do not introduce a specific experiment, ablation,
 table, model list, or result recap in the Introduction.
 
+## No Model-List Or Result-Recap Paragraph
+
+The Introduction sells the problem and contribution logic, not the full empirical scorecard.
+
+- Do not include a model list, benchmark snapshot list, or annotation-snapshot roster.
+- Do not include multiple percentages, result ranges, or before/after intervention deltas.
+- Do not introduce metric ranges as a miniature Results paragraph.
+- If a number is necessary, use one headline statistic once, as part of the optional evidence
+  preview, and leave the model-specific breakdown to Experiments.
+- If the Introduction starts to explain which models were evaluated or how their scores differ,
+  move that paragraph to Experiments.
+
 ## Backward-Then-Forward Planning
 
 Use backward-then-forward reasoning before drafting the section.
@@ -415,3 +427,4 @@ template-selection notes unless the user asks for reasoning.
 3. Are technical challenge, technical reason, and solved mechanism all explicit?
 4. Are claims in Introduction aligned with available evidence without becoming a results recap?
 5. Is terminology stable across all sections?
+6. Is there no model list, no result-recap paragraph, and no multiple-percentage score summary?

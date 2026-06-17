@@ -40,6 +40,12 @@ After this gate, continue to the Final Static Audits and Final Submission Readin
 edits create citation, format, page-budget, layout, or compile changes, the later audits judge the
 reviewed-and-revised draft, not the pre-review draft.
 
+If review edits changed manuscript prose, captions, table text, equations, headings, or appendix
+text, rerun the `academic-writing` hub's Paper Content Edit Transaction before judging the draft:
+re-read the touched section guide(s), rerun Section-Method Adherence and reverse-outline checks,
+and update `paper/section-compliance.md`. This is a reread/self-check procedure, not a freshness
+gate; do not add hash, mtime, timestamp, or source-hash requirements.
+
 Return only a concise Paper Review Report summary in the terminal or conversation when the user asks
 for a review, when review is the primary task, or when material risks remain. Do not print the full
 review table or full defect list in the terminal unless the user explicitly asks for it. Write
@@ -69,8 +75,8 @@ project's `paper/` directory.
 content page limit (every modeled venue does; the conference fallback is a soft 8-page upper bound),
 run the page-budget audit with the limit bound in the confirmed Paper Framework. When the Framework
 also records a content-page target (strict page-limited full papers normally target the full body
-budget), run the minimum-page gate too. Then run the citation audit with the paper-type citation
-floor:
+budget, and the target normally equals the limit), run the minimum-page gate too. Do not omit `--min-content-pages` for a strict page-limited full paper. If the Framework omitted the target,
+return to the Paper Framework checkpoint and fix it before returning the draft. underfilled compiled output is blocking: a draft that reaches only page 6 under an 8-page target is incomplete even when it is concise and under the maximum. Then run the citation audit with the paper-type citation floor:
 
 ```bash
 python3 "<path-to-academic-review>/scripts/audit_draft.py" paper --framework writing-policies/<paper-slug>-paper-framework.md --max-content-pages <limit>
@@ -101,7 +107,7 @@ Apply the compression ladder in order, cheapest first:
 2. Cut the Conclusion to a short close (drop any limitations paragraph and any future-impact closer).
 3. Merge over-budget subsections (≤4 per section) and demote single-paragraph steps to
    `\paragraph{}` run-ins.
-4. Move per-vector / per-harm / per-category enumerations into a table and keep only load-bearing
+4. Move per-condition / per-subgroup / per-category enumerations into a table and keep only load-bearing
    numbers in prose.
 5. Compress support and compress-first sections named in the confirmed Core Section Budget before
    touching primary-core or evidence-core sections.
@@ -133,7 +139,8 @@ citation dumps, or unsupported speculation.
   environments such as `\end{section}`, misplaced/duplicated or over-long Limitations units,
   Framework Figure Plan alignment failures (planned figures/tables missing from `paper/`, picture
   figures missing a Picture Brief or rendered artifact, `latex_includes.tex` entries that say
-  `not yet generated`), content-page overflow, and disclosure leaks — internal identifiers that should use a display name,
+  `not yet generated`, missing or unresolved `paper/section-compliance.md`), content-page overflow,
+  and disclosure leaks — internal identifiers that should use a display name,
   or do-not-disclose entities that appear in prose). For
   a misplaced Limitations unit, move it into the venue-correct Limitations home: the dedicated
   pre-reference section for ACL-family venues, or a compressed appendix section only when the active
@@ -151,8 +158,9 @@ citation dumps, or unsupported speculation.
 markers, footnotes, file/path artifacts, duplicate labels, unresolved rendered references, undefined
 references/citations, invalid LaTeX section environments, subsection budget, Limitations placement
 and length, venue-aware content-page budget, table/layout hazards, appendix plan/substance, Framework
-display-item alignment, and disclosure leaks. Treat script output as the source of truth instead of
-restating the full rule set here.
+display-item alignment, front-matter result-overload discipline, section-compliance ledger presence,
+and disclosure leaks. Treat script output as the source of truth instead of restating the full rule
+set here.
 
 ## Gate Receipt
 
@@ -166,6 +174,8 @@ file records gate evidence, not prose critique. Include:
   fresh self-pass fallback;
 - each audit command run and its result line, including the citation audit and draft audit with
   `--framework`, `--max-content-pages`, and `--min-content-pages` when applicable;
+- `paper/section-compliance.md` status, including whether Abstract and Introduction were checked
+  against their section guides without unresolved moves;
 - Submission Readiness verdict: `PASS / BLOCKED / OPEN_DECISION`;
 - remaining blockers, open decisions, and whether a separate `paper/review-report.md` was written.
 

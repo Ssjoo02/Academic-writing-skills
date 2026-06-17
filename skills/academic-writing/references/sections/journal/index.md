@@ -42,7 +42,7 @@ card.
 For figures, the shared `plot-style.md` (rcParams, colors, chart-type rules) and
 `figure-planning.md` (Display Item Contract, Display Review Gate, generation routes)
 are venue-agnostic. Journal papers load `journal/figure-sizing.md` for
-journal-specific column widths and `journal/figure-contract.md` for archetypes and
+journal-specific column widths and `journal/figure-contract.md` for composition patterns and
 reviewer-risk assessment — no conference venue names enter context.
 
 ## Cross-References

@@ -37,6 +37,68 @@ def read(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
+def iter_runtime_instruction_files(root: Path):
+    """Files that can shape skill behavior; excludes assets, tests, and maintenance logs."""
+    allowed_suffixes = {".md", ".yaml", ".yml", ".json"}
+    excluded_parts = {
+        ".git",
+        "__pycache__",
+        "tests",
+        "maintenance",
+        "scripts",
+        "mcp-servers",
+        "templates",
+        "evals",
+    }
+    for base_name in ("SKILL.md", "manifest.yaml", "_shared", "skills"):
+        base = root / base_name
+        if base.is_file():
+            yield base
+            continue
+        if not base.exists():
+            continue
+        for path in base.rglob("*"):
+            if not path.is_file() or path.suffix not in allowed_suffixes:
+                continue
+            if excluded_parts.intersection(path.relative_to(root).parts):
+                continue
+            yield path
+
+
+def validate_no_runtime_provenance_or_project_leaks(root: Path) -> None:
+    """Keep reusable skill instructions free of local provenance and paper-specific residue."""
+    blocked_patterns = {
+        "paper-specific project name": re.compile(r"MobileWorld(?:Safety)?"),
+        "paper-specific metric acronym": re.compile(r"\b(?:ASR|TCR)\b|ASR/TCR"),
+        "paper-specific result label": re.compile(r"\brun_failed\b"),
+        "paper-specific model fixture": re.compile(
+            r"Claude Sonnet|Gemini\s*3|Qwen3?\.?5|GUI-Owl|MAI-UI|Kimi"
+        ),
+        "paper-specific safety taxonomy wording": re.compile(
+            r"\battack vectors?\b|\bharm types?\b|\bper-harm\b|\brisk injection\b",
+            re.I,
+        ),
+        "paper-specific scorecard wording": re.compile(r"risk[-_]capability", re.I),
+        "local absolute path": re.compile(
+            r"/mnt/shared-storage-user|/home/chensujin|\bchensujin\b|"
+            r"workspace/writing_skill|/ai4good2-share"
+        ),
+        "external reference skill provenance": re.compile(
+            r"nature-skills|Auto-claude-code-research-in-sleep|"
+            r"Research-Paper-Writing-Skills|\bacademic-skills\b"
+        ),
+    }
+
+    for path in iter_runtime_instruction_files(root):
+        text = read(path)
+        for label, pattern in blocked_patterns.items():
+            match = pattern.search(text)
+            if match is not None:
+                raise AssertionError(
+                    f"{path.relative_to(root)} contains {label}: {match.group(0)!r}"
+                )
+
+
 def load_yaml(path: Path) -> dict:
     return yaml.safe_load(read(path)) or {}
 
@@ -143,9 +205,19 @@ def validate_evals(skill_dir: Path) -> None:
 def validate_root_router(root: Path) -> None:
     """The root SKILL.md is the discovered entry point; it must route to every sub-skill."""
     skill_md = root / "SKILL.md"
-    validate_standard_skill_frontmatter(skill_md, expected_name="academic-writing-skills")
+    frontmatter = load_skill_frontmatter(skill_md)
+    root_name = str(frontmatter.get("name", "")).strip()
+    require(
+        root_name in {"academic-writing-skills", "academic-cs-writing"},
+        f"{skill_md}: expected name academic-writing-skills or academic-cs-writing, got {root_name}",
+    )
+    validate_standard_skill_frontmatter(skill_md, expected_name=root_name)
     router = read(skill_md)
-    require("Academic-Writing-Skills" in router, "root SKILL.md must use the collection display name")
+    if root_name == "academic-cs-writing":
+        require("Academic CS Writing" in router, "root SKILL.md must use the CS package display name")
+        require("standalone computer-science package" in router, "root SKILL.md must state CS package scope")
+    else:
+        require("Academic-Writing-Skills" in router, "root SKILL.md must use the collection display name")
     for sib in (
         "skills/academic-writing/SKILL.md",
         "skills/academic-figure/SKILL.md",
@@ -185,10 +257,17 @@ def validate_shared_layer(root: Path) -> None:
     metric_design = read(shared / "checks/metric-design.md")
     require(
         "Outcome semantics first" in metric_design
-        and "compromise rate" in metric_design
+        and "failure rate" in metric_design
         and "partial" in metric_design
         and "denominator" in metric_design,
-        "metric-design must require explicit outcome semantics, compromise/partial handling, and denominators",
+        "metric-design must require explicit outcome semantics, partial/failure handling, and denominators",
+    )
+    require(
+        "Formal Count Notation" in metric_design
+        and "Do not use `#` as a count operator" in metric_design
+        and "N_{\\mathrm{failure}}" in metric_design
+        and "N_{\\mathrm{scorable}}" in metric_design,
+        "metric-design must forbid hash-count equations and require formal count variables",
     )
     contract = read(shared / "core/contract.md")
     stance = read(shared / "core/stance.md")
@@ -217,6 +296,12 @@ def validate_shared_layer(root: Path) -> None:
         "framework overview, Section Plan, Figure Plan" in stance
         and "localize their labels and natural-language cells" in stance,
         "shared stance must classify framework and Figure Plan checkpoint content as terminal interaction output",
+    )
+    require(
+        "Only the Section Plan and Figure Plan are mandatory terminal Markdown tables" in stance
+        and "Do not render Display-Item Page Budget as a terminal table" in stance
+        and "keep display-item page costs in the saved Paper Framework artifact" in stance,
+        "shared stance must keep terminal Paper Framework output to the two user-facing plan tables",
     )
     require(
         "Always localize user-facing checkpoint labels to the interaction language" in gates_flat
@@ -338,6 +423,7 @@ def validate_hub(root: Path) -> None:
         "conclusion": read(hub / "references/sections/conclusion.md"),
         "appendix": read(hub / "references/sections/appendix.md"),
     }
+    abstract_guide = base_section_guides["abstract"]
     intro_guide = base_section_guides["introduction"]
     related_work_guide = base_section_guides["related-work"]
     method_guide = base_section_guides["method"]
@@ -432,6 +518,28 @@ def validate_hub(root: Path) -> None:
         and "not a component checklist" in paper_framework,
         "Paper Framework must load and apply the paper-type Main Content contract",
     )
+    paper_type_index = read(root / "_shared/paper-types/index.md")
+    journal_paper_type_index = read(root / "_shared/paper-types/journal/index.md")
+    benchmark_profile = read(root / "_shared/paper-types/benchmark-dataset-paper.md")
+    for name, text in (
+        ("conference paper-type index", paper_type_index),
+        ("journal paper-type index", journal_paper_type_index),
+    ):
+        require(
+            "Evidence is a one-sentence budget" in text
+            and "no model list" in text
+            and "no model-specific deltas" in text
+            and "multiple percentage values" in text
+            and "model-list or result-recap" in text
+            and "paragraph" in text,
+            f"{name} must keep Paper Framework front-matter content from becoming result recaps",
+        )
+    require(
+        "one bounded evidence sentence" in benchmark_profile
+        and "do not list model-specific results or multiple percentages" in benchmark_profile
+        and "one high-level evidence preview" in benchmark_profile,
+        "Benchmark/dataset profile must constrain Abstract and Introduction framework content",
+    )
     require(
         "Journal Submission Package Plan" in paper_framework
         and "| Item | Required? | Source/status | Owner/reference | Blocker? |" in paper_framework
@@ -477,6 +585,41 @@ def validate_hub(root: Path) -> None:
         "Paper Framework terminal Figure Plan must be a localized Markdown table, not prose",
     )
     require(
+        "Terminal Paper Framework checkpoints have exactly two mandatory Markdown tables" in paper_framework
+        and "Section Plan and Figure Plan" in paper_framework
+        and "Do not render `Display-Item Page Budget` as a terminal table" in paper_framework
+        and "keep display-item page costs in the saved framework artifact" in paper_framework
+        and "The terminal checkpoint must not contain a `Display-Item Page Budget:` heading" in paper_framework,
+        "Paper Framework terminal checkpoint must suppress the display-item page-budget table",
+    )
+    require(
+        "After the Figure Plan table, do not output any additional Markdown table in the terminal checkpoint"
+        in paper_framework
+        and "display-item page costs must never appear as a third terminal table" in paper_framework
+        and "If display-item costs affect confirmation, mention the tradeoff in prose only" in paper_framework,
+        "Paper Framework terminal checkpoint must block extra markdown tables after the Figure Plan",
+    )
+    require(
+        "Display-Item Page Budget:\n\n| ID | Main-paper placement | Estimated page cost | Compression fallback |"
+        not in paper_framework,
+        "Paper Framework terminal schema must not include the old Display-Item Page Budget table block",
+    )
+    require(
+        "Journal Submission Package Plan:\n\n| Item | Required? | Source/status | Owner/reference | Blocker? |"
+        not in paper_framework
+        and "Appendix / Supplement Plan:\n\n| Item ID | Type | Claim backed | Source availability | Fill status | Main-text anchor | Fallback |"
+        not in paper_framework,
+        "Paper Framework terminal schema must not include journal or appendix table blocks",
+    )
+    require(
+        "When the user requests changes at the Paper Framework gate" in paper_framework
+        and "revision pass must re-render the full Paper Framework checkpoint" in paper_framework
+        and "must include the updated Section Plan table and updated Figure Plan table" in paper_framework
+        and "Do not answer only with a change summary" in paper_framework
+        and "cannot proceed to paper/ until the revised tables have been shown and confirmed" in paper_framework,
+        "Paper Framework revision pass must re-display revised Section/Figure Plan tables before proceeding",
+    )
+    require(
         "Chinese terminal chart-form values must be localized" in paper_framework
         and "schematic -> 示意图" in paper_framework
         and "donut -> 环形图" in paper_framework
@@ -499,6 +642,12 @@ def validate_hub(root: Path) -> None:
         "Paper Framework stage must distinguish submission limits, camera-ready allowances, and custom page targets",
     )
     require(
+        "set `Content-page target` equal to `Active content-page bound`" in paper_framework
+        and "Do not create `paper/` with a lower content-page target" in paper_framework
+        and "--min-content-pages <target>" in paper_framework,
+        "Paper Framework must make near-full page utilization a hard target for strict page-limited full papers",
+    )
+    require(
         "Abstract and Introduction rows preserve the paper-type Main Content movement" in paper_framework
         and "not component inventories" in paper_framework,
         "Paper Framework self-check must block checklist-style Abstract/Introduction rows",
@@ -509,6 +658,47 @@ def validate_hub(root: Path) -> None:
         "problem -> challenge/gap -> insight/contribution -> advantage -> evidence" in section_drafting
         and "state purpose or advantage" in section_drafting,
         "Section drafting must gate Abstract/Introduction on a coherent logic chain",
+    )
+    require(
+        "## Evidence Budget" in abstract_guide
+        and "at most one high-level evidence sentence" in abstract_guide
+        and "model-specific deltas" in abstract_guide
+        and "multiple percentage values" in abstract_guide,
+        "Abstract guide must cap result evidence and forbid model-specific result dumps",
+    )
+    require(
+        "## No Model-List Or Result-Recap Paragraph" in intro_guide
+        and "Do not include a model list" in intro_guide
+        and "multiple percentages" in intro_guide
+        and "before/after intervention deltas" in intro_guide,
+        "Introduction guide must forbid model-list and result-recap paragraphs",
+    )
+    require(
+        "one high-level evidence sentence at most" in section_drafting
+        and "model-specific deltas" in section_drafting
+        and "no model-list or" in section_drafting
+        and "result-recap paragraph" in section_drafting
+        and "no multiple-percentage score summary" in section_drafting,
+        "Section drafting must enforce abstract evidence budget and introduction result-recap bans",
+    )
+    require(
+        "Section Guide Compliance" in section_drafting
+        and "Ledger" in section_drafting
+        and "`paper/section-compliance.md`" in section_drafting
+        and "`Section`, `Guide loaded`, `Required moves checked`, `Result`, and" in section_drafting
+        and "audit_draft.py --framework" in section_drafting,
+        "Section drafting must write a durable section-compliance ledger checked by audit_draft",
+    )
+    require(
+        "## Paper Content Edit Transaction" in section_drafting
+        and "Before every paper-content edit" in section_drafting
+        and "re-read from disk the current target's section guide" in section_drafting
+        and "`references/sections/paragraph-flow.md`" in section_drafting
+        and "do not rely on a guide loaded earlier in the run" in section_drafting
+        and "update `paper/section-compliance.md`" in section_drafting
+        and "not a freshness gate" in section_drafting
+        and "Do not add hash, mtime, timestamp, or source-hash requirements" in section_drafting,
+        "Section drafting must require a reread/self-check transaction for every paper-content edit without a freshness gate",
     )
     require(
         "```mermaid" in intro_guide
@@ -735,11 +925,43 @@ def validate_hub(root: Path) -> None:
         "Section drafting must route appendix/supplement drafting through the appendix guide",
     )
     require(
+        "Metric definitions in any section" in section_drafting
+        and "_shared/checks/metric-design.md" in section_drafting
+        and "no raw `#` count notation" in section_drafting,
+        "Section drafting must route any metric definition through metric-design and ban raw hash count notation",
+    )
+    require(
+        "Reader-facing heading quality" in section_drafting
+        and "Do not create a body subsection whose title is an appendix pointer" in section_drafting
+        and "Appendix Matrix" in section_drafting
+        and "Every Experiments subsection title must name the finding, comparison, protocol, or analysis question" in section_drafting,
+        "Section drafting must forbid appendix-pointer body headings and require reader-facing result headings",
+    )
+    require(
+        "Subsection Title Quality" in experiments_guide
+        and "not the artifact state" in experiments_guide
+        and "Appendix Matrix" in experiments_guide
+        and "Aggregate Result Snapshot" in experiments_guide
+        and "Overall Performance-Robustness Tradeoff" in experiments_guide,
+        "Experiments guide must prevent weak artifact/status headings and model finding-led alternatives",
+    )
+    require(
         "Appendix / Supplement rewrite" in draft_revision
         and "references/sections/appendix.md" in draft_revision
         and "table-placement.md" in draft_revision
         and "submission-readiness.md" in draft_revision,
         "Draft Revision must support appendix/supplement rewrite and audit requests",
+    )
+    require(
+        "## Paper Content Edit Transaction" in draft_revision
+        and "Any revision that changes manuscript content" in draft_revision
+        and "re-read from disk" in draft_revision
+        and "`references/sections/<section>.md`" in draft_revision
+        and "`references/sections/paragraph-flow.md`" in draft_revision
+        and "update `paper/section-compliance.md`" in draft_revision
+        and "not a freshness gate" in draft_revision
+        and "Do not add hash, mtime, timestamp, or source-hash requirements" in draft_revision,
+        "Draft Revision must reread section guides and refresh section-compliance after content edits without a freshness gate",
     )
     stale_figure_paths = (
         "../academic-figure/references/sections/figures-and-tables.md",
@@ -772,6 +994,13 @@ def validate_hub(root: Path) -> None:
         and "2-4 sentence lead paragraph" in appendix_guide
         and "No stubs" in appendix_guide,
         "Appendix guide must keep appendix support-only, source-aware, substantive, and non-stubbed",
+    )
+    require(
+        "Benchmark / Dataset / Evaluation Appendix Evidence Package" in appendix_guide
+        and "Appendix Display Parity Gate" in appendix_guide
+        and "Appendix figures and tables are not second-class" in appendix_guide
+        and "denominator audit" in appendix_guide,
+        "Appendix guide must require substantive evidence packages and body-grade display QA",
     )
 
     # Orchestrator delegates to the three sibling skills
@@ -904,12 +1133,44 @@ def validate_figure_skill(root: Path) -> None:
     plot_style = read(fig / "references/figures/plot-style.md")
     chart_taxonomy = read(fig / "references/figures/chart-taxonomy.md")
     chart_patterns = read(fig / "references/figures/chart-patterns.md")
+    style_reference = read(fig / "references/figures/style-reference.md")
     conf_sizing = read(fig / "references/figures/conference/figure-sizing.md")
     schematic_design = read(fig / "references/figures/schematic-design.md")
     picture_generation = read(fig / "references/figures/picture-generation.md")
     paper_figure_server = read(fig / "mcp-servers/paper-figure/server.py")
     figure_manifest = read(fig / "manifest.yaml")
     figure_skill = read(fig / "SKILL.md")
+
+    generic_figure_docs = {
+        "chart-taxonomy.md": chart_taxonomy,
+        "chart-patterns.md": chart_patterns,
+        "style-reference.md": style_reference,
+        "plot-style.md": plot_style,
+        "table-design.md": table_design,
+        "table workflow": table_handling,
+        "picture-generation.md": picture_generation,
+    }
+    leaked_research_terms = (
+        "Mobile" + "World",
+        "Mobile" + "World" + "Safety",
+        "AS" + "R",
+        "TC" + "R",
+        "fig_a_" + "harm_type",
+        "radar_" + "attack_vector",
+        "attacker motif",
+        "harm/safe outcome",
+        "risk-capability",
+        "risk_capability",
+        "RISK_CAPABILITY",
+        "Gemini" + "3-Pro",
+        "Qw" + "en" + "3.5",
+    )
+    for doc_name, doc_text in generic_figure_docs.items():
+        for term in leaked_research_terms:
+            require(
+                term not in doc_text,
+                f"{doc_name} must keep reusable figure/table guidance free of paper-specific term `{term}`",
+            )
 
     require(
         not (fig / "static/figure-handling.md").exists()
@@ -928,6 +1189,12 @@ def validate_figure_skill(root: Path) -> None:
         and "static/table-handling.md" not in figure_manifest
         and "references/sections/figures-and-tables.md" not in figure_manifest,
         "academic-figure manifest must route through plot/schematic/picture/table workflows and prose display reference",
+    )
+    require(
+        "references/figures/style-reference.md" in figure_manifest
+        and "style reference" in figure_manifest
+        and "visual grammar" in figure_manifest,
+        "academic-figure manifest must route user-supplied reference figures through a style-only reference",
     )
     require(
         "Plot =" in figure_skill
@@ -976,6 +1243,13 @@ def validate_figure_skill(root: Path) -> None:
         "figure-planning must require semantics-first chart-form variety across a paper",
     )
     require(
+        "Appendix Display Parity Gate" in figure_planning
+        and "Appendix figures and tables are not second-class" in figure_planning
+        and "single-panel appendix heatmap" in figure_planning
+        and "0.60--0.70\\textwidth" in figure_planning,
+        "figure-planning must apply body-grade sizing and review gates to appendix displays",
+    )
+    require(
         "cross-figure chart-form audit" in plot_handling
         and "composition / coverage" in plot_handling
         and "avoid defaulting every numeric plot to bars" in plot_handling,
@@ -998,6 +1272,11 @@ def validate_figure_skill(root: Path) -> None:
         and "references/figures/chart-taxonomy.md" in plot_handling
         and "chart family" in plot_handling,
         "academic-figure must route data plots through chart-taxonomy before plotting",
+    )
+    require(
+        "references/figures/style-reference.md" in plot_handling
+        and "style-only" in plot_handling,
+        "plot workflow must load the style-reference boundary when a user supplies a reference figure",
     )
     require(
         "deterministic technical diagrams" in schematic_handling
@@ -1049,10 +1328,34 @@ def validate_figure_skill(root: Path) -> None:
     require(
         "Palette Presets" in chart_taxonomy
         and "hero-baseline" in chart_taxonomy
-        and "semantic-risk-capability" in chart_taxonomy
+        and "paired-opposing-rates" in chart_taxonomy
         and "distribution-neutral" in chart_taxonomy
         and "composition-muted" in chart_taxonomy,
         "chart-taxonomy must define reusable palette presets",
+    )
+    require(
+        "paired-opposing-scorecard" in chart_taxonomy
+        and "#C97B6B" in chart_taxonomy
+        and "#5E8FB8" in chart_taxonomy
+        and "opposite-valence" in chart_taxonomy,
+        "chart-taxonomy must define a muted reusable paired-opposing scorecard preset",
+    )
+    require(
+        "## Style Reference Boundary" in style_reference
+        and "Extract only visual grammar" in style_reference
+        and "Do not import research content" in style_reference
+        and "domain terms" in style_reference
+        and "metric names" in style_reference
+        and "result values" in style_reference
+        and "caption claims" in style_reference
+        and "paper-specific labels" in style_reference
+        and "style-only extraction" in style_reference,
+        "style-reference must forbid importing research content from user-supplied reference figures",
+    )
+    require(
+        "style reference is not a content source" in chart_taxonomy
+        and "Do not copy domain terms, metric names, labels, result values, or claims" in chart_taxonomy,
+        "chart-taxonomy must treat style references as visual grammar only",
     )
     require(
         "horizontal_bars" in chart_patterns
@@ -1070,11 +1373,47 @@ def validate_figure_skill(root: Path) -> None:
         "chart-taxonomy must define the shared-legend radar preset",
     )
     require(
+        "reference-style shared-legend radar" in chart_taxonomy
+        and "white-filled markers" in chart_taxonomy
+        and "custom theta labels" in chart_taxonomy
+        and "dashed light-grey rings" in chart_taxonomy,
+        "chart-taxonomy must lock the reference-style radar visual grammar without paper-specific names",
+    )
+    require(
+        "light grey interior fill" in chart_taxonomy
+        and "deep blue spoke labels" in chart_taxonomy
+        and "legend in two columns when six methods are shown" in chart_taxonomy,
+        "chart-taxonomy must preserve the reference radar page grammar",
+    )
+    require(
         "Preset: compact labeled donut" in chart_taxonomy
         and "thick ring" in chart_taxonomy
         and "outside code-percentage labels" in chart_taxonomy
         and "bottom legend maps codes to full labels" in chart_taxonomy,
         "chart-taxonomy must define the compact labeled donut preset",
+    )
+    require(
+        "Style-matched coverage donut" in chart_taxonomy
+        and "seven-color ring preset" in chart_taxonomy
+        and "#4B8BBE" in chart_taxonomy
+        and "#B1A1C8" in chart_taxonomy,
+        "chart-taxonomy must lock the reference-style coverage donut palette without paper-specific names",
+    )
+    require(
+        "blue-green ramp" not in chart_taxonomy
+        and "orange ramp" not in chart_taxonomy,
+        "chart-taxonomy must not keep the old split blue-green/orange donut palette",
+    )
+    require(
+        "percentage labels must not collide with the bottom legend" in chart_taxonomy
+        and "reserve enough bottom margin" in chart_patterns
+        and "label-legend overlap is a rendering defect" in chart_patterns,
+        "reference-style donut guidance must prevent label and legend collisions",
+    )
+    require(
+        "Four-method matched-pair panels should use a two-column shared legend" in chart_taxonomy
+        and "legend_ncol = 2 if len(methods) <= 4 else 3" in chart_patterns,
+        "reference-style radar guidance must specify compact shared-legend columns for four-method panels",
     )
     require(
         "Body compact mode" in chart_taxonomy
@@ -1088,6 +1427,31 @@ def validate_figure_skill(root: Path) -> None:
         and "draw_compact_labeled_donut" in chart_patterns
         and "white wedge separators" in chart_patterns,
         "chart-patterns must expose reusable shared-legend radar and compact labeled donut helpers",
+    )
+    require(
+        "PAIRED_OPPOSING_PALETTE" in chart_patterns
+        and "paired_opposing_horizontal_scorecard" in chart_patterns
+        and "add_custom_theta_labels" in chart_patterns
+        and "markerfacecolor='white'" in chart_patterns,
+        "chart-patterns must expose the paired-opposing scorecard and reference-style radar helpers",
+    )
+    require(
+        "COVERAGE_DONUT_MUTED_PALETTE" in chart_patterns
+        and "style-reference ring/donut palette" in chart_patterns
+        and "#4B8BBE" in chart_patterns
+        and "#6BA3CF" in chart_patterns
+        and "#8FBCDB" in chart_patterns
+        and "#E3A86D" in chart_patterns
+        and "#E08F72" in chart_patterns
+        and "#7DBD9C" in chart_patterns
+        and "#B1A1C8" in chart_patterns
+        and "draw_coverage_donut_pair" in chart_patterns,
+        "chart-patterns must expose the reference-style donut palette and coverage donut-pair helper",
+    )
+    require(
+        "#3A6682" not in chart_patterns
+        and "#DD9445" not in chart_patterns,
+        "chart-patterns must not keep stale split-ramp donut colors",
     )
     require(
         "body_compact=False" in chart_patterns
@@ -1108,6 +1472,13 @@ def validate_figure_skill(root: Path) -> None:
         and "One-column template" in conf_sizing
         and "`figure` + `width=0.45--1.00\\linewidth`" in conf_sizing,
         "conference figure-sizing must provide a deterministic figure span decision matrix",
+    )
+    require(
+        "Appendix Figure Sizing" in conf_sizing
+        and "appendix single-panel heatmap" in conf_sizing
+        and "0.60--0.70\\textwidth" in conf_sizing
+        and "same rendered QA" in conf_sizing,
+        "conference figure-sizing must define appendix figure size discipline",
     )
     require(
         "Single-column paper quick rule" in conf_sizing
@@ -1167,6 +1538,12 @@ def validate_figure_skill(root: Path) -> None:
     require(
         "Never let a table overflow" in table_placement and "appendix" in table_placement.lower(),
         "table-placement guide must make body and appendix overflow a hard defect",
+    )
+    require(
+        "Appendix display parity" in table_placement
+        and "Do not promote compact appendix protocol tables to `table*`" in table_placement
+        and "appendix float scatter" in table_placement,
+        "table-placement must prevent oversized appendix table floats and scatter",
     )
     require(
         "Prose-only display guidance" in display_prose
@@ -1280,6 +1657,19 @@ def validate_figure_skill(root: Path) -> None:
         "table guidance must make the polished scorecard style a general default, not a one-off example",
     )
     require(
+        "Paired opposing-rate scorecard" in table_design
+        and "group headers such as Coverage, Rates, and Outcome counts" in table_design
+        and "bold column extrema" in table_design
+        and "column maxima are salient rather than uniformly good" in table_design,
+        "table-design must define a polished paired opposing-rate scorecard template with extrema highlighting",
+    )
+    require(
+        "Main paired-rate scorecards" in table_handling
+        and "must not be emitted as a flat one-row header table" in table_handling
+        and "bold the declared extrema" in table_handling,
+        "table workflow must block flat unhighlighted paired-rate main scorecards",
+    )
+    require(
         "Universal Table Visual Grammar" in table_design
         and "not fitted to one dataset" in table_design
         and "bold every header level" in table_design
@@ -1287,6 +1677,12 @@ def validate_figure_skill(root: Path) -> None:
         and "Do not special-case literal model names" in table_handling
         and "Reuse the visual grammar across future papers" in table_handling,
         "table guidance must generalize polished styling across future papers instead of sample-specific layouts",
+    )
+    require(
+        "Appendix table visual grammar" in table_design
+        and "Appendix tables are not second-class" in table_design
+        and "avoid full-width sparse glossary tables" in table_design,
+        "table-design must apply polished table standards to appendix tables",
     )
     require(
         "if no Figure Plan is available" in table_handling
@@ -1447,6 +1843,14 @@ def validate_review_skill(root: Path) -> None:
         "page-limited venues must require compiled content-page auditing",
     )
     require(
+        "Do not omit `--min-content-pages`" in closing
+        and "target normally equals the limit" in closing
+        and "underfilled compiled output is blocking" in closing
+        and "under the confirmed target is `BLOCKED`" in submission
+        and "under the confirmed content-page target is also `blocking`" in paper_review,
+        "review gates must treat underfilled page-limited drafts as blocking, not merely concise",
+    )
+    require(
         "numeric content-page limit" in closing
         and "compiled content-page count" in paper_review
         and "moving Limitations to an appendix" in submission,
@@ -1457,6 +1861,14 @@ def validate_review_skill(root: Path) -> None:
         and "Method must explain the algorithm" in paper_review
         and "evidence hook for each load-bearing module" in paper_review,
         "paper-review must own primary-core floor enforcement and method-paper underdevelopment findings",
+    )
+    require(
+        "front-matter discipline" in paper_review
+        and "problem -> challenge/gap -> insight/contribution -> advantage -> one bounded evidence sentence"
+        in paper_review
+        and "no model-list paragraph" in paper_review
+        and "metric ranges" in paper_review,
+        "paper-review must flag abstract result overload and introduction model/result recap failures",
     )
     require(
         "Bounded Review Intake" in paper_review
@@ -1508,6 +1920,21 @@ def validate_review_skill(root: Path) -> None:
         "closing-gates must require a compact durable gate receipt for full paper closing runs",
     )
     require(
+        "section-compliance.md" in closing
+        and "front-matter result-overload discipline" in closing
+        and "section-compliance ledger presence" in closing,
+        "closing-gates must record section-compliance and front-matter discipline as static audit evidence",
+    )
+    require(
+        "review edits changed manuscript prose" in closing
+        and "Paper Content Edit Transaction" in closing
+        and "re-read the touched section guide" in closing
+        and "update `paper/section-compliance.md`" in closing
+        and "not a freshness" in closing
+        and "do not add hash, mtime, timestamp, or source-hash requirements" in closing,
+        "closing-gates must rerun the paper-content edit transaction after review-driven content edits without a freshness gate",
+    )
+    require(
         "Risk Action Mapping" in reviewer_risk
         and all(
             token in reviewer_risk
@@ -1536,10 +1963,20 @@ def validate_review_skill(root: Path) -> None:
         "HARDCODED_STRUCTURAL_REF_RE",
         "check_framework_alignment",
         "parse_framework_display_items",
+        "parse_framework_page_budget",
+        "framework content-page target applied",
         "check_appendix_plan",
         "check_content_page_bounds_from_pages",
         "min_content_pages",
         "content-page budget underfilled",
+        "check_heading_quality",
+        "check_front_matter_discipline",
+        "check_section_compliance_ledger",
+        "PERCENT_VALUE_RE",
+        "MODEL_NAME_RE",
+        "RESULT_DELTA_RE",
+        "APPENDIX_POINTER_HEADING_RE",
+        "WEAK_RESULT_HEADING_RE",
         "DISPLAY_REF_RE",
         "COMPACT_SINGLE_COLUMN_WIDTH_MAX",
         "LIMITATIONS_MAX_WORDS = 180",
@@ -1557,6 +1994,7 @@ def main(argv: list[str]) -> int:
     validate_packaging_boundary(root)
     validate_shared_layer(root)
     validate_no_stale_deleted_paths(root)
+    validate_no_runtime_provenance_or_project_leaks(root)
 
     skills_dir = root / "skills"
     require(skills_dir.is_dir(), "skills/ directory missing")

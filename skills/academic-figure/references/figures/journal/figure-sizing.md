@@ -112,7 +112,7 @@ TIFF by default for CS journals (JMLR, TPAMI) unless asked.
   — figures count toward the page budget. Move extra figures to separate
   supplemental files. See `_shared/venues/ieee-tpami.md` for current limits.
 - **journal-generic**: column layout `not verified` — confirm from the target
-  journal template before setting `figsize`. Apply the journal figure archetypes
+  journal template before setting `figsize`. Apply the journal figure composition patterns
   and reviewer-risk checklist from `references/figures/journal/figure-contract.md`.
   Resolve display-item caps and supplementary model from the venue card.
 
@@ -121,7 +121,7 @@ TIFF by default for CS journals (JMLR, TPAMI) unless asked.
 - `plot-style.md` — rcParams, colors, per-chart-type rules, legend rules,
   multi-panel architecture (load first)
 - `chart-patterns.md` — reusable Python plotting helpers
-- `references/figures/journal/figure-contract.md` — journal figure archetypes,
+- `references/figures/journal/figure-contract.md` — journal figure composition patterns,
   panel logic, aesthetic integration, reviewer-risk checklist
 - `figure-planning.md` — Display Item Contract, Display Review Gate, generation
   routes

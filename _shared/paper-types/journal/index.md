@@ -24,9 +24,11 @@ compress it into a short planning cue, **not a component checklist**.
 
 - **Abstract**: preserve `problem/challenge -> gap -> contribution/insight -> advantage -> evidence`.
   Name only the central object and strongest evidence; avoid inventories like "task count, protocol,
-  result range".
+  result range". Evidence is a one-sentence budget: no model list, no model-specific deltas, and no
+  multiple percentage values.
 - **Introduction**: preserve `problem/gap -> contribution -> evidence preview`. State why the paper
-  exists and what the evidence will support.
+  exists and what the evidence will support. Do not turn the preview into a model-list or result-recap
+  paragraph.
 - **Body sections**: name the section job plus the evidence or display anchor, e.g., "dataset
   construction and benchmark evidence", not paragraphs or subsection lists.
 

@@ -53,12 +53,12 @@ silently — keep the wording bounded and flag it, per the writing-only scope.
     matching contribution bullet. This is the one place emphasis is expected; do not leave the name
     unformatted there.
   - After those first mentions, write the name as plain text (no bold, no small caps). Keep its
-    capitalization identical everywhere (e.g. `MobileWorldSafety`, never alternating with
-    `Mobileworldsafety` or `MOBILEWORLDSAFETY`).
+    capitalization identical everywhere (e.g. `MethodName`, never alternating with
+    `Methodname` or `METHODNAME`).
   - **Do not wrap names in `\textsc{}`.** Small caps renders lowercase identifiers
-    (`\textsc{gemini3}`) as ugly all-lowercase glyphs and clashes with the bold first-mention
+    (`\textsc{modelx}`) as ugly all-lowercase glyphs and clashes with the bold first-mention
     convention. Write model, system, and method names in their canonical capitalization as plain
-    text (`Gemini3-Pro`, `Qwen3.5`), matching the Writing Policy's stabilized term list.
+    text (for example, `Model-X` or `SystemName`), matching the Writing Policy's stabilized term list.
 
 ## 4. Structural requirements
 

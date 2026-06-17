@@ -48,8 +48,8 @@ body must be argumentative, never completeness:
 - ❌ Listing every category `V1…Vn` / `H1…Hn` with its definition and task count in the body.
 - ❌ Making a subsection whose main content is a glossary-style itemize/enumerate list
   (`V1 -- Email: ...`, `H1 -- Phishing: ...`). This is still enumeration even when no counts appear.
-- ✅ "We define `n` attack vectors spanning `<short span>`; two are novel (`Vk`, `Vj`, motivated
-  below). The full taxonomy with per-vector counts is in Table/Appendix X."
+- ✅ "We define `n` categories spanning `<short span>`; two are novel (`Ck`, `Cj`, motivated
+  below). The full taxonomy with per-category counts is in Table/Appendix X."
 
 For taxonomy sections, the prose job is **argument and design logic**, not dictionary coverage:
 why this axis is needed, how the categories separate failure modes, what is novel or surprising, and
@@ -70,16 +70,15 @@ never by deleting the actual claim or its key evidence.
 Before (body text, unfocused — full inventory inline):
 
 ```text
-We define 8 attack vectors. V1 -- Email: ... 20 tasks. V2 -- SMS: ... 16 tasks.
-V3 -- Web: ... 21 tasks. [... five more bullets ...]
+We define 8 categories. C1 -- Source A: ... 20 items. C2 -- Source B: ... 16 items.
+C3 -- Source C: ... 21 items. [... five more bullets ...]
 ```
 
 After (body text, one stroke + pointer; full list moved to a table/appendix):
 
 ```text
-The benchmark spans 8 attack vectors, from common text channels (email, SMS, web, social,
-work chat, files) to two we introduce: compromised tool return values (V7) and visual-payload
-injection (V8). Table~\ref{tab:vectors} lists all vectors with per-vector task counts.
+The benchmark spans 8 categories, from common input conditions to two newly introduced stress
+conditions. Table~\ref{tab:categories} lists all categories with per-category item counts.
 ```
 
 ## Before Drafting

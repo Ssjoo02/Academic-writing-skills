@@ -45,13 +45,15 @@ references:
       path: references/figures/picture-generation.md
     - condition: "data-driven plots require reusable code patterns (grouped bars, trend lines, heatmaps, radar, save helpers)"
       path: references/figures/chart-patterns.md
+    - condition: "user supplies a style reference, reference figure, PDF, screenshot, or style example; extract visual grammar only and do not import research content"
+      path: references/figures/style-reference.md
     - condition: "figure planning, Display Item Contract, Display Review Gate, failure signatures, generation routes"
       path: references/figures/figure-planning.md
     - condition: "Venue Kind is conference AND data-driven plots need column widths, figsize, font hierarchy, height budget"
       path: references/figures/conference/figure-sizing.md
     - condition: "Venue Kind is journal AND data-driven plots need column widths, figsize, font hierarchy, height budget, display-item caps, export formats"
       path: references/figures/journal/figure-sizing.md
-    - condition: "Venue Kind is journal AND figure planning needs journal-specific archetypes, panel logic, aesthetic integration, reviewer-risk checklist"
+    - condition: "Venue Kind is journal AND figure planning needs journal-specific composition patterns, panel logic, aesthetic integration, reviewer-risk checklist"
       path: references/figures/journal/figure-contract.md
     - condition: "all figures have passed individual review gates AND submission-readiness cross-figure check is needed (statistics minimum, image-integrity, export bundle)"
       path: references/figures/qa-contract.md

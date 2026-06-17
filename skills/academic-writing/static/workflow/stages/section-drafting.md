@@ -17,6 +17,12 @@ Load section references when drafting each section:
 | Conclusion / Limitations | `references/sections/conclusion.md`, `references/sections/paragraph-flow.md` |
 | Appendix / Supplement | `references/sections/appendix.md`, `references/sections/paragraph-flow.md`; invoke the `academic-figure` skill for appendix figures/tables |
 
+Metric definitions in any section: whenever a Method, Benchmark, Dataset, Experiments, Appendix, or
+caption defines a rate, score, denominator, or outcome aggregation, also load
+`_shared/checks/metric-design.md`. Equations must use formal count variables and no raw `#` count notation;
+write `N_{\mathrm{failure}}`, `N_{\mathrm{partial}}`, and `N_{\mathrm{scorable}}` rather
+than `#failure`, `# partial`, or `# scorable`.
+
 **Journal section overlays (only when `venue_kind=journal`).** After loading each base section guide
 above, also load the matching overlay and apply it on top of the base (it states only the journal
 deltas; see `references/sections/journal/index.md`):
@@ -34,6 +40,16 @@ When `venue_kind=conference`, do **not** load any file under `references/section
 
 Load a local example only when the section guide explicitly points to one, the section structure is
 uncertain, or the user asks to learn from examples. Learn structure, not phrasing.
+
+## Paper Content Edit Transaction
+
+Any operation that writes, rewrites, compresses, expands, polishes, or renames manuscript prose,
+captions, table text, section headings, or appendix text is a paper-content edit. Before every paper-content edit, re-read from disk the current target's section guide, any required journal
+overlay, the conditional metric/claim/display references that apply to the edit, and
+`references/sections/paragraph-flow.md`; do not rely on a guide loaded earlier in the run.
+
+After the edit, rerun the Section-Method Adherence check for the touched section(s), revise until
+all required moves are `present` or the residual risk is explicit, and update `paper/section-compliance.md`. This is a reread/self-check procedure, not a freshness gate. Do not add hash, mtime, timestamp, or source-hash requirements.
 
 For each section, follow this drafting loop:
 
@@ -54,9 +70,12 @@ For each section, follow this drafting loop:
    its prose must explain the design rationale, category boundaries, and the few salient/novel
    members, while complete definitions/counts live in a table or appendix.
 5. Run reverse outlining and claim-evidence mapping internally; revise before moving to next section.
-6. **Section-Method Adherence check (mandatory, internal).** Before moving on, verify the section
+6. **Section-Method Adherence check (mandatory).** Before moving on, verify the section
    against the *required moves* of its section guide and mark each `present` / `missing`. A `missing`
    move means the section is not done — revise until resolved or record it as an explicit risk.
+   **Reader-facing heading quality:** subsection titles must describe what the reader learns, not
+   the artifact used or where extra material lives. Do not create a body subsection whose title is an appendix pointer such as `Appendix Matrix`, `Appendix Heatmap`, or `Supplementary Details`;
+   make that a prose cross-reference near the relevant result instead. Every Experiments subsection title must name the finding, comparison, protocol, or analysis question, not an internal evidence state such as "snapshot" or "matrix".
    Minimum required moves per section:
    - **Method** (`references/sections/method.md`): every module subsection has motivation, design,
      technical advantage, and evidence hook; an overview/section-map opens the section; terms defined
@@ -67,12 +86,14 @@ For each section, follow this drafting loop:
      section; route them to the dedicated Limitations section below.
    - **Abstract**: problem -> challenge/gap -> insight/contribution -> advantage -> evidence
      chain present; contribution sentences state purpose or advantage, not only a component list;
-     central claims map to available evidence.
+     central claims map to available evidence; one high-level evidence sentence at most, with no
+     model-specific deltas and no multiple percentage values.
    - **Introduction**: Introduction chain: task/application or setting -> target goal ->
      prior/current-practice failure -> root technical issue -> contribution/pipeline -> why it
      works -> contribution bullets -> optional evidence preview; no separate experiment paragraph;
      contribution sentences state purpose or advantage, not only a component list; central claims
-     map to available evidence; contributions preview maps to later sections.
+     map to available evidence; contributions preview maps to later sections; no model-list or
+     result-recap paragraph and no multiple-percentage score summary.
    - **Related Work**: organized by topic group with a stated distinction per group, not a citation
      list. **Every named prior method, benchmark, dataset, model, or framework carries a `\cite`**;
      proactively run the targeted citation search (see Citation Search Trigger) rather than leaving
@@ -96,13 +117,21 @@ For each section, follow this drafting loop:
      table or appendix; no glossary-style taxonomy subsection whose main content is one item per
      category; every prose number supports a claim rather than transcribing a table.
 
-   Keep this check internal. Round 2 of the Post-Draft Review Gate (the independent subagent, owned by
-   the `academic-review` skill) must independently re-verify these same required moves against the
-   section guides — it is the external check that the self-assessment was honest.
+   Keep paragraph plans and section plans internal, but write a compact **Section Guide Compliance
+   Ledger** to `paper/section-compliance.md` as the durable receipt. The ledger must include one row
+   per drafted section: `Section`, `Guide loaded`, `Required moves checked`, `Result`, and
+   `Residual risk`. Use `present` only when the required moves are actually present; do not write
+   `missing`, `unchecked`, `not loaded`, `todo`, or `tbd` in a returned draft. The closing
+   `audit_draft.py --framework ...` gate blocks if this ledger is absent or unresolved.
+   Round 2 of the Post-Draft Review Gate (the independent subagent, owned by the `academic-review`
+   skill) must independently re-verify these same required moves against the section guides — it is
+   the external check that the self-assessment was honest.
 
 **Non-negotiables while drafting (these hold here, not only in the rules file):** no `\footnote{}`;
 no `\texttt{*.json/*.py/*.csv}` or code identifiers or local paths in prose; subsection budget (0 for
 short sections, ≤4 per main section); do not add sections/subsections beyond the confirmed Framework.
+Any equation that defines a metric, rate, or denominator must use formal count notation, with no raw
+`#` count notation.
 For taxonomies, inventories, and per-category counts, follow the Salience And Compression rule once:
 the body gives the dimension, total, and salient/novel members; the full definitions/counts go to a
 table or appendix. The ban includes the **disguised form**: a run of `\textbf{V1 (...)}.` /

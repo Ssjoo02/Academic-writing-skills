@@ -18,6 +18,41 @@ SPEC.loader.exec_module(audit_draft)
 
 
 class PageBudgetTests(unittest.TestCase):
+    def test_framework_page_budget_parser_rounds_target_to_reached_page(self) -> None:
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp:
+            framework = Path(tmp) / "paper-framework.md"
+            framework.write_text(
+                "## Page Budget Summary\n\n"
+                "- Active content-page bound: 8\n"
+                "- Content-page target: 7.75 pages\n",
+                encoding="utf-8",
+            )
+
+            target, bound = audit_draft.parse_framework_page_budget(framework)
+
+        self.assertEqual(target, 8)
+        self.assertEqual(bound, 8)
+
+    def test_framework_page_budget_parser_reads_markdown_tables(self) -> None:
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp:
+            framework = Path(tmp) / "paper-framework.md"
+            framework.write_text(
+                "| Field | Value |\n"
+                "|---|---:|\n"
+                "| Active content-page bound | 8 |\n"
+                "| Content-page target | 8 |\n",
+                encoding="utf-8",
+            )
+
+            target, bound = audit_draft.parse_framework_page_budget(framework)
+
+        self.assertEqual(target, 8)
+        self.assertEqual(bound, 8)
+
     def test_references_page_counts_as_content_when_main_text_reaches_it(self) -> None:
         pages = [
             "Title\nAbstract\nIntroduction",
@@ -150,6 +185,139 @@ class LimitationsPlacementTests(unittest.TestCase):
             }
         )
         self.assertTrue(any("more than one dedicated Limitations section" in e for e in errors), errors)
+
+
+class HeadingQualityTests(unittest.TestCase):
+    def _run(self, tmp_files: dict[str, str]) -> list[str]:
+        import tempfile
+
+        errors: list[str] = []
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            paths = []
+            for name, content in tmp_files.items():
+                p = base / name
+                p.parent.mkdir(parents=True, exist_ok=True)
+                p.write_text(content, encoding="utf-8")
+                paths.append(p)
+            audit_draft.check_heading_quality(paths, base, errors)
+        return errors
+
+    def test_body_appendix_pointer_subsection_is_flagged(self) -> None:
+        errors = self._run(
+            {
+                "sections/experiments.tex": (
+                    "\\section{Experiments}\n"
+                    "\\subsection{Appendix Matrix}\n"
+                    "Appendix~\\ref{sec:appendix-results} contains the heatmap.\n"
+                )
+            }
+        )
+        self.assertTrue(any("appendix pointer heading" in e for e in errors), errors)
+
+    def test_snapshot_result_heading_is_flagged(self) -> None:
+        errors = self._run(
+            {
+                "sections/experiments.tex": (
+                    "\\section{Experiments and Empirical Findings}\n"
+                    "\\subsection{Aggregate Result Snapshot}\n"
+                    "Figure~\\ref{fig:main-results} reports failure and success rates.\n"
+                )
+            }
+        )
+        self.assertTrue(any("non-reader-facing result heading" in e for e in errors), errors)
+
+    def test_finding_led_result_heading_is_clean(self) -> None:
+        errors = self._run(
+            {
+                "sections/experiments.tex": (
+                    "\\section{Experiments and Empirical Findings}\n"
+                    "\\subsection{Overall Performance-Robustness Tradeoff}\n"
+                    "Figure~\\ref{fig:main-results} reports failure and success rates.\n"
+                )
+            }
+        )
+        self.assertEqual(errors, [])
+
+
+class FrontMatterDisciplineTests(unittest.TestCase):
+    def _run_front_matter(
+        self,
+        abstract: str = "",
+        introduction: str = "",
+    ) -> tuple[list[str], list[str]]:
+        import tempfile
+
+        errors: list[str] = []
+        warnings: list[str] = []
+        with tempfile.TemporaryDirectory() as tmp:
+            paper = Path(tmp)
+            (paper / "sections").mkdir()
+            (paper / "main.tex").write_text(
+                "\\documentclass{article}\n"
+                "\\begin{document}\n"
+                "\\input{sections/abstract}\n"
+                "\\input{sections/introduction}\n"
+                "\\end{document}\n",
+                encoding="utf-8",
+            )
+            (paper / "sections" / "abstract.tex").write_text(abstract, encoding="utf-8")
+            (paper / "sections" / "introduction.tex").write_text(introduction, encoding="utf-8")
+            audit_draft.check_front_matter_discipline(paper, errors, warnings)
+        return errors, warnings
+
+    def test_abstract_with_model_specific_result_dump_is_flagged(self) -> None:
+        errors, _warnings = self._run_front_matter(
+            abstract=(
+                "We present a benchmark. System A has 40.4\\% failure rate and System B has "
+                "66.9\\% failure rate. An intervention reduces the failure rate from "
+                "66.9\\% to 41.5\\% while increasing the success rate from 30.0\\% to 43.1\\%."
+            )
+        )
+
+        self.assertTrue(any("abstract result overload" in e for e in errors), errors)
+
+    def test_concise_abstract_with_bounded_evidence_is_clean(self) -> None:
+        errors, _warnings = self._run_front_matter(
+            abstract=(
+                "Interactive systems are increasingly evaluated by aggregate task success, but "
+                "completion alone does not show whether systems behave reliably under distribution "
+                "shifts. We present a benchmark that preserves the original user goal while varying "
+                "task-relevant conditions. Its labeling protocol separates successful completion, "
+                "partial completion, and invalid runs before aggregation. Existing annotation "
+                "snapshots show substantial residual failures across evaluated systems."
+            )
+        )
+
+        self.assertFalse(any("abstract result overload" in e for e in errors), errors)
+
+    def test_introduction_model_list_and_result_recap_is_flagged(self) -> None:
+        errors, _warnings = self._run_front_matter(
+            introduction=(
+                "\\section{Introduction}\n"
+                "Our empirical analysis uses existing annotation snapshots for System A, "
+                "System B, System C, System D, and System E. The results show failure rates "
+                "ranging from 40.4--66.9\\% and success rates ranging from 30.0--50.9\\%, with "
+                "one intervention reducing the failure rate from 66.9\\% to 41.5\\%."
+            )
+        )
+
+        self.assertTrue(any("introduction result recap" in e for e in errors), errors)
+
+    def test_section_compliance_ledger_required_with_framework(self) -> None:
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp:
+            paper = Path(tmp) / "paper"
+            paper.mkdir()
+            framework = Path(tmp) / "writing-policies" / "paper-framework.md"
+            framework.parent.mkdir()
+            framework.write_text("## Section Plan\n", encoding="utf-8")
+            errors: list[str] = []
+
+            audit_draft.check_section_compliance_ledger(paper, framework, errors)
+
+        self.assertTrue(any("section guide compliance ledger missing" in e for e in errors), errors)
 
 
 class CompileIntegrityTests(unittest.TestCase):
@@ -471,7 +639,7 @@ class CompileIntegrityTests(unittest.TestCase):
                 "\\label{tab:main_results}\n"
                 "\\begin{tabular}{l r r r r r}\n"
                 "\\toprule\n"
-                "Model & ASR & TCR & Exec & Def & RF \\\\\n"
+                "System & Failure & Success & Completed & Recovered & Invalid \\\\\n"
                 "\\bottomrule\n"
                 "\\end{tabular}\n"
                 "\\end{table}\n",
@@ -507,7 +675,7 @@ class CompileIntegrityTests(unittest.TestCase):
                 "\\label{tab:ablation}\n"
                 "\\begin{tabular}{l r r}\n"
                 "\\toprule\n"
-                "Setting & ASR & TCR \\\\\n"
+                "Setting & Failure & Success \\\\\n"
                 "\\bottomrule\n"
                 "\\end{tabular}\n"
                 "\\end{table}\n",
@@ -648,7 +816,7 @@ class CompileIntegrityTests(unittest.TestCase):
                 "## 4. Figure Plan\n\n"
                 "| ID | Type | Layout | Section | Message | Source | Generation route |\n"
                 "|---|---|---|---|---|---|---|\n"
-                "| Tab. 2 | Main results scorecard | single-column | Experiments | Per-model defend, compromise, and unresolved rates for eight evaluated agents. | Results | LaTeX table |\n",
+                "| Tab. 2 | Main results scorecard | single-column | Experiments | Per-system success, failure, and unresolved rates for eight evaluated systems. | Results | LaTeX table |\n",
                 encoding="utf-8",
             )
             paper = root / "paper"
@@ -740,7 +908,7 @@ class CompileIntegrityTests(unittest.TestCase):
                 "\\label{tab:main_results}\n"
                 "\\begin{tabular}{l r r}\n"
                 "\\toprule\n"
-                "Model & ASR & TCR \\\\\n"
+                "System & Failure & Success \\\\\n"
                 "\\bottomrule\n"
                 "\\end{tabular}\n"
                 "\\end{table*}\n",

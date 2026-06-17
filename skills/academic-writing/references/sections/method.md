@@ -206,7 +206,7 @@ template-selection notes unless the user asks for reasoning.
 - Introducing modules that do not support any claim.
 - Hiding reproducibility-critical details.
 - Making the figure carry explanation that the prose should provide.
-- **Enumerating a taxonomy/inventory in the body** (every component, vector, harm type, category,
+- **Enumerating a taxonomy/inventory in the body** (every component, condition, subgroup, category,
   or per-category count, one item per line). Mention it in one stroke — dimension, total, and only
   the salient/novel members — and put the full list in a table or appendix. See the Salience And
   Compression rules in `references/sections/paragraph-flow.md`.

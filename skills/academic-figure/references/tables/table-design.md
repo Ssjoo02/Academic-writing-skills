@@ -70,6 +70,21 @@ Then adapt the grammar by table type:
 - For any new paper, infer the table type first and reapply this grammar to the paper's own metrics,
   baselines, tasks, and venue width constraints.
 
+### Appendix table visual grammar
+
+Appendix tables are not second-class. Apply the same booktabs/header/spacing polish, caption
+discipline, wrapping strategy, metric precision, and rendered-page inspection as body tables. The
+difference is evidence role, not quality.
+
+For appendix protocol, taxonomy, inventory, and denominator-audit tables:
+
+- keep sparse glossary-style tables single-column or natural-width; avoid full-width sparse glossary tables unless the definitions would be unreadable otherwise;
+- use wrapping prose columns for label meanings, edge cases, and reproducibility notes;
+- include totals, denominators, source scope, or scorable/excluded status when those are the point of
+  the appendix item;
+- do not add performance highlighting to protocol/setup tables; reserve bold for headers, group
+  labels, and totals.
+
 ## Metric Direction And Uncertainty
 
 Metric direction belongs in headers or captions whenever the table uses best-value emphasis. Use
@@ -117,6 +132,23 @@ phase-grouped layout for training configuration, and not performance highlights 
 summaries.
 For training configuration specifically, use a key-value or phase-grouped layout.
 
+### Paired opposing-rate scorecard
+
+Use this stricter pattern when the main result table reports one lower-is-better rate and one
+higher-is-better rate. It is a central scorecard, not a plain numeric dump.
+
+- Use group headers such as Coverage, Rates, and Outcome counts, with `\multicolumn` spanners and
+  `\cmidrule` under each group. Do not emit a flat one-row header table for a main paired-rate result.
+- Put metric direction or interpretation in the header or caption. If the paper wants to emphasize
+  a warning/error concentration, bold column extrema and explain that column maxima are salient rather than uniformly good;
+  for example, maxima for lower-is-better or error columns may be warning
+  signals, while maxima for higher-is-better or success columns may be positive signals.
+- Keep model order aligned with the narrative or model-family grouping. Use `\addlinespace` or a
+  fine `\midrule` between natural blocks such as base models, adapted variants, and domain-specialist
+  models.
+- Use heavier top/bottom booktabs rules and compact spacing, but no boxes, no vertical rules, and no
+  harsh row striping.
+
 ## LaTeX Patterns
 
 Single-column prose table:
@@ -149,7 +181,7 @@ Double-column numeric table:
 \setlength{\tabcolsep}{3pt}
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}l r r r r r@{}}
 \toprule
-Model & ASR $\downarrow$ & TCR $\uparrow$ & Exec & Def & RF \\
+Method & Lower $\downarrow$ & Higher $\uparrow$ & Comp. & Success & Err. \\
 \midrule
 ...
 \bottomrule
@@ -173,7 +205,7 @@ Model & ASR $\downarrow$ & TCR $\uparrow$ & Exec & Def & RF \\
 - Prose cells use wrapping `X`/`Y` or fractional `p{...}` widths tied to `\linewidth` or
   `\textwidth`.
 - Keep numeric precision consistent within each metric column.
-- Mark metric direction in headers or caption (`ASR $\downarrow$`, `TCR $\uparrow$`).
+- Mark metric direction in headers or caption (`Lower $\downarrow$`, `Higher $\uparrow$`).
 - For polished scorecards, use **multi-level column headers** when metrics naturally form groups:
   create `\multicolumn` spanners with `\cmidrule`, use **bold spanner headers**, and use **bold leaf
   column headers** for the metric names. Keep the first column header bold as well.

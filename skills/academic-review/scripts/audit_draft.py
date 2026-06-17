@@ -23,6 +23,10 @@ Checks (errors block; warnings inform):
   (References, or a venue-excluded section such as Limitations / Acknowledgments / Ethics);
   when a minimum is supplied, underfilled page-limited drafts are also blocking.
 - subsection budget: at most 4 \\subsection per main section
+- front-matter discipline: Abstract must not become a dense result/model-specific recap, and
+  Introduction must not contain a model-list / result-recap paragraph
+- heading quality: no body subsection whose title is only an appendix/supplement pointer, and no
+  weak results heading such as "Aggregate Result Snapshot"
 - table hygiene: no \\hline in tables (use booktabs); booktabs loaded when any
   table exists; warn on vertical rules and \\textsc{lowercase} names
 - appendix starts on a fresh page (\\clearpage before \\appendix)
@@ -50,6 +54,8 @@ Checks (errors block; warnings inform):
   Paper Framework Figure Plan must materialize in `paper/`; planned picture/teaser figures must
   have both a Picture Brief and an output image, registry comments such as "not yet generated"
   are blocking errors, and framework prose must not reference unplanned Fig./Tab. IDs.
+- Section guide compliance ledger when `--framework` is provided: `paper/section-compliance.md`
+  must record that section guides were loaded and required moves were checked.
 - appendix planning: if the draft has appendix content, `paper/appendix-plan.md` must record the
   planned appendix items, source availability, fill status, and fallback for missing evidence.
 - compile-log signals when main.log exists (undefined refs/citations, multiply
@@ -60,6 +66,7 @@ Checks (errors block; warnings inform):
 from __future__ import annotations
 
 import argparse
+import math
 import re
 import shutil
 import subprocess
@@ -95,6 +102,26 @@ DISCLOSURE_FILES = (".disclosure.yaml", ".disclosure.yml")
 MARKER_RE = re.compile(r"%\s*(CITATION_NEEDED|EVIDENCE_NEEDED|FIGURE_NEEDED|TABLE_NEEDED)\b")
 SUBSECTION_RE = re.compile(r"\\subsection\b\s*\{")
 SECTION_RE = re.compile(r"\\section\b\s*\{")
+HEADING_COMMAND_RE = re.compile(r"\\(section|subsection|subsubsection|paragraph)\*?\s*\{([^}]*)\}")
+APPENDIX_POINTER_HEADING_RE = re.compile(r"\b(?:Appendix|Supplement(?:ary)?)\b", re.I)
+WEAK_RESULT_HEADING_RE = re.compile(r"\b(?:aggregate\s+)?results?\s+snapshot\b", re.I)
+PERCENT_VALUE_RE = re.compile(r"\b\d+(?:\.\d+)?\s*\\?%")
+RESULT_METRIC_RE = re.compile(
+    r"\b(?:accuracy|F1|score|scores|rate|rates|success|failure|risk|capability|"
+    r"task completion|completion|intervention|recovery|recovered)\b",
+    re.I,
+)
+MODEL_NAME_RE = re.compile(
+    r"\b(?:model|models|method|methods|baseline|baselines|system|systems|agent|agents|"
+    r"variant|variants|checkpoint|checkpoints)\b",
+    re.I,
+)
+RESULT_DELTA_RE = re.compile(
+    r"\b(?:reduce[sd]?|drop(?:s|ped)?|increase[sd]?|improve[sd]?|rise[sn]?|raise[sd]?)\b"
+    r"[^.\n]{0,120}\bfrom\b[^.\n]{0,80}\bto\b",
+    re.I,
+)
+MODEL_LIST_CUE_RE = re.compile(r"\b(?:including|for|across|among|uses?|evaluates?)\b", re.I)
 LABEL_RE = re.compile(r"\\label\s*\{([^}]*)\}")
 INPUT_RE = re.compile(r"\\(?:input|include)\s*\{([^}]*)\}")
 INVALID_SECTION_ENV_RE = re.compile(r"\\(?:begin|end)\s*\{(?:section|subsection|subsubsection|paragraph)\}")
@@ -167,7 +194,7 @@ TEXTWIDTH_TABLE_RE = re.compile(
 )
 FULL_WIDTH_TABLE_PLAN_RE = re.compile(
     r"\b(?:main results?|headline|leaderboard|sota|state-of-the-art|"
-    r"per-model|per-app|per-vector|per-harm|per-category|"
+    r"per-model|per-dataset|per-condition|per-subgroup|per-category|"
     r"model\s*[x×]\s*dataset|matrix|full matrix|aggregate results?)\b",
     re.I,
 )
@@ -229,6 +256,14 @@ FIGURE_ENV_WITH_STAR_RE = re.compile(r"\\begin\{figure(\*?)\}(.*?)\\end\{figure\
 FRAMEWORK_FIGURE_PLAN_RE = re.compile(r"^#+\s*\d*\.?\s*Figure Plan\b", re.I)
 FRAMEWORK_NEXT_SECTION_RE = re.compile(r"^#+\s+")
 FRAMEWORK_SEPARATOR_RE = re.compile(r"^\s*\|?\s*:?-{3,}:?\s*(?:\|\s*:?-{3,}:?\s*)+\|?\s*$")
+FRAMEWORK_TARGET_LABEL_RE = re.compile(
+    r"\bContent-page target\b|内容页目标|正文页目标|主文页数目标",
+    re.I,
+)
+FRAMEWORK_BOUND_LABEL_RE = re.compile(
+    r"\bActive content-page bound\b|有效内容页上限|正文页上限|主文页数上限",
+    re.I,
+)
 FIG_ID_RE = re.compile(r"\bfig(?:ure)?\.?\s*(\d+)\b", re.I)
 DISPLAY_REF_RE = re.compile(r"\b(Fig(?:ure)?|Tab(?:le)?)\.?\s*(\d+)\b", re.I)
 APPENDIX_PLAN_REQUIRED_TOKENS = (
@@ -319,6 +354,47 @@ def parse_framework_display_items(framework_path: Path) -> list[dict[str, str]]:
             items.append(row)
 
     return items
+
+
+def _ceil_page_value(text: str) -> int | None:
+    match = re.search(r"\d+(?:\.\d+)?", text)
+    if not match:
+        return None
+    return int(math.ceil(float(match.group(0))))
+
+
+def parse_framework_page_budget(framework_path: Path) -> tuple[int | None, int | None]:
+    """Return (content-page target, active content-page bound) parsed from a framework file.
+
+    Decimal targets such as 7.75 mean "the draft must reach page 8", so they are rounded up for
+    the integer page-reach audit.
+    """
+    text = framework_path.read_text(encoding="utf-8", errors="ignore")
+    target: int | None = None
+    bound: int | None = None
+
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped:
+            continue
+
+        candidates: list[tuple[str, str]] = []
+        if stripped.startswith("|"):
+            cells = split_markdown_row(stripped)
+            for index, cell in enumerate(cells[:-1]):
+                candidates.append((cell, cells[index + 1]))
+        else:
+            candidates.append((stripped, stripped))
+
+        for label, value_text in candidates:
+            if target is None and FRAMEWORK_TARGET_LABEL_RE.search(label):
+                target = _ceil_page_value(value_text)
+            if bound is None and FRAMEWORK_BOUND_LABEL_RE.search(label):
+                bound = _ceil_page_value(value_text)
+        if target is not None and bound is not None:
+            break
+
+    return target, bound
 
 
 def framework_item_number(item_id: str) -> str | None:
@@ -785,6 +861,34 @@ def check_subsection_budget(path: Path, base: Path, errors: list[str]) -> None:
             )
 
 
+def check_heading_quality(paths: list[Path], base: Path, errors: list[str]) -> None:
+    """Block scaffolding headings that should be prose pointers or finding-led titles."""
+    for path in paths:
+        name = rel(path, base)
+        lower_name = name.lower()
+        if "appendix" in lower_name or lower_name == "checklist.tex":
+            continue
+        text = strip_comments(path.read_text(encoding="utf-8", errors="ignore"))
+        for match in HEADING_COMMAND_RE.finditer(text):
+            command, raw_title = match.groups()
+            title = re.sub(r"\\[A-Za-z]+\*?(?:\[[^\]]*\])?", "", raw_title)
+            title = re.sub(r"\s+", " ", title).strip()
+            if not title:
+                continue
+            line = text.count("\n", 0, match.start()) + 1
+            if command != "section" and APPENDIX_POINTER_HEADING_RE.search(title):
+                errors.append(
+                    f"appendix pointer heading in body: {name}:{line}: "
+                    f"\\{command}{{{title}}}; make this a prose cross-reference, not a body subsection"
+                )
+            if WEAK_RESULT_HEADING_RE.search(title):
+                errors.append(
+                    f"non-reader-facing result heading: {name}:{line}: "
+                    f"\\{command}{{{title}}}; use a finding-led title such as "
+                    f"'Overall Performance-Robustness Tradeoff' or 'Denominator Effects'"
+                )
+
+
 def check_tables(path: Path, base: Path, errors: list[str], warnings: list[str]) -> None:
     text = strip_comments(path.read_text(encoding="utf-8", errors="ignore"))
     name = rel(path, base)
@@ -843,6 +947,165 @@ def _prose_word_count(segment: str) -> int:
     s = re.sub(r"\\[a-zA-Z@]+\*?", " ", s)   # drop control sequences
     s = re.sub(r"[{}\\$&~^_%#]", " ", s)
     return sum(1 for w in s.split() if any(c.isalpha() for c in w))
+
+
+def _latex_to_plain(text: str) -> str:
+    """Best-effort plain text for lightweight front-matter heuristics."""
+    text = strip_ref_like(strip_comments(text))
+    for _ in range(4):
+        text = re.sub(r"\\[A-Za-z@]+\*?(?:\[[^\]]*\])?\{([^{}]*)\}", r"\1", text)
+    text = re.sub(r"\\[A-Za-z@]+\*?", " ", text)
+    text = re.sub(r"[{}$&~_^#]", " ", text)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def _read_input_target(paper_dir: Path, target: str) -> str:
+    path = paper_dir / target
+    if path.suffix != ".tex":
+        path = path.with_suffix(".tex")
+    if path.exists():
+        return path.read_text(encoding="utf-8", errors="ignore")
+    return ""
+
+
+def _section_source(paper_dir: Path, section: str) -> tuple[str, str]:
+    """Return (display name, LaTeX source) for a common front-matter section."""
+    section_dir = paper_dir / "sections"
+    candidates: list[Path] = []
+    if section == "abstract":
+        candidates.extend(
+            [
+                section_dir / "abstract.tex",
+                section_dir / "0_abstract.tex",
+                section_dir / "00_abstract.tex",
+            ]
+        )
+    elif section == "introduction":
+        candidates.extend(
+            [
+                section_dir / "introduction.tex",
+                section_dir / "1_introduction.tex",
+                section_dir / "01_introduction.tex",
+            ]
+        )
+    for candidate in candidates:
+        if candidate.exists():
+            return rel(candidate, paper_dir), candidate.read_text(encoding="utf-8", errors="ignore")
+
+    main = paper_dir / "main.tex"
+    if not main.exists():
+        return section, ""
+    main_text = strip_comments(main.read_text(encoding="utf-8", errors="ignore"))
+    if section == "abstract":
+        env = re.search(r"\\begin\{abstract\}(.*?)\\end\{abstract\}", main_text, re.S)
+        if env:
+            return "main.tex abstract", env.group(1)
+        for m in INPUT_RE.finditer(main_text):
+            target = m.group(1).strip()
+            if "abstract" in target.lower():
+                body = _read_input_target(paper_dir, target)
+                if body:
+                    return target, body
+    else:
+        for m in INPUT_RE.finditer(main_text):
+            target = m.group(1).strip()
+            if "intro" in target.lower():
+                body = _read_input_target(paper_dir, target)
+                if body:
+                    return target, body
+        intro = re.search(
+            r"\\section\*?\s*\{\s*Introduction\s*\}(.*?)(?=\\section\*?\s*\{|\\appendix\b|\\bibliography\b|\\end\{document\})",
+            main_text,
+            re.S | re.I,
+        )
+        if intro:
+            return "main.tex Introduction", intro.group(1)
+    return section, ""
+
+
+def check_front_matter_discipline(
+    paper_dir: Path,
+    errors: list[str],
+    warnings: list[str],
+) -> None:
+    """Block common failures where front matter turns into a results dump.
+
+    This is intentionally a narrow heuristic. It does not grade prose quality; it catches the
+    stable, easy-to-measure failure mode where Abstract/Introduction violate the section guides by
+    carrying multiple percentages, model-specific deltas, or a model-list result paragraph.
+    """
+    abstract_name, abstract_source = _section_source(paper_dir, "abstract")
+    if abstract_source:
+        plain = _latex_to_plain(abstract_source)
+        percent_count = len(PERCENT_VALUE_RE.findall(abstract_source))
+        model_count = len({m.group(0).lower() for m in MODEL_NAME_RE.finditer(plain)})
+        has_delta = bool(RESULT_DELTA_RE.search(plain))
+        has_metric = bool(RESULT_METRIC_RE.search(plain))
+        if percent_count > 2 or (model_count and percent_count) or (has_delta and percent_count >= 2):
+            errors.append(
+                f"abstract result overload: {abstract_name} contains {percent_count} percentage "
+                f"value(s), {model_count} model-specific name(s), and "
+                f"{'a model/result delta' if has_delta else 'no explicit delta'}; Abstract should "
+                f"follow problem -> challenge/gap -> insight/contribution -> advantage -> one "
+                f"bounded evidence sentence, not a result recap"
+            )
+        elif has_metric and percent_count == 2:
+            warnings.append(
+                f"abstract evidence budget near limit: {abstract_name} has two numeric result values; "
+                f"keep them as one bounded evidence sentence"
+            )
+
+    intro_name, intro_source = _section_source(paper_dir, "introduction")
+    if intro_source:
+        plain = _latex_to_plain(intro_source)
+        percent_count = len(PERCENT_VALUE_RE.findall(intro_source))
+        model_names = {m.group(0).lower() for m in MODEL_NAME_RE.finditer(plain)}
+        model_count = len(model_names)
+        has_metric = bool(RESULT_METRIC_RE.search(plain))
+        has_delta = bool(RESULT_DELTA_RE.search(plain))
+        has_model_list = model_count >= 3 and bool(MODEL_LIST_CUE_RE.search(plain))
+        if (percent_count > 1 and has_metric) or has_delta or (has_model_list and (percent_count or has_metric)):
+            errors.append(
+                f"introduction result recap: {intro_name} contains {percent_count} percentage "
+                f"value(s), {model_count} model-specific name(s), and "
+                f"{'a result delta' if has_delta else 'no explicit delta'}; Introduction should "
+                f"contain at most one high-level evidence preview sentence and no model-list or "
+                f"result-recap paragraph"
+            )
+
+
+def check_section_compliance_ledger(
+    paper_dir: Path,
+    framework_path: Path | None,
+    errors: list[str],
+) -> None:
+    """Require a durable record that section guides were loaded and checked.
+
+    The drafting workflow can keep paragraph plans internal, but for a complete framework-backed
+    paper the closing audit needs a small artifact proving each section was checked against its
+    required moves. This prevents "the guide existed but was not actually applied" failures.
+    """
+    if framework_path is None:
+        return
+    ledger = paper_dir / "section-compliance.md"
+    if not ledger.exists():
+        errors.append(
+            "section guide compliance ledger missing: paper/section-compliance.md must record "
+            "the section guide loaded for each drafted section and the required moves checked"
+        )
+        return
+    text = ledger.read_text(encoding="utf-8", errors="ignore")
+    lower = text.lower()
+    for token in ("abstract", "introduction"):
+        if token not in lower:
+            errors.append(f"section guide compliance ledger incomplete: missing {token} row")
+    for bad in ("missing", "unchecked", "not loaded", "not applied", "todo", "tbd"):
+        if bad in lower:
+            errors.append(
+                f"section guide compliance ledger has unresolved status token '{bad}'; "
+                f"revise the affected section or record a blocking risk before returning"
+            )
+            break
 
 
 def appendix_segments(paper_dir: Path) -> list[tuple[str, str]]:
@@ -1473,6 +1736,19 @@ def audit(
     errors: list[str] = []
     warnings: list[str] = []
 
+    if framework_path is not None and framework_path.exists():
+        framework_target, framework_bound = parse_framework_page_budget(framework_path)
+        if max_content_pages is None and framework_bound is not None:
+            max_content_pages = framework_bound
+            warnings.append(
+                f"framework content-page bound applied: --max-content-pages {max_content_pages}"
+            )
+        if min_content_pages is None and framework_target is not None:
+            min_content_pages = framework_target
+            warnings.append(
+                f"framework content-page target applied: --min-content-pages {min_content_pages}"
+            )
+
     files = prose_tex_files(paper_dir)
     if not files:
         errors.append(f"no .tex files found under {paper_dir}")
@@ -1496,6 +1772,8 @@ def audit(
         check_prose_in_narrow_column(path, paper_dir, errors)
         check_disclosure(path, paper_dir, naming_map, do_not_disclose, errors)
         check_internal_id_heuristic(path, paper_dir, allow, warnings)
+    check_heading_quality(files, paper_dir, errors)
+    check_front_matter_discipline(paper_dir, errors, warnings)
     check_limitations(paper_dir, errors, warnings)
     check_booktabs_loaded(paper_dir, files, errors)
     check_appendix_page(paper_dir, warnings)
@@ -1507,6 +1785,7 @@ def audit(
     check_labels(files, paper_dir, errors)
     check_input_consistency(paper_dir, errors, warnings)
     check_framework_alignment(paper_dir, framework_path, errors, warnings)
+    check_section_compliance_ledger(paper_dir, framework_path, errors)
     check_log(paper_dir, errors, warnings)
     check_rendered_pdf_refs(paper_dir, errors)
     check_page_budget(paper_dir, max_content_pages, min_content_pages, errors, warnings)

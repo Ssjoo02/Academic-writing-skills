@@ -218,11 +218,10 @@ The Direct Image Prompt is **one clean visual paragraph**, not a filled-in rubri
 Describe the scene the way you would commission an illustrator, and name the exact
 labels that should appear, spelled correctly. Quality guardrails:
 
-- **Illustrative, not a flowchart.** Aim for a scene with concrete objects —
-  smartphone / device frames, app UI panels, channel icons (envelope, chat
-  bubble, browser, file), an attacker motif, harm/safe outcome icons — connected
-  by clean arrows. **Do not ask for "rounded rectangles", "boxes in a row", or a
-  "flat box-and-arrow flowchart"**; that is exactly the look the user rejected.
+- **Illustrative, not a flowchart.** Aim for a scene with concrete objects that match the current
+  paper — device or interface frames when relevant, process icons, source/target motifs, and outcome
+  icons from the Writing Policy — connected by clean arrows. **Do not ask for "rounded rectangles",
+  "boxes in a row", or a "flat box-and-arrow flowchart"**; that is exactly the look the user rejected.
 - **Academic aesthetic**: flat vector illustration, clean lines, minimalist,
   generous but balanced whitespace (no large empty bands; fill the canvas evenly),
   similar in restraint and clarity to figures in DeepMind or OpenAI papers.
@@ -252,18 +251,17 @@ prompt.
 ### Example Direct Image Prompt (illustrative method banner, with labels)
 
 > A clean flat vector academic illustration of a left-to-right method story for
-> building a mobile-app safety benchmark. Six evenly spaced circular icon
+> constructing and evaluating a benchmark. Five evenly spaced circular icon
 > medallions in a single horizontal row, equal spacing, connected by thin clean
-> right-pointing arrows: a checklist clipboard, a smartphone showing an app
-> screen, a hand typing a chat message, a magnifier over a warning shield, a
-> stack of Android emulator phone frames, and a padlocked archive box. Below each
-> medallion place one short, correctly spelled sans-serif caption, in order:
-> "MobileWorld", "Injection", "Taxonomy", "Evaluation", "ASR / TCR". Soft
-> professional pastel palette of blue, teal, amber, and slate on a white background,
-> minimalist. Compose as a wide, short banner (roughly 3:1) that fills the entire
-> frame edge to edge, with no empty top or bottom bands and no wide blank margins.
-> Render only these five short labels — clean and legible — and no other text. No
-> photorealistic photos, messy sketches, unreadable text, or 3D shading artifacts.
+> right-pointing arrows: a checklist clipboard, a device screen, an input message,
+> a magnifier over a shield, and a compact results table. Below each medallion
+> place one short, correctly spelled sans-serif caption, in order: "Tasks",
+> "Inputs", "Checks", "Labels", "Metrics". Soft professional pastel palette of
+> blue, teal, amber, and slate on a white background, minimalist. Compose as a
+> wide, short banner (roughly 3:1) that fills the entire frame edge to edge, with
+> no empty top or bottom bands and no wide blank margins. Render only these five
+> short labels — clean and legible — and no other text. No photorealistic photos,
+> messy sketches, unreadable text, or 3D shading artifacts.
 
 ## Image Renderer Preference
 

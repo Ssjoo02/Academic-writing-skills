@@ -72,10 +72,15 @@ BASELINE_PALETTE = [
 JOURNAL_GROUPED_BAR_PALETTE = [
     "#C7D7EA", "#8FB3D1", "#5F8FB8", "#D07A68",
 ]
+PAIRED_OPPOSING_PALETTE = {
+    "lower_better": "#C97B6B",  # muted coral, for lower-is-better foreground metrics
+    "higher_better": "#5E8FB8", # steel blue, for higher-is-better foreground metrics
+}
 SHARED_LEGEND_RADAR_PALETTE = [
-    "#5E9BC9", "#59AE8B", "#E0AF45", "#CF7968", "#8E78BE", "#9A9A9A",
+    "#C97B6B", "#5E8FB8", "#5DA88A", "#D4A64E", "#8E7FB8", "#9B9B9B",
 ]
-SHARED_LEGEND_RADAR_MARKERS = ['s', '^', 'D', 'o', 'v', 'P']
+SHARED_LEGEND_RADAR_MARKERS = ['o', 's', '^', 'D', 'o', 's']
+SHARED_LEGEND_RADAR_LINESTYLES = ['-', '-', (0, (6, 3)), (0, (6, 3)), (0, (2, 2)), (0, (2, 2))]
 
 # ── Delta markers (directional only, never entity identity) ──
 DELTA_UP   = "#2E9E44"
@@ -329,6 +334,45 @@ For the common paper case of two related radar panels, use
 but removes per-panel legends and adds one shared legend below the full figure.
 
 ```python
+def add_custom_theta_labels(ax, angles, labels, rmax, fontsize=9, pad=14,
+                            color="#2C3E50", fontweight="bold"):
+    """Place radar spoke labels outside the ring with visual-angle-aware alignment."""
+    import numpy as np
+
+    for angle, label in zip(angles, labels):
+        visual_angle_rad = (np.pi / 2 - angle) % (2 * np.pi)
+        deg = np.degrees(visual_angle_rad)
+        if 85 < deg < 95:
+            ha, va, dx, dy = "center", "bottom", 0, pad
+        elif 5 < deg <= 85:
+            ha, va, dx, dy = "left", "bottom", pad, pad
+        elif 355 < deg <= 360 or 0 <= deg <= 5:
+            ha, va, dx, dy = "left", "center", pad, 0
+        elif 275 < deg <= 355:
+            ha, va, dx, dy = "left", "top", pad, -pad
+        elif 265 < deg <= 275:
+            ha, va, dx, dy = "center", "top", 0, -pad
+        elif 185 < deg <= 265:
+            ha, va, dx, dy = "right", "top", -pad, -pad
+        elif 175 < deg <= 185:
+            ha, va, dx, dy = "right", "center", -pad, 0
+        else:
+            ha, va, dx, dy = "right", "bottom", -pad, pad
+        ax.annotate(
+            label,
+            xy=(angle, rmax),
+            xytext=(dx, dy),
+            textcoords="offset points",
+            ha=ha,
+            va=va,
+            fontsize=fontsize,
+            fontweight=fontweight,
+            color=color,
+            zorder=30,
+            annotation_clip=False,
+        )
+
+
 def radar_chart(ax, categories, values_dict, colors=None,
                 fill_alpha=0.06, lw=1.8, markersize=5,
                 per_spoke_norm=True, display_lo=20, display_hi=95,
@@ -388,15 +432,18 @@ def radar_chart(ax, categories, values_dict, colors=None,
     ax.set_xticks([])
     ax.set_ylim(0, display_hi + 6)
     if title:
-        ax.set_title(title, fontsize=13, fontweight='bold', color='#303030', pad=22)
+        ax.set_title(title, fontsize=13, fontweight='bold', color='#333333', y=1.16, pad=0)
 
-    # Light contour rings + spokes (never a heavy black boundary).
+    # Light dashed contour rings + spokes (never a heavy black boundary).
     for frac in (0.25, 0.5, 0.75, 1.0):
         r = display_lo + (display_hi - display_lo) * frac
         ax.plot(angles_closed, np.full_like(angles_closed, r),
-                color='#CFCECE', lw=0.6, zorder=1)
+                color='#E0E0E0', lw=0.8, linestyle=(0, (5, 5)), zorder=1)
     for a in angles:
-        ax.plot([a, a], [0, display_hi], color='#CFCECE', lw=0.5, zorder=1)
+        ax.plot([a, a], [0, display_hi], color='#E0E0E0', lw=0.8, zorder=1)
+    ax.spines['polar'].set_visible(True)
+    ax.spines['polar'].set_color('#666666')
+    ax.spines['polar'].set_linewidth(1.2)
     if radial_ticks and not per_spoke_norm:
         vlo, vhi = value_range
         label_angle = np.deg2rad(18)
@@ -412,13 +459,12 @@ def radar_chart(ax, categories, values_dict, colors=None,
         ring = np.append(disp[i], disp[i][0])
         ax.plot(angles_closed, ring, ls, lw=lw, color=color, label=name, zorder=3)
         ax.scatter(angles, disp[i], s=markersize**2, facecolors='white',
-                   edgecolors=color, marker=mk, zorder=4, linewidths=1.0)
+                   edgecolors=color, marker=mk, zorder=4, linewidths=1.4)
         if fill:
             ax.fill(angles_closed, ring, color=color, alpha=fill)
 
-    # Spoke labels offset beyond the outer ring so they never overlap data or rings.
-    for a, cat in zip(angles, categories):
-        ax.text(a, display_hi + 11, cat, ha='center', va='center', fontsize=9)
+    # Spoke labels offset beyond the outer ring with visual-angle-aware alignment.
+    add_custom_theta_labels(ax, angles, categories, display_hi, fontsize=9, pad=14)
 
     from matplotlib.lines import Line2D
     handles = [Line2D([0], [0], color=c, marker=m, linestyle=ls, lw=lw,
@@ -445,17 +491,17 @@ consistent method encodings, light rings/spokes, and one shared legend below the
 
 ```python
 def draw_shared_legend_radar(panel_specs, colors=None, markers=None, linestyles=None,
-                             figsize=(10.5, 4.4), shared_scale=True,
+                             figsize=(15.0, 7.8), shared_scale=True,
                              value_range=(0, 100), radial_ticks=(20, 40, 60, 80)):
     """
     Shared-legend multi-panel radar.
 
     panel_specs: list[dict] with keys:
-      title      — panel title, e.g. '(a) ASR by Attack Vector'
+      title      — panel title, e.g. '(a) Rate by category group'
       categories — spoke labels
       values     — dict[method_name, list[float]]
 
-    Use shared_scale=True when all panels use the same unit, such as ASR (%).
+    Use shared_scale=True when all panels use the same unit, such as a percentage rate.
     """
     if len(panel_specs) < 2:
         raise ValueError("shared-legend radar expects at least two panels")
@@ -467,7 +513,7 @@ def draw_shared_legend_radar(panel_specs, colors=None, markers=None, linestyles=
     if markers is None:
         markers = list(SHARED_LEGEND_RADAR_MARKERS[:len(methods)])
     if linestyles is None:
-        linestyles = ['-', '-', '--', '--', '--', '--'][:len(methods)]
+        linestyles = list(SHARED_LEGEND_RADAR_LINESTYLES[:len(methods)])
 
     fig, axes = plt.subplots(
         1, len(panel_specs), figsize=figsize,
@@ -486,8 +532,8 @@ def draw_shared_legend_radar(panel_specs, colors=None, markers=None, linestyles=
             markers=markers,
             linestyles=linestyles,
             fill_alpha=0.0,
-            lw=1.7,
-            markersize=4.8,
+            lw=1.8,
+            markersize=5.0,
             per_spoke_norm=not shared_scale,
             display_lo=0 if shared_scale else 20,
             display_hi=90 if shared_scale else 95,
@@ -498,12 +544,13 @@ def draw_shared_legend_radar(panel_specs, colors=None, markers=None, linestyles=
         )
 
     labels = [h.get_label() for h in shared_handles]
+    legend_ncol = 2 if len(methods) <= 4 else 3
     fig.legend(
         handles=shared_handles,
         labels=labels,
         loc="lower center",
         bbox_to_anchor=(0.5, -0.02),
-        ncol=min(6, len(labels)),
+        ncol=legend_ncol,
         frameon=False,
         fontsize=10,
         handlelength=2.2,
@@ -582,6 +629,50 @@ def horizontal_bars(ax, labels, values, colors=None, errors=None,
             ax.text(x, bar.get_y() + bar.get_height() / 2,
                     f'{val:.1f}', va='center', ha=ha, fontsize=8)
     ax.figure.tight_layout(pad=1.2)
+```
+
+---
+
+## Pattern: paired_opposing_horizontal_scorecard(ax, labels, lower_values, higher_values, ...)
+
+Use this for the **Preset: paired-opposing horizontal scorecard**.
+
+```python
+def paired_opposing_horizontal_scorecard(ax, labels, lower_values, higher_values,
+                                         lower_label='Lower-is-better',
+                                         higher_label='Higher-is-better',
+                                         xlabel='Rate over comparable items (%)',
+                                         xlim=None):
+    """Paired horizontal bars for one lower-is-better and one higher-is-better metric."""
+    lower_values = np.asarray(lower_values, dtype=float)
+    higher_values = np.asarray(higher_values, dtype=float)
+    y = np.arange(len(labels))
+    height = 0.34
+    lower_color = PAIRED_OPPOSING_PALETTE["lower_better"]
+    higher_color = PAIRED_OPPOSING_PALETTE["higher_better"]
+
+    ax.barh(y - height / 2, lower_values, height, color=lower_color,
+            edgecolor="#A96A5D", linewidth=0.35, label=lower_label)
+    ax.barh(y + height / 2, higher_values, height, color=higher_color,
+            edgecolor="#4D789B", linewidth=0.35, label=higher_label)
+    for yi, val in zip(y - height / 2, lower_values):
+        ax.text(val + 1.0, yi, f"{val:.1f}", va="center", ha="left",
+                fontsize=8, color="#333333")
+    for yi, val in zip(y + height / 2, higher_values):
+        ax.text(val + 1.0, yi, f"{val:.1f}", va="center", ha="left",
+                fontsize=8, color="#333333")
+
+    ax.set_yticks(y)
+    ax.set_yticklabels(labels)
+    ax.invert_yaxis()
+    if xlim is None:
+        xlim = max(float(lower_values.max()), float(higher_values.max())) + 9
+    ax.set_xlim(0, xlim)
+    ax.set_xlabel(xlabel)
+    ax.grid(axis="x", color="#E0E0E0", linewidth=0.7)
+    ax.set_axisbelow(True)
+    ax.legend(frameon=False, loc="lower right", ncol=2)
+    ax.figure.tight_layout(pad=0.6)
 ```
 
 ---
@@ -758,7 +849,7 @@ def pie_or_donut(ax, labels, values, colors=None, donut=True,
     ax.set_aspect('equal')
 ```
 
-For paper-ready taxonomy coverage or harm-type coverage, prefer the named preset below over
+For paper-ready taxonomy or category coverage, prefer the named preset below over
 `pie_or_donut()`.
 
 ---
@@ -773,9 +864,12 @@ to full category labels. Keep long labels out of wedges.
 from matplotlib.patches import Patch
 
 COMPOSITION_DONUT_PALETTE = [
-    "#4F90C2", "#6BA5D0", "#8DBBDA", "#E8AD68",
-    "#DF8A72", "#7DBE9B", "#A996C7",
+    "#4B8BBE", "#6BA3CF", "#8FBCDB", "#E3A86D",
+    "#E08F72", "#7DBD9C", "#B1A1C8",
 ]
+
+# style-reference ring/donut palette extracted as visual grammar only.
+COVERAGE_DONUT_MUTED_PALETTE = COMPOSITION_DONUT_PALETTE
 
 def draw_compact_labeled_donut(ax, codes, values, full_labels=None, colors=None,
                                title=None, startangle=90, legend_ncol=3,
@@ -820,11 +914,14 @@ def draw_compact_labeled_donut(ax, codes, values, full_labels=None, colors=None,
         angle = np.deg2rad((wedge.theta1 + wedge.theta2) / 2.0)
         x, y = np.cos(angle), np.sin(angle)
         ha = "left" if x >= 0 else "right"
+        # Pull bottom labels slightly inward so they do not collide with the legend.
+        label_radius = 1.12 if body_compact else 1.26
+        if y < -0.72:
+            label_radius = 1.04 if body_compact else 1.16
         ax.annotate(
             f"{code} ({pct:.1f}%)",
             xy=(0.72 * x, 0.72 * y),
-            xytext=((1.12 if body_compact else 1.26) * x,
-                    (1.12 if body_compact else 1.26) * y),
+            xytext=(label_radius * x, label_radius * y),
             ha=ha,
             va="center",
             fontsize=6.8 if body_compact else 10,
@@ -867,9 +964,44 @@ def draw_compact_labeled_donut(ax, codes, values, full_labels=None, colors=None,
     return wedges
 ```
 
+For a two-panel style-matched coverage figure, use the fixed seven-color
+coverage donut palette for both panels instead of generic categorical colors:
+
+```python
+def draw_coverage_donut_pair(axes, left_items, right_items,
+                             left_title="Coverage group A",
+                             right_title="Coverage group B"):
+    """
+    Two quiet body coverage donuts using the reference palette.
+
+    left_items / right_items: list[(code, count)] in semantic display order.
+    """
+    for ax, items, title, colors in (
+        (axes[0], left_items, left_title,
+         COVERAGE_DONUT_MUTED_PALETTE[:len(left_items)]),
+        (axes[1], right_items, right_title,
+         COVERAGE_DONUT_MUTED_PALETTE[:len(right_items)]),
+    ):
+        codes = [code for code, _ in items]
+        values = [count for _, count in items]
+        draw_compact_labeled_donut(
+            ax,
+            codes,
+            values,
+            colors=colors,
+            title=title,
+            startangle=90,
+            show_total_in_center=True,
+            body_compact=True,
+        )
+```
+
 For a main-text two-panel coverage figure, start with `figsize=(5.6, 2.15)` and include the rendered
 PDF at about `0.58--0.72\textwidth`. Use the full legend variant only when the composition figure is
-the central evidence item or when no appendix/table defines the short codes.
+the central evidence item or when no appendix/table defines the short codes. If a legend is kept,
+reserve enough bottom margin (`fig.subplots_adjust(bottom=0.32)` or more for two-row legends) and
+inspect the rendered PDF/PNG: label-legend overlap is a rendering defect, not a harmless compactness
+tradeoff.
 
 ---
 

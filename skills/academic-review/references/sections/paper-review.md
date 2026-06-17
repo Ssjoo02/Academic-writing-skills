@@ -78,13 +78,20 @@ Check whether readers can understand and reproduce the work:
 - **no disclosure leaks**: no internal identifiers (checkpoint / training-run / sweep / wandb / tool
   / unreleased-model names) where a public display name belongs, and no do-not-disclose entity
   anywhere (not even by negation or exclusion phrasing).
+- **front-matter discipline**: the Abstract follows the section-guide chain
+  problem -> challenge/gap -> insight/contribution -> advantage -> one bounded evidence sentence;
+  it does not become a dense model-specific result recap. The Introduction has no separate
+  experiment paragraph, no model-list paragraph, no multiple-percentage score summary, and no
+  before/after result delta; detailed numbers belong in Experiments.
 - **Core section underdeveloped**: the primary core section below its confirmed floor is at least a
   `high` finding. If the section is too thin for a reader to understand or reproduce the central
   contribution, it is `blocking`. For method papers, Method must explain the algorithm /
   architecture / training or inference flow, key equations or pseudocode when needed, module
   rationale, implementation-critical settings, and the evidence hook for each load-bearing module.
 
-Failure signals: a subsection that opens with background or a list instead of its point; an
+Failure signals: an Abstract with several percentages, model names, or "reduced from X to Y" deltas;
+an Introduction paragraph that lists evaluated models and metric ranges; a subsection that opens
+with background or a list instead of its point; an
 itemize/enumerate of taxonomy members or per-category counts living in a body section; sentences that
 restate numbers already in a table; a four-paragraph conclusion or one that ends on a vision/impact
 statement; a "Limitations of …" run-in sitting inside the Experiments section; a raw checkpoint/run
@@ -180,7 +187,7 @@ Check format risks before any submission-ready claim:
 - **page count follows the active venue rule, with the compiled PDF as authority**. If the active
   venue/framework has a numeric content-page limit, over the limit is `blocking`, not a formatting
   note. A draft that exceeds the page limit is not review-complete even if its Paper Framework
-  budget looked feasible.
+  budget looked feasible. For strict page-limited full papers, ending under the confirmed content-page target is also `blocking`; the review must require substantive expansion of the primary/evidence core rather than accepting an underfilled draft as "concise."
 - references, appendix, supplement, checklist material, and required statements are in the confirmed
   order,
 - anonymous submissions do not expose author identity,
@@ -194,10 +201,11 @@ Check format risks before any submission-ready claim:
   justified.
 
 Page-limit failure signals: the compiled main content reaches page 9 for an 8-page conference limit
-or page 5 for a 4-page short-paper limit; Limitations or ethics text sits inside a numbered body
-section and consumes content pages; the draft claims to fit because planned page arithmetic fit, but
-the PDF does not; the reviewer cannot find the compiled page-budget audit result when compile tools
-are available.
+or page 5 for a 4-page short-paper limit; the compiled main content reaches only page 6 when the
+confirmed target is page 8; Limitations or ethics text sits inside a numbered body section and
+consumes content pages; the draft claims to fit because planned page arithmetic fit, but the PDF does
+not; the reviewer cannot find the compiled page-budget audit result when compile tools are
+available.
 
 Limitations placement tradeoff: for ACL-family venues, keep Limitations in the required dedicated
 `\section{Limitations}` after Conclusion and before References; this is post-main material and should

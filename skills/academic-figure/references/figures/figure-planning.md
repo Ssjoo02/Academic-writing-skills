@@ -25,7 +25,7 @@ and LaTeX tables.
 
 Before assigning a generation route or writing code, establish:
 
-1. **Core conclusion**: the one-sentence claim this figure must defend. Every panel, label, and
+1. **Core conclusion**: the one-sentence claim this figure must support. Every panel, label, and
    visual choice must serve this conclusion. If a planned panel does not carry a unique piece of
    evidence for the conclusion, drop it or merge it.
 
@@ -89,7 +89,7 @@ Every planned figure or table must declare one layout target:
   whose tabular environment is bounded by `\linewidth`.
 - `double-column`: use `figure*` or `table*` and bound content by `\textwidth`.
 - `appendix`: still choose `single-column` or `double-column`; appendix material must not exceed
-  the printable area.
+  the printable area, and appendix placement does not lower the visual standard.
 - `supplement`: use when the item is too wide or dense to stay readable in the paper.
 
 #### Column-Span Decision (decide span by role + width need, not by figure number)
@@ -113,7 +113,7 @@ placed at the top or bottom of the page) when ANY of these hold:
 - the item is a **pipeline / framework / architecture / system-overview / benchmark-construction
   diagram** with left-to-right horizontal flow — these read as cramped, illegible strips in a ~3 in
   column and belong full-width;
-- it is a **multi-panel figure** (≥2 panels side by side — e.g. a per-vector and a per-harm radar, or
+- it is a **multi-panel figure** (≥2 panels side by side — e.g. a per-condition and a per-subgroup radar, or
   grouped small-multiples);
 - it is a **wide comparison**: a grouped-bar/heatmap/radar with enough labels, cells, or legend
   complexity to become unreadable in one column, or a table that the table-placement contract
@@ -180,6 +180,20 @@ inserted at `0.60--0.70\linewidth` in one-column templates. Treat `>0.70\linewid
 defect unless the confirmed Paper Framework explicitly budgets the item as a large main evidence
 figure.
 
+**Appendix Display Parity Gate.** Appendix figures and tables are not second-class. Apply the same
+Display Item Contract and rendered-page review used for body displays. For a two-column conference
+appendix, keep compact protocol tables, inventories, label glossaries, and small secondary plots
+single-column by default; do not promote them to `figure*` or `table*` only because they are in the
+appendix. A single-panel appendix heatmap or small result matrix should first be tested as
+single-column; if it truly needs cross-column placement, include it at `0.60--0.70\textwidth` or
+`0.65--0.78\textwidth` rather than filling the whole span by habit. Promote to wider widths only
+when labels, cell text, or a full result matrix fail the rendered legibility floor.
+
+Appendix float pages are part of the paper QA surface. A half-empty page caused by sparse
+cross-column floats, an oversized appendix heatmap, a full-width table with only a few short cells,
+or a caption/table/figure that looks rougher than the body is a defect that must be revised before
+returning the draft.
+
 For a one-column template, the Figure Plan `Layout` should remain `single-column`; record the actual
 width fraction in the message, display-item budget, or framework execution report (for example,
 `single-column, 0.65\linewidth teaser` or `single-column, 0.95\linewidth pipeline`). Do not encode
@@ -189,9 +203,9 @@ one-column full-width figures as `double-column`.
 of equal-sized subplots; panels need not be equal when the evidence is not equally important. Give a
 pipeline/schematic panel the dominant area; align panels on a shared baseline, use small bold lowercase
 panel letters (a, b, c) at the top-left, and a **single shared legend** rather than one legend per
-panel. **Two charts that compare the same models on different axes (e.g. defend rate by attack vector
-and by harm type) belong in one multi-panel `figure*` with a shared legend — not two separate
-single-column floats**, which read as disconnected and waste space. A radar/polar comparison is hard to
+panel. **Two charts that compare the same methods on two related category axes (for example, the same
+rate by category group and by outcome group) belong in one multi-panel `figure*` with a shared legend
+— not two separate single-column floats**, which read as disconnected and waste space. A radar/polar comparison is hard to
 read at single-column width with 6+ spokes and 3+ methods; use a cross-column multi-panel layout, or
 switch to grouped bars / a heatmap if the radar still muddies.
 

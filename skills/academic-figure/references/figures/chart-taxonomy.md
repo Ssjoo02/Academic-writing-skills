@@ -30,6 +30,15 @@ Add a compact design record to `paper/framework-execution-report.md` or the figu
 | Fig. 2 | Ours improves accuracy at similar latency. | a | grouped bar | results/main.csv | mean +/- 95% CI over 5 seeds | double-column | hero-baseline | shared legend below, units in axes | SVG/PDF/PNG |
 ```
 
+## Style Reference Boundary
+
+When the user provides an example figure or asks to match a reference style, load
+`style-reference.md` before plotting. A style reference is not a content source. Extract only visual
+grammar: palette, typography, line/marker treatment, grid/ring style, legend placement, panel layout,
+spacing, and aspect ratio. Do not copy domain terms, metric names, labels, result values, or claims
+from the reference figure; use the current paper's Writing Policy, Figure Plan, and workspace data for
+all scientific content.
+
 ## Palette Presets
 
 Choose by data structure, not by personal taste.
@@ -38,12 +47,13 @@ Choose by data structure, not by personal taste.
 |---|---|---|
 | `peer` | equal-status methods, tasks, datasets | restrained qualitative palette + one marker/hatch per entity; use saturated Okabe-Ito colors only when equal-status separation is more important than journal visual calm |
 | `hero-baseline` | one proposed method vs baselines | muted baseline colors + one saturated hero color; hero appears last |
-| `semantic-risk-capability` | two opposite metrics such as risk vs capability | deep blue for capability, brick red for risk; do not use grey for either foreground metric |
+| `paired-opposing-rates` | two opposite-valence metrics, one lower-is-better and one higher-is-better | muted coral `#C97B6B` for the lower-is-better foreground metric and steel blue `#5E8FB8` for the higher-is-better foreground metric; do not use grey or harsh saturated primaries for either foreground metric |
+| `paired-opposing-scorecard` | opposite-valence paired headline rates across methods | horizontal paired bars with the lower-is-better rate in muted coral `#C97B6B`, the higher-is-better rate in steel blue `#5E8FB8`, light grid, no heavy black outlines, and end labels outside bars |
 | `sequential` | ordered magnitude, rank, scale, ablation depth | single-hue ramp, darker = larger or later |
 | `diverging` | signed delta, z-score, gain/loss around zero | `RdBu_r` with zero-centered normalization |
 | `distribution-neutral` | boxes, violins, densities where shape matters | neutral fill + colored median/mean/focus marker; avoid rainbow groups |
 | `composition-muted` | stacked bars, pie, donut | 3-7 muted categorical fills; sort by semantic order or descending share; use short codes when labels are long |
-| `shared-legend-radar` | radar comparisons that reuse one method set | muted blue, teal-green, gold, coral, purple, grey with white-filled markers; no filled polygons; coral is the focus/proposed method when one exists |
+| `shared-legend-radar` | radar comparisons that reuse one method set | muted coral, steel blue, green, gold, purple, grey with white-filled markers; no filled polygons; coral is the focus/proposed method when one exists |
 
 Global rules: same entity means same `(color, marker)` across all figures; green/red are directional
 annotations only; no rainbow/jet; add markers or hatches when color alone would carry identity.
@@ -76,21 +86,47 @@ chart-family rows above, so later figures in the same paper inherit a consistent
 ### Preset: shared-legend radar
 
 Use for two related radar panels that compare the same methods across two taxonomies or metric
-families. The intended visual grammar is a wide, clean, review-ready radar comparison:
+families. The intended visual grammar is a wide, clean, review-ready radar comparison. For
+reference-style shared-legend radar figures, match the following stricter design:
 
-- Use **two polar panels** side by side with bold panel titles such as `(a) ASR by Attack Vector`
-  and `(b) ASR by Harm Category`.
+- Use **two polar panels** side by side with bold panel titles such as `(a) Rate by Category Group`
+  and `(b) Rate by Outcome Group`.
 - Use one method-to-color and method-to-marker mapping across both panels; lines may mix solid and
   dashed styles when six methods need separation.
-- Use the local shared-legend radar palette by default: muted blue, teal-green, gold, coral, purple,
-  and neutral grey (`#5E9BC9`, `#59AE8B`, `#E0AF45`, `#CF7968`, `#8E78BE`, `#9A9A9A`). Reserve the
-  coral line for the focus/proposed method when one exists.
-- Use **no filled polygons**. Keep only colored traces, white-edged markers, light grey rings, and
-  light grey spokes so overlapping methods remain legible.
-- Use a common radial scale when all spokes are the same unit (for example 0--100 ASR). If spokes
+- Use the local shared-legend radar palette by default: muted coral, steel blue, green, gold, purple,
+  and neutral grey (`#C97B6B`, `#5E8FB8`, `#5DA88A`, `#D4A64E`, `#8E7FB8`, `#9B9B9B`). Reserve the
+  coral line for the focus, highest-risk, or proposed-method story when one exists.
+- Use **white-filled markers** with colored edges, 1.6--1.9 pt lines, and redundant marker/linestyle
+  identities so crossings remain readable in grayscale.
+- Use **no filled polygons** for dense overlays; at most use a very faint fill (`alpha <= 0.04`) when
+  a single panel has few series and the fill does not muddy overlaps.
+- Use dashed light-grey rings, light-grey spokes, and a restrained outer ring rather than heavy black
+  polar grids.
+- Use the named reference page grammar when the user asks for that style: light grey interior fill,
+  deep blue spoke labels, restrained charcoal title text, and a legend in two columns when six methods are shown.
+- Use **custom theta labels** placed outside the outer ring with alignment adjusted by visual angle;
+  default polar tick labels collide too often and are not acceptable for long categorical axis labels.
+- Use a common radial scale when all spokes are the same unit (for example 0--100 rate). If spokes
   have different units, normalize per spoke and state that in the caption.
 - Put **one shared legend below the figure**, not one legend per panel. The legend should carry the
   full method names; panel spokes may use compact axis labels with line breaks.
+- Four-method matched-pair panels should use a two-column shared legend. This keeps the legend
+  compact and closer to the reference style than a stretched single-row legend.
+
+### Preset: paired-opposing horizontal scorecard
+
+Use for paired headline metrics where one rate is lower-is-better and the other is
+higher-is-better.
+
+- Plot horizontal paired bars so long model names remain readable.
+- Use `paired-opposing-scorecard` colors: lower-is-better in muted coral `#C97B6B`,
+  higher-is-better in steel blue `#5E8FB8`. Keep both foreground metrics equally saturated and avoid the old harsh deep-red /
+  deep-blue pairing.
+- Do not use heavy black bar outlines. Use no outline or a subtle same-family darker edge; rely on a
+  light x-grid and whitespace for separation.
+- Put numeric labels at bar ends with enough x-axis headroom. Keep the legend frameless and compact.
+- Caption must state the denominator, metric direction (`lower is better` / `higher is better` when useful),
+  and whether rows are ordered by claim, model family, or value.
 
 ### Preset: compact labeled donut
 
@@ -111,6 +147,17 @@ central evidence figure, size it as a quiet inset-style display: include it at
 `0.58--0.72\textwidth` when it is one panel inside a two-column-width multi-panel figure. Keep the
 canvas around 2.0--2.4 in tall and **omit the bottom legend** when full code definitions live in the caption, appendix, or nearby table.
 Keep only short code-percentage labels around the rings; long labels belong outside the main graphic.
+
+**Style-matched coverage donut.** When the figure is a coverage or composition snapshot and the user
+supplies a visual reference, do not use a generic qualitative palette or `PEER_PALETTE`. Use the
+seven-color ring preset as the primary donut palette:
+`#4B8BBE`, `#6BA3CF`, `#8FBCDB`, `#E3A86D`, `#E08F72`, `#7DBD9C`, `#B1A1C8`.
+Apply this ordered palette to related coverage donuts unless the user explicitly supplies a
+different chart-specific reference. Do not split a paired coverage figure into separate ramps by
+default. Keep white wedge separators, short code labels, and restrained dark text; never introduce
+black wedges or saturated rainbow categories for this preset.
+Outside percentage labels must not collide with the bottom legend, panel title, caption, or neighboring donut; reserve
+extra bottom and side margin or omit the legend in body-compact mode.
 
 ## Extended Patterns From `type.md`
 

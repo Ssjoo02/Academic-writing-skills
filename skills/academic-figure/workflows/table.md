@@ -39,6 +39,9 @@ The deep references are:
    split/abbreviate/move detail when a secondary table is too dense.
 8. Mark metric direction in headers when known. If Metric direction unknown appears in the contract,
    do not guess metric direction; ask, mark unknown, or avoid best-value emphasis.
+   Main paired-rate scorecards must not be emitted as a flat one-row header table: use group headers
+   such as Coverage, Rates, and Outcome counts, and bold the declared extrema according to the table
+   contract.
 9. Run cross-table consistency before returning a draft: method order, metric precision, public
    method name, abbreviation expansion, and highlight conventions must match across the paper.
 

@@ -2,7 +2,7 @@
 
 Load this file for **journal papers** after `figure-planning.md` and
 `references/figures/journal/figure-sizing.md`. It covers journal-specific figure
-archetypes, panel logic, aesthetic integration rules, and reviewer-risk assessment
+composition patterns, panel logic, aesthetic integration rules, and reviewer-risk assessment
 — the compositional and strategic decisions that differentiate journal figures
 from conference figures.
 
@@ -23,14 +23,14 @@ space but higher expectations. This changes three things:
    a pasted collage. Schematic colors and data-plot colors should relate; the
    visual vocabulary set in panel (a) should carry through to panel (f).
 
-## Journal Figure Archetypes
+## Journal Figure Composition Patterns
 
 Replace the baseline "Display type" classification (which routes to a generation
-method) with these **compositional archetypes** when planning journal figures.
-The archetype drives panel count, sizing, and evidence hierarchy — choose it
+method) with these **composition patterns** when planning journal figures.
+The composition pattern drives panel count, sizing, and evidence hierarchy — choose it
 before picking a generation route.
 
-| Archetype | When to use | Hero panel | Supporting panels |
+| Composition pattern | When to use | Hero panel | Supporting panels |
 |---|---|---|---|
 | `quantitative grid` | The claim is mainly numerical comparison; no schematic or image is needed | Optional; often a dominant summary metric or the proposed method's bar | Shared axes, aligned scales, compact legends; equal panel sizes acceptable here |
 | `schematic-led composite` | A workflow, mechanism, device, or experimental design must be understood before the data makes sense | One wide story panel (top or left), 35–60% of total figure area | 2–4 quantitative validation panels — smaller, visually quieter, below or to the right |

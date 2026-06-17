@@ -133,7 +133,7 @@ charts. Before generating the first plot, fix a single palette and reuse it acro
 chart, line plot, radar, and heatmap accents. **Family consistency beats maximal hue
 separation:** keep baselines in one cool family and the proposed method in one hero family.
 
-- **One entity → one (color, marker) pair across *every* figure.** If "Gemini3-Pro" is the
+- **One entity → one (color, marker) pair across *every* figure.** If "Method A" is the
   deep-blue series in Figure 3, it is deep blue everywhere it appears — never remapped.
 - Group related entities into **families** and color by family (e.g. all "Frontier LLM"
   baselines in cool blues, all "Specialist agent" baselines in warm neutrals), rather than
@@ -180,14 +180,14 @@ PEER_MARKERS = ['o', 's', '^', 'D', 'v', 'P', 'X', '*']  # pair 1:1 with colors
 - Balanced luminance → equal visual weight (the point of a peer comparison).
 - Cap at **6–8 categories**. Beyond that, group/aggregate or use small multiples; do not
   keep adding hues. **Reduce saturation before adding categories.**
-- For a **2–3 series** comparison where every series matters (e.g. two metrics like
-  ASR vs. TCR across models), pick from the local publication palette so the colors stay
-  consistent across the paper — `#0F4D92` deep blue paired with `#B64342` brick red
-  (default), or `#42949E` teal, or `#8BCF8B` soft green. Do **not** ship the matplotlib
-  default orange/blue (`#1f77b4`/`#ff7f0e`) and do **not** hand-mix off-palette hues like a
-  brown/clay — those read muddy. When the two series have opposite valence (e.g. ASR =
-  risk/bad, TCR = capability), put the warmer/red hue on the "risk" series. Do not paint one
-  series grey; keep the legend frameless (`frameon=False`).
+- For a **2–3 series** comparison where every series matters (e.g. one lower-is-better and one
+  higher-is-better rate across methods), pick from the local publication palette so the colors stay
+  consistent across the paper. For opposite-valence headline rates, use the
+  `paired-opposing-scorecard` palette: muted coral `#C97B6B` for lower-is-better and
+  steel blue `#5E8FB8` for higher-is-better. Do **not** ship the matplotlib
+  default orange/blue (`#1f77b4`/`#ff7f0e`), the old harsh deep-red / deep-blue pairing, or
+  hand-mixed brown/clay hues — those read muddy. Do not paint one series grey; keep the legend
+  frameless (`frameon=False`).
 - For a **journal grouped bar with 4 methods/series**, do not use a loud four-hue set unless the
   paper needs equal-status categorical separation. Prefer a restrained family palette such as
   `["#C7D7EA", "#8FB3D1", "#5F8FB8", "#D07A68"]`: three related blues plus one warm focus color.

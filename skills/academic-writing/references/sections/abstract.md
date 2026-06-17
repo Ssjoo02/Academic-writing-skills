@@ -94,6 +94,18 @@ Before writing, select exactly one of Version 1, Version 2, or Version 3 interna
 has one central insight, prefer Version 2. If the paper has several independent contributions, use
 Version 3. Do not expose template-selection notes unless the user asks for reasoning.
 
+## Evidence Budget
+
+The evidence sentence proves that the contribution is grounded; it is not a miniature Results
+section.
+
+- Use at most one high-level evidence sentence in the abstract.
+- Prefer a qualitative or bounded comparative summary unless a single headline number is essential.
+- Do not include model-specific deltas, intervention before/after chains, or multiple percentage values.
+- Do not list evaluated models, full metric ranges, ablations, or table-level details.
+- If several numbers feel necessary, move them to Experiments and keep the abstract at the
+  problem -> challenge/gap -> insight/contribution -> advantage -> evidence level.
+
 ## Example Bank
 
 After selecting a section template, open only the matching example file if a concrete writing
@@ -111,3 +123,5 @@ metrics, or citation framing.
 5. Is there any sentence that mixes too many messages?
 6. Does every claim map to the Writing Policy?
 7. Would a skeptical reviewer know what is new, why it matters, and what evidence supports it?
+8. Is the evidence sentence within the Evidence Budget, with no model-specific deltas or multiple
+   percentage values?

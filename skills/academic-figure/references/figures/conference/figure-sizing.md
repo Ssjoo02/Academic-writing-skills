@@ -77,6 +77,22 @@ If the proposed insertion would require text below 7 pt, rotated labels beyond ~
 legend that consumes more than one-third of the plot area, promote the figure to the next wider
 layout or split the evidence into a table/appendix figure.
 
+### Appendix Figure Sizing
+
+Appendix figures use the same rendered QA as body figures. Do not treat the appendix as a place to
+dump oversized plots. In a two-column conference appendix:
+
+- compact inventories, protocol visuals, and secondary single plots stay `figure` +
+  `width=\columnwidth` when readable;
+- an appendix single-panel heatmap or small result matrix should first be tested at column width; if
+  it needs to escape the column, use `figure*` with `width=0.60--0.70\textwidth` or at most
+  `0.65--0.78\textwidth` for moderate density;
+- reserve `0.90--1.00\textwidth` for dense multi-panel appendix figures, wide full-result matrices,
+  or displays whose labels/cell text are unreadable otherwise;
+- inspect the rendered appendix page. A float-only or half-empty page created by sparse full-width
+  appendix figures is a layout defect, not an acceptable side effect of moving material after the
+  references.
+
 ### Single-column paper quick rule
 
 For one-column conference templates and single-column journal drafts, `figure*` is unavailable and

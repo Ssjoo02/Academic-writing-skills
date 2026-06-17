@@ -99,6 +99,19 @@ phrasing.
 Do not load full-draft-only references by default: venue profiles or paper type profiles. Load those
 only when the user asks to revise using project evidence or venue-specific expectations.
 
+## Paper Content Edit Transaction
+
+Any revision that changes manuscript content - prose, captions, table text, section headings,
+appendix text, displayed equations, or claim wording - is a paper-content edit. Before applying the
+edit, identify the touched section(s) and re-read from disk the matching
+`references/sections/<section>.md` guide, `references/sections/paragraph-flow.md`, any journal
+overlay required by the target, and any conditional metric/claim/display references triggered by
+the changed text. Do not rely on a section guide loaded earlier in the run.
+
+After the edit, rerun the relevant Section-Method Adherence check and reverse-outline check for the
+touched section(s). When revising a complete `paper/` project, update `paper/section-compliance.md` with the section, guide loaded, required moves checked, result, and residual risk. When revising only a snippet or isolated section, return a compact compliance note
+instead of writing a project ledger. This is a reread/self-check procedure, not a freshness gate. Do not add hash, mtime, timestamp, or source-hash requirements.
+
 ## State 3: Section Drafting Protocol
 
 Use this protocol for any section-level draft or rewrite. Do not use it for sentence, paragraph,

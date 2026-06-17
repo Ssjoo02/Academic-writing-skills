@@ -49,8 +49,16 @@ distinct table/figure. Keep Experiments to roughly 0–4 subsections — do not 
 subsection per analysis step (no `4.1 … 4.6`); a single-paragraph step should stay a paragraph,
 optionally with a `\paragraph{}` run-in or bold lead-in.
 
+## Subsection Title Quality
+
+Use finding-led, reader-facing subsection titles. The title should name the comparison, protocol, or
+interpretation the reader will get, not the artifact state, data-storage state, or appendix location.
+Avoid weak scaffolding titles such as `Aggregate Result Snapshot`, `Result Snapshot`, `Appendix Matrix`, `Appendix Heatmap`, or `Full Matrix`. Better titles include `Overall Performance-Robustness Tradeoff`, `Outcome Distribution and Denominator Effects`, `Category and Subgroup Concentration`, or another title that states the analysis role. If the only content is "the appendix
+contains a detailed matrix," do not make a subsection; write one prose cross-reference at the end of
+the relevant analysis block.
+
 **Statistics are tables, not prose.** "Benchmark statistics" and per-category breakdowns (per-app,
-per-vector, per-harm, per-split counts) belong in **one table or figure**, not enumerated in
+per-condition, per-subgroup, per-split counts) belong in **one table or figure**, not enumerated in
 sentences. In prose, lead with the point and cite only the figures that carry an argument — the
 total, the dominant or surprising share, the headline coverage — then point to the table. Do not
 transcribe a table into running text. See the Salience And Compression rules in

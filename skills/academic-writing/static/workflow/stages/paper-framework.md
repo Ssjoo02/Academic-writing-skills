@@ -86,7 +86,7 @@ Load only the references needed to resolve paper structure and physical format:
   Plan, the **`academic-review`** skill's `data-code-availability` reference when empirical data,
   code, source data, repositories, accession numbers, or reproducibility statements are involved,
   plus the **`academic-figure`** skill's journal figure-contract for journal-specific figure
-  archetypes and panel logic that inform the Figure Plan's panel count and evidence hierarchy.
+  composition patterns and panel logic that inform the Figure Plan's panel count and evidence hierarchy.
 
 **Template Acquisition (local-first — do not web-fetch when a preloaded template exists).** The
 official templates for the major venues are bundled in `_shared/templates/`. Acquire the template in
@@ -162,12 +162,15 @@ Page-budget arithmetic must be explicit. Start with the venue or generic total b
 fixed front/back matter only when it counts toward the limit, assign a `Page budget` to each planned
 section, and ensure the total planned pages must not exceed the venue limit or generic drafting
 budget. For a strict page-limited full-paper venue, the framework must also define a **content-page
-target**: normally the target equals the limit, because the first complete draft should use the
-available body budget for substantive supported content rather than stopping several pages early. If
-the target is lower than the limit, record the reason as an explicit framework tradeoff. If the draft
-would overflow, compress or move lower-priority material to appendix before creating `paper/`; if the
-draft would underfill the target, expand the primary/evidence core with supported analysis, protocol
-detail, or result interpretation before padding support sections.
+target**: set `Content-page target` equal to `Active content-page bound`, because the first complete
+draft should use the available body budget for substantive supported content rather than stopping
+several pages early. Do not create `paper/` with a lower content-page target unless the user
+explicitly approves that lower target as a framework tradeoff. If the user says only "must not exceed
+X pages", treat that as "reach page X without exceeding it" for a strict full-paper venue, not as
+permission to stop at page X-2. If the draft would overflow, compress or move lower-priority
+material to appendix before creating `paper/`; if the draft would underfill the target, expand the
+primary/evidence core with supported analysis, protocol detail, or result interpretation before
+padding support sections.
 
 File format:
 
@@ -182,7 +185,9 @@ File format:
    Limitations / Acknowledgments / Ethics for venues that exclude them). Record the planned main-text
    total and any overflow or compression decisions. The active bound is the `--max-content-pages`
    value; the target is the `--min-content-pages` value when the venue/framework says the draft
-   should fill the page budget. Both are blocking gates once confirmed.
+   should fill the page budget. For strict page-limited full papers, the terminal checkpoint must
+   show the downstream audit command with `--max-content-pages <limit> --min-content-pages <target>`.
+   Both are blocking gates once confirmed.
 3. **Core Section Budget**: name the `Primary core section`, `Evidence core section`, and
    `Compress-first sections`; state each core section's Minimum floor and any venue-driven tradeoff.
 4. **Section Framework**: ordered section list with section name, role
@@ -201,7 +206,10 @@ File format:
    etc.). Run a cross-figure visual variety check for all numeric plots: do not let every numeric
    result figure default to bar charts when the evidence includes composition, coverage, trend,
    matrix, or tradeoff claims better served by another chart form.
-6. **Venue Assembly Plan**: post-main order, required statements or checklists, optional appendices,
+6. **Display-Item Page Budget**: saved-artifact-only table estimating each planned display item's
+   main-paper page cost and compression fallback. Keep this table in the saved framework artifact
+   and use it for page arithmetic and later audit commands; do not render it as a terminal table.
+7. **Venue Assembly Plan**: post-main order, required statements or checklists, optional appendices,
    and `not verified` venue fields. Record that the appendix begins on a fresh page (`\clearpage`
    before `\appendix`). When the venue requires a Limitations section (ACL family), plan it as a
    single dedicated `\section{Limitations}` placed after Conclusion and before References — it is the
@@ -210,22 +218,22 @@ File format:
    whether Limitations may be moved to an appendix if the compiled draft exceeds the page limit. When
    appendix pages count against the limit or appendices are forbidden, record that appendix movement
    is not an available compression path.
-7. **Journal Submission Package Plan**: include only when `venue_kind=journal`; otherwise state
+8. **Journal Submission Package Plan**: include only when `venue_kind=journal`; otherwise state
    `n/a`. Materialize journal companion artifacts early in a table with `Item`, `Required?`,
-   `Source/status`, `Owner/reference`, and `Blocker?`. Include Data/Code Availability, Author
-   Contributions, Competing Interests, Funding/Acknowledgments, Ethics / IRB / consent, Reporting
-   Summary / checklist, Cover letter, graphical abstract / highlights / key points, source-data
+   `Source/status`, `Owner/reference`, and `Blocker?`. Saved artifact table header:
+   `| Item | Required? | Source/status | Owner/reference | Blocker? |`. Include Data/Code Availability, Author
+   Contributions, Competing Interests, Funding/Acknowledgments, Ethics / IRB / consent, Reporting Summary / checklist, Cover letter, graphical abstract / highlights / key points, source-data
    files, and any venue-specific submission forms. Mark real repository identifiers, DOI/accession
    status, and embargo/restriction wording as source/status facts; missing required identifiers are
    blockers or Open Decisions, not prose to invent later.
-8. **Appendix / Supplement Plan**: list every planned appendix or supplement item, or state `none`.
+9. **Appendix / Supplement Plan**: list every planned appendix or supplement item, or state `none`.
    This plan becomes `paper/appendix-plan.md` during LaTeX project setup. Each item must record
    `Item ID`, `Type`, `Claim backed`, `Source availability`, `Fill status`, `Main-text anchor`, and
    `Fallback`. Include appendix-only full lists, proofs, protocol details, full result matrices,
    prompts, configurations, robustness sweeps, and qualitative example sets only when the source is
    available or the item is explicitly omitted. Do not use appendix movement to hide main evidence
    needed for the central claim.
-9. **Open Decisions**: only blocking missing evidence, uncertain section choices, terminology,
+10. **Open Decisions**: only blocking missing evidence, uncertain section choices, terminology,
    figure/table choices, or user decisions.
 
 For the Figure Plan, use the **`academic-figure`** skill's figure-planning reference. Deciding whether
@@ -242,11 +250,10 @@ writing-policies/<paper-slug>-paper-framework.<language-code>.md
 
 Terminal-facing Paper Framework checkpoint: mirror the user's interaction language. In a Chinese
 conversation, translate the overview headings, section summaries, Figure Plan summaries,
-Display-Item Page Budget summaries, Journal Submission Package Plan summaries, Appendix /
-Supplement summaries, decisions, blockers, and user action request into Chinese. Keep file paths,
-LaTeX commands, BibTeX/citation keys, manifest values, figure/table IDs, and machine-parsed markers
-in their original form; the saved framework artifact remains English by default unless the user
-requested a translated sibling artifact.
+decisions, blockers, and user action request into Chinese. Keep file paths, LaTeX commands,
+BibTeX/citation keys, manifest values, figure/table IDs, and machine-parsed markers in their
+original form; the saved framework artifact remains English by default unless the user requested a
+translated sibling artifact.
 
 **Language routing invariant:** the saved framework artifact may keep the English schema below, but
 the checkpoint displayed in the terminal is the interaction-language version. Do not paste the
@@ -263,9 +270,6 @@ checkpoint must use at least these labels:
 | `Section Plan` | `章节计划` |
 | `Core Section Budget` | `核心章节预算` |
 | `Figure Plan` | `图表计划` |
-| `Display-Item Page Budget` | `图表页面预算` |
-| `Journal Submission Package Plan` | `期刊投稿材料计划` |
-| `Appendix / Supplement Plan` | `附录 / 补充材料计划` |
 | `Structure vs paper-type profile` | `结构与 paper type profile 对齐` |
 | `Decisions to confirm` | `待确认决策` |
 | `Unresolved blockers` | `未解决阻塞项` |
@@ -302,10 +306,23 @@ For Chinese terminal output, render `图表计划` as a Markdown table with this
 
 Do not write `图表计划包含` plus a prose list of figures/tables, or any prose-only figure summary, as a substitute for the table.
 
-Show the framework to the user for confirmation using this semantic structure. Do not use a generic
-dimension/content table or any other structure. The English labels below are the saved-artifact
+Terminal Paper Framework checkpoints have exactly two mandatory Markdown tables: Section Plan and Figure Plan. These are the only Markdown tables in the terminal checkpoint. After the Figure Plan table, do not output any additional Markdown table in the terminal checkpoint. Do not render `Display-Item Page Budget` as a terminal table; keep display-item page costs in the saved framework artifact and use them for page arithmetic, framework self-checks, and later audit commands. The terminal checkpoint must not contain a `Display-Item Page Budget:` heading; display-item page costs must never appear as a third terminal table. If display-item costs affect confirmation, mention the tradeoff in prose only under the framework overview, Core Section Budget, `待确认决策`, or `未解决阻塞项`.
+Journal Submission Package Plan and Appendix / Supplement Plan also stay in the saved framework
+artifact by default; if they create a required decision or blocker, summarize that issue in the
+framework overview, `待确认决策`, or `未解决阻塞项`, not as extra tables.
+
+When the user requests changes at the Paper Framework gate, apply the changes to the framework
+artifact and stay inside the same gate. The revision pass must re-render the full Paper Framework
+checkpoint in the terminal using the same interaction-language schema; revision pass must re-render the full Paper Framework checkpoint before asking for confirmation again. It must include the updated
+Section Plan table and updated Figure Plan table, even if only one figure, section, or page budget
+changed; every revision pass must include the updated Section Plan table and updated Figure Plan table. Do not answer only with a change summary, bullet list, or "file updated" note. The workflow
+cannot proceed to paper/ until the revised tables have been shown and confirmed.
+
+Show the framework to the user for confirmation using this terminal structure. Do not use a generic
+dimension/content table or any other structure. The English labels below name the terminal checkpoint
 schema; terminal-facing labels and natural-language cell content must be translated to the user's
-interaction language when different.
+interaction language when different. Saved framework artifacts still keep the full File format above,
+including saved-only display-item page costs.
 ```text
 Checkpoint: Paper Framework
 Stage result: <one sentence>
@@ -340,36 +357,13 @@ Figure Plan:
 | Tab. 1 | <taxonomy/result/...> | <table> | <single-column/double-column/supplement> | Method | <what the table shows> |
 | ... | ... | ... | ... | ... | ... |
 
-Display-Item Page Budget:
-
-| ID | Main-paper placement | Estimated page cost | Compression fallback |
-|---|---|---:|---|
-| Fig. 1 | <single-column/double-column/supplement> | <0.25/0.5/1.0 page> | <shrink / merge / move to appendix> |
-| Tab. 1 | <single-column/double-column/supplement> | <0.25/0.5/1.0 page> | <compress columns / move full version to appendix> |
-
-Journal Submission Package Plan:
-
-| Item | Required? | Source/status | Owner/reference | Blocker? |
-|---|---|---|---|---|
-| Data/Code Availability | <yes/no/not verified> | <repository, DOI/accession, URL, embargo/restriction, or missing> | academic-review: data-code-availability.md | <yes/no/open> |
-| Reporting Summary / checklist | <yes/no/not verified> | <filled/missing/not applicable> | academic-review: journal-submission-elements.md | <yes/no/open> |
-| Cover letter | <yes/no/not verified> | <scope/significance points available or missing> | active venue card | <yes/no/open> |
-| n/a | n/a | n/a | n/a | n/a |
-
-Appendix / Supplement Plan:
-
-| Item ID | Type | Claim backed | Source availability | Fill status | Main-text anchor | Fallback |
-|---|---|---|---|---|---|---|
-| App. A | <taxonomy/proof/protocol/result matrix/...> | <claim/section/table/figure> | <source path / user supplied / missing> | <filled/partial/omitted> | <body pointer> | <compress/omit/supplement/evidence risk> |
-| none | n/a | n/a | n/a | n/a | n/a | n/a |
-
 Structure vs paper-type profile:
 - Profile: <paper-type name> → <the profile file's section table, its section column copied verbatim in order — not paraphrased>
 - Adopted: <the section list above, in order>
 - Deviations: <"matches profile", OR one line per split / merge / rename / addition / reorder with its reason>
 
 Decisions to confirm:
-- Required: <section order / core-section floors / prose page budget / display-item page budget / venue assembly>
+- Required: <section order / core-section floors / prose page budget / display-item cost tradeoff if it changes compression / venue assembly>
 - Structure basis: <which paper type drove the structure; if any deviation is listed above, why it is necessary and not just "cleaner">
 - Optional: <template / language variant defaults>
 Unresolved blockers: <none or concise list>
